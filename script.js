@@ -88,17 +88,6 @@ function vimeoEmbed(url){
   return `https://player.vimeo.com/video/${id}?autoplay=1&title=0&byline=0`;
 }
 
-function parseYoutubeIdFromFilename(filename){
-  const m = filename.match(/_([A-Za-z0-9_-]{6,})\.youtube$/);
-  return m ? m[1] : null;
-}
-function parseVimeoIdFromFilename(filename){
-  const m = filename.match(/_(\d+)\.vimeo$/);
-  return m ? m[1] : null;
-}
-
-
-
 // open/close
 function openLightbox(src){
   // ensure item present
@@ -155,48 +144,24 @@ function showMedia(index){
     // show custom play overlay
     lbPlay.classList.add('show');
     lbPlay.onclick = ()=>{ lbPlay.classList.remove('show'); video.play(); };
-  
-} else if(['youtube','vimeo'].includes(e)){
-    // prefer ID-in-filename: mediumX_spreadY_<ID>.youtube/.vimeo
-    const ytId = e==='youtube' ? parseYoutubeIdFromFilename(source) : null;
-    const vmId = e==='vimeo' ? parseVimeoIdFromFilename(source) : null;
-    if (ytId || vmId) {
+  } else if(['youtube','vimeo'].includes(e)){
+    // read file to obtain URL
+    fetch(source).then(r=>r.text()).then(url=>{
+      const trimmed = url.trim();
+      let embed = e==='youtube' ? youtubeEmbed(trimmed) : vimeoEmbed(trimmed);
+      if(!embed){ // fallback to raw URL
+        embed = trimmed;
+      }
       const iframe = document.createElement('iframe');
-      iframe.src = ytId
-        ? `https://www.youtube.com/embed/${ytId}?autoplay=1&controls=1&modestbranding=1&rel=0`
-        : `https://player.vimeo.com/video/${vmId}?autoplay=1&title=0&byline=0`;
+      iframe.src = embed;
       iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen';
       iframe.allowFullscreen = true;
       iframe.width = '960';
       iframe.height = '540';
       stage.appendChild(iframe);
-      lbPlay.classList.remove('show');
-    } else {
-      // fallback: old workflow uses file content with URL (works on http(s), not file://)
-      fetch(source).then(r=>r.text()).then(url=>{
-        const trimmed = url.trim();
-        let embed = e==='youtube' ? youtubeEmbed(trimmed) : vimeoEmbed(trimmed);
-        if(!embed){ embed = trimmed; }
-        const iframe = document.createElement('iframe');
-        iframe.src = embed;
-        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen';
-        iframe.allowFullscreen = true;
-        iframe.width = '960';
-        iframe.height = '540';
-        stage.appendChild(iframe);
-        lbPlay.classList.remove('show');
-      }).catch(()=>{
-        const msg = document.createElement('div');
-        msg.style.color='white';
-        msg.style.maxWidth='520px';
-        msg.style.textAlign='center';
-        msg.innerHTML = 'Nelze načíst URL z .youtube/.vimeo mimo http(s). Přejmenuj soubor na <code>mediumX_spreadY_<strong>ID</strong>.youtube</code>/<code>.vimeo</code>.';
-        stage.appendChild(msg);
-        lbPlay.classList.remove('show');
-      });
-    }
+      lbPlay.classList.remove('show'); // not needed; player shows controls
+    });
   } else {
-
     const div=document.createElement('div');
     div.style.color='white';
     div.textContent = 'Unsupported media: ' + source;
