@@ -59,28 +59,15 @@ let mediaItems = [
   {src:'media/medium1_spread3.jpg'},
   {src:'media/medium2_spread3.gif'},
   {src:'media/medium3_spread4.gif'},
-  {src:'media/medium4_spread5.youtube'}
+  {src:'media/medium4_spread5.youtube'},
+  {src:'media/medium5_spread6_76979871.vimeo'},
+  {src:'media/medium6_spread7_CC_1916_09_04_TheCount--cc_1916_09_04_thecount.mpg.archive'}
 ];
 let currentMediaIndex = 0;
 
 // helpers
 function parseSpreadFromFilename(filename){ const m = filename.match(/_spread(\d+)/); if(m) return parseInt(m[1]); }
 function ext(path){ const m=path.match(/\.([a-z0-9]+)$/i); return m?m[1].toLowerCase():''; }
-
-// ---- ID-from-filename helpers ----
-function basename(path){ return path.split('/').pop(); }
-function youtubeIdFromName(path){
-  const base = basename(path).replace(/\.(youtube)$/i,'');
-  const last = base.split('_').pop();
-  if (/^[A-Za-z0-9_-]{11}$/.test(last)) return last;
-  return null;
-}
-function vimeoIdFromName(path){
-  const base = basename(path).replace(/\.(vimeo)$/i,'');
-  const last = base.split('_').pop();
-  if (/^\d{5,12}$/.test(last)) return last; // common vimeo numeric id
-  return null;
-}
 function youtubeEmbed(url){
   try{
     // youtu.be/ID or watch?v=ID
@@ -160,59 +147,40 @@ function showMedia(index){
     lbPlay.classList.add('show');
     lbPlay.onclick = ()=>{ lbPlay.classList.remove('show'); video.play(); };
   
-} else if(['youtube','vimeo'].includes(e)){
-    // 1) Try to parse ID from filename to avoid CORS / fetch
-    const ytId = e==='youtube' ? youtubeIdFromName(source) : null;
-    const vmId = e==='vimeo' ? vimeoIdFromName(source) : null;
+  } else if(['youtube','vimeo'].includes(e)){
+    // NEW: no fetch, parse ID from filename: mediumX_spreadY_<ID>.youtube|vimeo
+    // Accept plain ID or ID with private hash: mediumX_spreadY_<ID>[-hHASH].youtube|vimeo
+    const idMatch = source.match(/_([0-9]{6,})(?:-h([A-Za-z0-9]+))?\.(youtube|vimeo)$/i);
     let embed = null;
-    if (ytId) { console.log('YouTube ID from filename:', ytId);
-      embed = `https://www.youtube.com/embed/${ytId}`;
-    } else if (vmId) { console.log('Vimeo ID from filename:', vmId);
-      embed = `https://player.vimeo.com/video/${vmId}`;
+    if (idMatch) {
+      const id = idMatch[1];
+      if (e==='youtube') {
+        embed = `https://www.youtube-nocookie.com/embed/${id}?autoplay=0&controls=1&modestbranding=1&rel=0`;
+      } else {
+        const h = idMatch[2] ? `?h=${idMatch[2]}` : '';
+        embed = `https://player.vimeo.com/video/${id}${h}`;
+      }
     }
-    if (embed) {
+    if (embed){
       const iframe = document.createElement('iframe');
       iframe.src = embed;
-      iframe.allow = e==='youtube'
-        ? 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen'
-        : 'autoplay; fullscreen; picture-in-picture';
+      iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen';
       iframe.allowFullscreen = true;
       iframe.width = '960';
       iframe.height = '540';
       stage.appendChild(iframe);
       lbPlay.classList.remove('show');
     } else {
-      // 2) Fallback to loading URL from file (legacy workflow). On file:// this may fail.
-      console.log('Falling back to fetch for URL:', source); fetch(source).then(r=>r.text()).then(url=>{
-        const trimmed = url.trim();
-        let embedUrl = e==='youtube' ? youtubeEmbed(trimmed) : vimeoEmbed(trimmed);
-        if(!embedUrl){ embedUrl = trimmed; }
-        const iframe = document.createElement('iframe');
-        iframe.src = embedUrl;
-        iframe.allow = e==='youtube'
-          ? 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen'
-          : 'autoplay; fullscreen; picture-in-picture';
-        iframe.allowFullscreen = true;
-        iframe.width = '960';
-        iframe.height = '540';
-        stage.appendChild(iframe);
-        lbPlay.classList.remove('show');
-      }).catch(err=>{
-        // 3) Final fallback: show a link
-        const a = document.createElement('a');
-        a.href = '#';
-        a.textContent = e==='youtube' ? 'Otevřít na YouTube' : 'Otevřít na Vimeo';
-        a.onclick = ()=>{
-          const guess = e==='youtube' ? 'https://www.youtube.com' : 'https://vimeo.com';
-          window.open(guess, '_blank');
-        };
-        a.style.color = 'white';
-        a.style.fontSize = '18px';
-        stage.appendChild(a);
-        lbPlay.classList.remove('show');
-      });
+      // graceful fallback: clickable link
+      const a = document.createElement('a');
+      a.href = '#';
+      a.textContent = 'Otevřít na ' + (e==='youtube'?'YouTube':'Vimeo');
+      a.onclick = () => { window.open(source, '_blank'); };
+      a.style.color = '#fff';
+      stage.appendChild(a);
+      lbPlay.classList.remove('show');
     }
-} else {
+  } else {
     const div=document.createElement('div');
     div.style.color='white';
     div.textContent = 'Unsupported media: ' + source;
