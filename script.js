@@ -60,8 +60,8 @@ let mediaItems = [
   {src:'media/medium2_spread3.gif'},
   {src:'media/medium3_spread4.gif'},
   {src:'media/medium4_spread5.youtube'},
-  {src:'media/medium5_spread6_76979871.vimeo'},
-  {src:'media/medium6_spread7_CC_1916_09_04_TheCount--cc_1916_09_04_thecount.mpg.archive'}
+    { src:'media/medium5_spread6_1114653811.vimeo'},
+    { src:'medium6_spread7_1114707280.vimeo'}
 ];
 let currentMediaIndex = 0;
 
@@ -158,7 +158,7 @@ function showMedia(index){
         embed = `https://www.youtube-nocookie.com/embed/${id}?autoplay=0&controls=1&modestbranding=1&rel=0`;
       } else {
         const h = idMatch[2] ? `?h=${idMatch[2]}` : '';
-        embed = `https://player.vimeo.com/video/${id}${h}`;
+          embed = `https://player.vimeo.com/video/${id}?autoplay=1&loop=1&title=0&byline=0${h}`;
       }
     }
     if (embed){

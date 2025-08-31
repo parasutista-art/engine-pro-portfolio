@@ -21,8 +21,28 @@ body{margin:0;background:#000;overflow:hidden;display:flex;justify-content:flex-
 /* Lightbox */
 .lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);backdrop-filter:blur(15px);justify-content:center;align-items:center;z-index:25000;opacity:0;transition:opacity 1s ease}
 .lightbox.show{display:flex;opacity:1}
-.lightbox-stage{position:relative;max-width:60vw;max-height:85vh;display:flex;align-items:center;justify-content:center}
-.lightbox-stage img,.lightbox-stage video,.lightbox-stage iframe{max-width:60vw;max-height:85vh;border:none;border-radius:6px;background:transparent}
+.lightbox-stage {
+    position: relative;
+    max-width: 50vw;
+    max-height: 60vh;
+    width: auto;
+    height: auto;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    display: flex;
+    align-items: center;
+    justify-content: center
+}
+    .lightbox-stage img, .lightbox-stage video, .lightbox-stage iframe {
+        width: 60vw;
+        height: 85vh;
+        max-width: 2000px;
+        max-height: 2000px;
+        border: none;
+        border-radius: 6px;
+        background: transparent
+    }
 .lightbox-arrow{position:absolute;top:50%;transform:translateY(-50%);font-size:3rem;color:#fff;cursor:pointer;user-select:none;z-index:26000;padding:6px 10px;background:rgba(0,0,0,.25);border-radius:6px}
 .lightbox-arrow.left{left:20px}
 .lightbox-arrow.right{right:20px}
