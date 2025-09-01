@@ -145,9 +145,8 @@ const arrowRight = document.getElementById('arrowRight');
 
 let mediaItems = [
     { src: 'media/medium1_spread3.jpg' },
-    { src: 'media/medium2_spread3.gif' },
+    { src: 'media/medium2_spread4.gif' },
     { src: 'media/medium3_spread4.gif' },
-    { src: 'media/medium4_spread5.youtube' },
     { src: 'media/medium5_spread6_1114653811.vimeo' },
     { src: 'medium6_spread7_1114707280.vimeo' },
     { src: 'media/medium7_spread8.jpg' }

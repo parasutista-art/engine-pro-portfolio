@@ -41,7 +41,8 @@ body {
     padding: 10px;
     background: #111;
     height: 100%;
-    overflow-y: auto
+    overflow-y: auto;
+    display: none;
 }
 
 .rightbar {
@@ -53,7 +54,8 @@ body {
     background: #111;
     padding: 10px;
     overflow-y: auto;
-    z-index: 12000
+    z-index: 12000;
+    display: none;
 }
 
     .sidebar button, .rightbar button {
