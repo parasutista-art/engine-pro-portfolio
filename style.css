@@ -35,7 +35,6 @@ body {
         background: rgba(0,0,0,0.8);
     }
 
-
 .sidebar {
     width: 150px;
     padding: 10px;
@@ -109,11 +108,6 @@ body {
         background: #000
     }
 
-    .paper .front {
-        z-index: 1;
-        position: relative
-    }
-
     .paper .back {
         transform: rotateY(180deg) translateZ(0.1px)
     }
@@ -160,7 +154,7 @@ body {
     .slider-wrap input {
         width: 100%
     }
-/* Lightbox */
+
 .lightbox {
     display: none;
     position: fixed;
@@ -226,7 +220,7 @@ body {
     .lightbox-arrow.right {
         right: 20px
     }
-/* custom play overlay */
+
 .lb-play {
     position: absolute;
     inset: auto;
@@ -264,37 +258,54 @@ body {
     cursor: pointer;
     z-index: 9999;
     user-select: none;
-    display: none; /* standardnì schovat */
+    display: none;
 }
 
     #lb-zoom.active {
         background: rgba(0,150,255,0.8);
     }
 
-/* ===================================== */
-/* === Interaktivní vrstva a tlačítka === */
-/* ===================================== */
-/* Kontejner, který se roztáhne přes celou knihu. */
-/* Přesně kopíruje rozměry a pozici #book elementu. */
 #interactive-layer {
     position: absolute;
     width: calc(min(90vw, 90vh * var(--spread-ratio)));
     height: calc(min(90vh, 90vw / var(--spread-ratio)));
-    /* Deaktivuje interakci pro vrstvu samotnou, aby neblokovala myš. */
     pointer-events: none;
-    z-index: 1500; /* Nad knihou, ale pod UI šipkami */
+    z-index: 1500;
 }
 
-/* Styl pro jednotlivá klikatelná tlačítka. */
 .interactive-button {
     position: absolute;
-    background: rgba(255, 100, 0, 0.5); /* Oranžová barva pro ladění */
+    background: transparent;
     cursor: pointer;
-    /* Povolí interakci jen pro tlačítka. */
     pointer-events: auto;
-    transition: background-color 0.2s;
+    transition: background-color 0.2s, border 0.2s;
 }
 
     .interactive-button:hover {
-        background: rgba(255, 100, 0, 0.7); /* Zvýraznění při najetí myší */
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid white
     }
+
+/* ===================================== */
+/* === NOVÁ PRAVIDLA PRO OBSAH STRÁNEK === */
+/* ===================================== */
+
+/* Nový kontejner pro obrázek a GIF. Přebírá zodpovědnost za pozicování. */
+.page-content {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+/* Pravidla pro samotný GIF overlay. */
+.gif-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+    /* Zajistí, že GIF je VŽDY NAD statickým obrázkem uvnitř .page-content. */
+    z-index: 2;
+}
