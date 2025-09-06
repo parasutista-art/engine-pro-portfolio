@@ -44,7 +44,6 @@ let mediaItems = [
     { src: 'media/medium7_spread8.jpg' }
 ];
 
-
 // =================================================================
 //  PAGE STRUCTURE & GIF OVERLAY ENGINE
 // =================================================================
@@ -89,14 +88,17 @@ function setupGifOverlays() {
 // =================================================================
 
 /**
- * NOVÉ: Pomocná funkce pro aktualizaci URL v adresním řádku.
- * @param {number} spreadIndex - Index dvoustrany, který se má zobrazit v URL.
+ * OPRAVA: Jednodušší a spolehlivější funkce pro aktualizaci URL.
+ * Mění přímo 'location.hash', což je nejlepší způsob pro tento účel.
+ * @param {number} spreadIndex - Index dvoustrany.
  */
 function updateURL(spreadIndex) {
-    // Pokud jsme na první straně, URL vyčistíme. Jinak přidáme #spread=...
-    const newUrl = spreadIndex > 0 ? `#spread=${spreadIndex}` : window.location.pathname + window.location.search;
-    // Použijeme pushState pro změnu URL bez znovunačtení stránky
-    history.pushState({ spread: spreadIndex }, `Spread ${spreadIndex}`, newUrl);
+    // Tímto zápisem se vyhneme duplicitním záznamům v historii,
+    // pokud se hash nezměnil.
+    const newHash = spreadIndex > 0 ? `spread=${spreadIndex}` : '';
+    if (location.hash.substring(1) !== newHash) {
+        location.hash = newHash;
+    }
 }
 
 function updateBook(progressValue) {
@@ -153,7 +155,7 @@ function animateTo(from, to, duration = CONFIG.animationDuration) {
             slider.value = state.currentSpread;
             updateBook(state.currentSpread);
 
-            // ZMĚNA: Po dokončení animace aktualizujeme URL
+            // Po dokončení animace aktualizujeme URL
             updateURL(state.currentSpread);
 
             state.animationFrame = null;
@@ -165,7 +167,8 @@ function animateTo(from, to, duration = CONFIG.animationDuration) {
 }
 
 function goTo(spreadIndex) {
-    if (spreadIndex !== state.currentSpread) {
+    // Zabráníme animaci, pokud jsme již na cílové stránce
+    if (spreadIndex !== state.currentSpread && !state.isAnimating) {
         animateTo(state.currentSpread, spreadIndex);
     }
 }
@@ -182,199 +185,37 @@ function prev() {
 // =================================================================
 //  INTERACTIVE BUTTONS & LIGHTBOX (beze změny)
 // =================================================================
+function hideButtons() { if (interactiveLayer) { interactiveLayer.innerHTML = ''; } }
+function renderButtons(spreadIndex) { hideButtons(); const buttonsForSpread = buttonData.filter(btn => btn.spread === spreadIndex); buttonsForSpread.forEach(data => { const btn = document.createElement('div'); btn.className = 'interactive-button'; Object.assign(btn.style, data.styles); if (data.clipPath) { btn.style.clipPath = data.clipPath; } const action = data.url ? () => window.open(data.url, '_blank') : () => openLightbox(data.mediaSrc); btn.addEventListener('click', action); interactiveLayer.appendChild(btn); }); }
+function getFileExtension(path) { return path.split('.').pop().toLowerCase(); }
+function openLightbox(src) { let mediaIndex = mediaItems.findIndex(m => m.src === src); if (mediaIndex === -1) { mediaItems.push({ src }); mediaIndex = mediaItems.length - 1; } state.currentMediaIndex = mediaIndex; showMedia(state.currentMediaIndex); lightbox.classList.add('show'); lightbox.setAttribute('aria-hidden', 'false'); }
+function closeLightbox() { lightbox.classList.remove('show'); lightbox.setAttribute('aria-hidden', 'true'); lightboxStage.innerHTML = ''; lightboxPlayButton.classList.remove('show'); }
+function showMedia(index) { if (index < 0 || index >= mediaItems.length) return; state.currentMediaIndex = index; const { src } = mediaItems[index]; lightboxStage.innerHTML = ''; lightboxZoomButton.style.display = 'none'; lightboxPlayButton.classList.remove('show'); const extension = getFileExtension(src); if (['jpg', 'jpeg', 'png', 'webp', 'avif'].includes(extension)) { const img = document.createElement('img'); img.src = src; img.draggable = false; lightboxStage.appendChild(img); setupImageZoom(img); } else if (extension === 'gif') { const img = document.createElement('img'); img.src = src; img.draggable = false; lightboxStage.appendChild(img); } else if (['mp4', 'webm', 'ogg'].includes(extension)) { const video = document.createElement('video'); video.src = src; video.controls = true; video.playsInline = true; lightboxStage.appendChild(video); lightboxPlayButton.classList.add('show'); lightboxPlayButton.onclick = () => { lightboxPlayButton.classList.remove('show'); video.play(); }; } else if (['youtube', 'vimeo'].includes(extension)) { const idMatch = src.match(/_([0-9]{6,})(?:-h([A-Za-z0-9]+))?\.(youtube|vimeo)$/i); if (idMatch) { const [, id, h, type] = idMatch; let embedUrl = ''; if (type === 'youtube') { embedUrl = `https://www.youtube-nocookie.com/embed/${id}?autoplay=0&controls=1&modestbranding=1&rel=0`; } else { const hParam = h ? `&h=${h}` : ''; embedUrl = `https://player.vimeo.com/video/${id}?autoplay=1&loop=1&title=0&byline=0${hParam}`; } const iframe = document.createElement('iframe'); iframe.src = embedUrl; iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen'; iframe.allowFullscreen = true; lightboxStage.appendChild(iframe); } } }
+function setupImageZoom(img) { lightboxZoomButton.style.display = 'block'; lightboxZoomButton.classList.remove('active'); let zoomState = { isActive: false, scale: 1, posX: 0, posY: 0, isDragging: false, startX: 0, startY: 0 }; const applyTransform = () => { img.style.transform = `translate(${zoomState.posX}px, ${zoomState.posY}px) scale(${zoomState.scale})`; }; const resetZoom = () => { zoomState.scale = 1; zoomState.posX = 0; zoomState.posY = 0; applyTransform(); }; lightboxZoomButton.onclick = () => { zoomState.isActive = !zoomState.isActive; lightboxZoomButton.classList.toggle('active', zoomState.isActive); img.style.cursor = zoomState.isActive ? 'grab' : 'default'; if (!zoomState.isActive) resetZoom(); }; img.addEventListener("wheel", e => { if (!zoomState.isActive) return; e.preventDefault(); const delta = e.deltaY > 0 ? -0.1 : 0.1; zoomState.scale = Math.min(Math.max(1, zoomState.scale + delta), CONFIG.maxZoomScale); applyTransform(); }); img.addEventListener("dblclick", () => { if (!zoomState.isActive) return; zoomState.scale = zoomState.scale > 1 ? 1 : 2; if (zoomState.scale === 1) resetZoom(); else applyTransform(); }); img.addEventListener("mousedown", e => { if (!zoomState.isActive || zoomState.scale <= 1) return; zoomState.isDragging = true; zoomState.startX = e.clientX - zoomState.posX; zoomState.startY = e.clientY - zoomState.posY; img.style.cursor = "grabbing"; }); window.addEventListener("mousemove", e => { if (!zoomState.isDragging) return; zoomState.posX = e.clientX - zoomState.startX; zoomState.posY = e.clientY - zoomState.startY; applyTransform(); }); window.addEventListener("mouseup", () => { if (zoomState.isDragging) { zoomState.isDragging = false; img.style.cursor = "grab"; } }); }
+function lightboxNext() { if (state.currentMediaIndex < mediaItems.length - 1) { showMedia(state.currentMediaIndex + 1); } }
+function lightboxPrev() { if (state.currentMediaIndex > 0) { showMedia(state.currentMediaIndex - 1); } }
 
-// ... (zde je celý zbytek kódu pro tlačítka a lightbox, který se nemění)
-function hideButtons() {
-    if (interactiveLayer) {
-        interactiveLayer.innerHTML = '';
-    }
-}
-
-function renderButtons(spreadIndex) {
-    hideButtons();
-    const buttonsForSpread = buttonData.filter(btn => btn.spread === spreadIndex);
-
-    buttonsForSpread.forEach(data => {
-        const btn = document.createElement('div');
-        btn.className = 'interactive-button';
-        Object.assign(btn.style, data.styles);
-
-        if (data.clipPath) {
-            btn.style.clipPath = data.clipPath;
-        }
-
-        const action = data.url
-            ? () => window.open(data.url, '_blank')
-            : () => openLightbox(data.mediaSrc);
-
-        btn.addEventListener('click', action);
-        interactiveLayer.appendChild(btn);
-    });
-}
-
-function getFileExtension(path) {
-    return path.split('.').pop().toLowerCase();
-}
-
-function openLightbox(src) {
-    let mediaIndex = mediaItems.findIndex(m => m.src === src);
-    if (mediaIndex === -1) {
-        mediaItems.push({ src });
-        mediaIndex = mediaItems.length - 1;
-    }
-    state.currentMediaIndex = mediaIndex;
-    showMedia(state.currentMediaIndex);
-    lightbox.classList.add('show');
-    lightbox.setAttribute('aria-hidden', 'false');
-}
-
-function closeLightbox() {
-    lightbox.classList.remove('show');
-    lightbox.setAttribute('aria-hidden', 'true');
-    lightboxStage.innerHTML = '';
-    lightboxPlayButton.classList.remove('show');
-}
-
-function showMedia(index) {
-    if (index < 0 || index >= mediaItems.length) return;
-    state.currentMediaIndex = index;
-    const { src } = mediaItems[index];
-
-    lightboxStage.innerHTML = '';
-    lightboxZoomButton.style.display = 'none';
-    lightboxPlayButton.classList.remove('show');
-
-    const extension = getFileExtension(src);
-
-    if (['jpg', 'jpeg', 'png', 'webp', 'avif'].includes(extension)) {
-        const img = document.createElement('img');
-        img.src = src;
-        img.draggable = false;
-        lightboxStage.appendChild(img);
-        setupImageZoom(img);
-    } else if (extension === 'gif') {
-        const img = document.createElement('img');
-        img.src = src;
-        img.draggable = false;
-        lightboxStage.appendChild(img);
-    } else if (['mp4', 'webm', 'ogg'].includes(extension)) {
-        const video = document.createElement('video');
-        video.src = src;
-        video.controls = true;
-        video.playsInline = true;
-        lightboxStage.appendChild(video);
-        lightboxPlayButton.classList.add('show');
-        lightboxPlayButton.onclick = () => {
-            lightboxPlayButton.classList.remove('show');
-            video.play();
-        };
-    } else if (['youtube', 'vimeo'].includes(extension)) {
-        const idMatch = src.match(/_([0-9]{6,})(?:-h([A-Za-z0-9]+))?\.(youtube|vimeo)$/i);
-        if (idMatch) {
-            const [, id, h, type] = idMatch;
-            let embedUrl = '';
-            if (type === 'youtube') {
-                embedUrl = `https://www.youtube-nocookie.com/embed/${id}?autoplay=0&controls=1&modestbranding=1&rel=0`;
-            } else {
-                const hParam = h ? `&h=${h}` : '';
-                embedUrl = `https://player.vimeo.com/video/${id}?autoplay=1&loop=1&title=0&byline=0${hParam}`;
-            }
-            const iframe = document.createElement('iframe');
-            iframe.src = embedUrl;
-            iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen';
-            iframe.allowFullscreen = true;
-            lightboxStage.appendChild(iframe);
-        }
-    }
-}
-
-function setupImageZoom(img) {
-    lightboxZoomButton.style.display = 'block';
-    lightboxZoomButton.classList.remove('active');
-
-    let zoomState = {
-        isActive: false,
-        scale: 1,
-        posX: 0,
-        posY: 0,
-        isDragging: false,
-        startX: 0,
-        startY: 0
-    };
-
-    const applyTransform = () => {
-        img.style.transform = `translate(${zoomState.posX}px, ${zoomState.posY}px) scale(${zoomState.scale})`;
-    };
-
-    const resetZoom = () => {
-        zoomState.scale = 1;
-        zoomState.posX = 0;
-        zoomState.posY = 0;
-        applyTransform();
-    };
-
-    lightboxZoomButton.onclick = () => {
-        zoomState.isActive = !zoomState.isActive;
-        lightboxZoomButton.classList.toggle('active', zoomState.isActive);
-        img.style.cursor = zoomState.isActive ? 'grab' : 'default';
-        if (!zoomState.isActive) resetZoom();
-    };
-
-    img.addEventListener("wheel", e => {
-        if (!zoomState.isActive) return;
-        e.preventDefault();
-        const delta = e.deltaY > 0 ? -0.1 : 0.1;
-        zoomState.scale = Math.min(Math.max(1, zoomState.scale + delta), CONFIG.maxZoomScale);
-        applyTransform();
-    });
-
-    img.addEventListener("dblclick", () => {
-        if (!zoomState.isActive) return;
-        zoomState.scale = zoomState.scale > 1 ? 1 : 2;
-        if (zoomState.scale === 1) resetZoom();
-        else applyTransform();
-    });
-
-    img.addEventListener("mousedown", e => {
-        if (!zoomState.isActive || zoomState.scale <= 1) return;
-        zoomState.isDragging = true;
-        zoomState.startX = e.clientX - zoomState.posX;
-        zoomState.startY = e.clientY - zoomState.posY;
-        img.style.cursor = "grabbing";
-    });
-
-    window.addEventListener("mousemove", e => {
-        if (!zoomState.isDragging) return;
-        zoomState.posX = e.clientX - zoomState.startX;
-        zoomState.posY = e.clientY - zoomState.startY;
-        applyTransform();
-    });
-
-    window.addEventListener("mouseup", () => {
-        if (zoomState.isDragging) {
-            zoomState.isDragging = false;
-            img.style.cursor = "grab";
-        }
-    });
-}
-
-function lightboxNext() {
-    if (state.currentMediaIndex < mediaItems.length - 1) {
-        showMedia(state.currentMediaIndex + 1);
-    }
-}
-
-function lightboxPrev() {
-    if (state.currentMediaIndex > 0) {
-        showMedia(state.currentMediaIndex - 1);
-    }
-}
 // =================================================================
 //  EVENT LISTENERS
 // =================================================================
 
+/**
+ * OPRAVA: Vytvoříme si funkci, která umí přečíst hash z URL a přejít na stránku.
+ */
+function handleHashChange() {
+    const hash = location.hash;
+    let targetSpread = 0;
+    if (hash.startsWith('#spread=')) {
+        const spreadFromUrl = parseInt(hash.substring(8), 10);
+        if (!isNaN(spreadFromUrl) && spreadFromUrl >= 0 && spreadFromUrl <= state.maxSpread) {
+            targetSpread = spreadFromUrl;
+        }
+    }
+    goTo(targetSpread);
+}
+
+
 function setupEventListeners() {
-    // ... (stávající posluchače)
     document.getElementById('arrowLeft').addEventListener('click', prev);
     document.getElementById('arrowRight').addEventListener('click', next);
     slider.addEventListener('input', () => { if (!state.isAnimating) { hideButtons(); updateBook(parseFloat(slider.value)); } });
@@ -387,22 +228,8 @@ function setupEventListeners() {
     document.querySelector('.lightbox-arrow.right').addEventListener('click', lightboxNext);
     window.addEventListener('keydown', e => { if (!lightbox.classList.contains('show')) return; if (e.key === 'Escape') closeLightbox(); if (e.key === 'ArrowRight') lightboxNext(); if (e.key === 'ArrowLeft') lightboxPrev(); });
 
-    // ... (debugovací tlačítka)
-    document.querySelectorAll('.sidebar button[onclick]').forEach(button => { const command = button.getAttribute('onclick'); button.removeAttribute('onclick'); if (command.startsWith('goTo')) { const page = parseInt(command.match(/\d+/)[0], 10); button.addEventListener('click', () => goTo(page)); } });
-    document.querySelectorAll('.rightbar button[onclick]').forEach(button => { const command = button.getAttribute('onclick'); button.removeAttribute('onclick'); if (command.startsWith('openLightbox')) { const src = command.match(/'([^']+)'/)[1]; button.addEventListener('click', () => openLightbox(src)); } });
-
-    /**
-     * NOVÉ: Posluchač pro tlačítka zpět/vpřed v prohlížeči.
-     */
-    window.addEventListener('popstate', (event) => {
-        // Získáme stav, který jsme uložili pomocí pushState
-        if (event.state && typeof event.state.spread !== 'undefined') {
-            goTo(event.state.spread);
-        } else {
-            // Pokud stav neexistuje (např. jsme se vrátili na úplný začátek), jdeme na stranu 0
-            goTo(0);
-        }
-    });
+    // OPRAVA: Přidáme posluchač pro změnu hashe (pro tlačítka zpět/vpřed)
+    window.addEventListener('hashchange', handleHashChange);
 
     function animateWheel() {
         if (Math.abs(state.wheelAccumulator) < 0.001) {
@@ -433,8 +260,8 @@ function main() {
     setupGifOverlays();
     setupEventListeners();
 
-    // ZMĚNA: Logika pro načtení správné stránky podle URL
-    const hash = window.location.hash;
+    // OPRAVA: Logika pro načtení správné stránky podle URL
+    const hash = location.hash;
     let initialSpread = 0;
     if (hash.startsWith('#spread=')) {
         const spreadFromUrl = parseInt(hash.substring(8), 10);
@@ -448,9 +275,6 @@ function main() {
     slider.value = initialSpread;
     updateBook(initialSpread);
     renderButtons(initialSpread);
-
-    // Uložíme počáteční stav do historie prohlížeče
-    history.replaceState({ spread: initialSpread }, `Spread ${initialSpread}`, window.location.href);
 }
 
 document.addEventListener('DOMContentLoaded', main);
