@@ -33,6 +33,16 @@ const buttonData = [
             height: '24%'
         }
     },
+    {
+        spread: 4,
+        url: 'https://drive.google.com/drive/folders/1FrY21x_N2kG79eNC36Gj2iPrpOIcFiuB?usp=sharing',
+        styles: {
+            top: '20% ',
+            left: '33%',
+            width: '10%',
+            height: '8%'
+        }
+    },
     // Spread 5
     {
         spread: 5,
