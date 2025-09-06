@@ -39,7 +39,7 @@ const buttonData = [
         styles: {
             top: '20% ',
             left: '33%',
-            width: '10%',
+            width: '12%',
             height: '8%'
         }
     },

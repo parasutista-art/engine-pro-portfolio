@@ -1,14 +1,17 @@
-﻿:root {
+﻿/* ===================================== */
+/* === ZÁKLADNÍ NASTAVENÍ & LAYOUT === */
+/* ===================================== */
+:root {
     --page-ratio: 2480/3508;
-    --spread-ratio: calc(2*var(--page-ratio));
+    --spread-ratio: calc(2 * var(--page-ratio));
 }
 
 * {
-    box-sizing: border-box
+    box-sizing: border-box;
 }
 
 html, body {
-    height: 100%
+    height: 100%;
 }
 
 body {
@@ -18,23 +21,23 @@ body {
     display: flex;
     justify-content: flex-start;
     align-items: center;
-    flex-direction: row;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #fff;
     user-select: none;
-    font-family: system-ui,Segoe UI,Roboto,sans-serif;
-    color: #fff
 }
 
-#btn-jump {
-    background: rgba(0,0,0,0.5);
-    color: white;
-    border: none;
-    border-radius: 5px;
+.book-viewport {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    height: 100%;
 }
 
-    #btn-jump:hover {
-        background: rgba(0,0,0,0.8);
-    }
-
+/* ===================================== */
+/* === DEBUGOVACÍ LIŠTA === */
+/* ===================================== */
 .sidebar {
     width: 150px;
     padding: 10px;
@@ -44,20 +47,7 @@ body {
     display: none;
 }
 
-.rightbar {
-    position: absolute;
-    right: 0;
-    top: 0;
-    width: 160px;
-    height: 100%;
-    background: #111;
-    padding: 10px;
-    overflow-y: auto;
-    z-index: 12000;
-    display: none;
-}
-
-    .sidebar button, .rightbar button {
+    .sidebar button {
         width: 100%;
         margin: 6px 0;
         padding: 8px;
@@ -65,29 +55,23 @@ body {
         color: #fff;
         border: none;
         cursor: pointer;
-        border-radius: 4px
+        border-radius: 4px;
     }
 
-        .sidebar button:hover, .rightbar button:hover {
-            background: #555
+        .sidebar button:hover {
+            background: #555;
         }
 
-.book-viewport {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-    height: 100%
-}
-
+/* ===================================== */
+/* === KNIHA & STRÁNKY === */
+/* ===================================== */
 .book {
     position: relative;
-    width: calc(min(90vw,90vh*var(--spread-ratio)));
-    height: calc(min(90vh,90vw/var(--spread-ratio)));
+    width: calc(min(90vw, 90vh * var(--spread-ratio)));
+    height: calc(min(90vh, 90vw / var(--spread-ratio)));
     transform-style: preserve-3d;
-    perspective: 2000px;
-    z-index: 100
+    perspective: 2500px;
+    z-index: 100;
 }
 
 .paper {
@@ -97,7 +81,7 @@ body {
     top: 0;
     left: 50%;
     transform-style: preserve-3d;
-    transform-origin: left center
+    transform-origin: left center;
 }
 
     .paper .front, .paper .back {
@@ -105,166 +89,190 @@ body {
         inset: 0;
         backface-visibility: hidden;
         transform-style: preserve-3d;
-        background: #000
+        background: #000;
     }
 
     .paper .back {
-        transform: rotateY(180deg) translateZ(0.1px)
+        transform: rotateY(180deg);
     }
+
+.page-content {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
 
 .page-image {
     width: 100%;
     height: 100%;
     object-fit: contain;
     display: block;
-    pointer-events: none
+    pointer-events: none;
 }
 
-.arrow {
+/* DŮLEŽITÁ ZMĚNA ZDE: Univerzální styl pro GIF i WebM */
+.media-overlay {
     position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 3rem;
-    color: #fff;
-    cursor: pointer;
-    user-select: none;
-    z-index: 20000;
-    padding: 6px 10px;
-    background: rgba(0,0,0,.25);
-    border-radius: 6px
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+    z-index: 2;
 }
 
-    .arrow.left {
-        left: 10px
-    }
-
-    .arrow.right {
-        right: 10px
-    }
-
+/* ===================================== */
+/* === OVLÁDACÍ PRVKY === */
+/* ===================================== */
 .slider-wrap {
     position: absolute;
-    bottom: 10px;
+    bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
     width: 50%;
-    z-index: 11000
+    max-width: 600px;
+    z-index: 11000;
 }
 
-    .slider-wrap input {
-        width: 100%
+    .slider-wrap input[type="range"] {
+        width: 100%;
     }
 
+.nav-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 2.5rem;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.3);
+    border: none;
+    cursor: pointer;
+    user-select: none;
+    z-index: 20000;
+    padding: 10px 15px;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+    line-height: 1;
+}
+
+    .nav-arrow:hover {
+        background: rgba(0, 0, 0, 0.6);
+    }
+
+    .nav-arrow.left {
+        left: 20px;
+    }
+
+    .nav-arrow.right {
+        right: 20px;
+    }
+
+/* ===================================== */
+/* === LIGHTBOX === */
+/* ===================================== */
 .lightbox {
-    display: none;
+    display: flex;
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.45);
+    background: rgba(0, 0, 0, 0.45);
     backdrop-filter: blur(15px);
     justify-content: center;
     align-items: center;
     z-index: 25000;
     opacity: 0;
-    transition: opacity 1s ease
+    pointer-events: none;
+    transition: opacity 0.3s ease;
 }
 
     .lightbox.show {
-        display: flex;
-        opacity: 1
+        opacity: 1;
+        pointer-events: auto;
     }
 
 .lightbox-stage {
     position: relative;
-    max-width: 50vw;
-    max-height: 60vh;
     width: auto;
     height: auto;
-    border: none;
-    border-radius: 6px;
-    background: transparent;
+    max-width: 80vw;
+    max-height: 90vh;
     display: flex;
     align-items: center;
-    object-fit: contain;
-    justify-content: center
+    justify-content: center;
 }
 
     .lightbox-stage img, .lightbox-stage video, .lightbox-stage iframe {
-        width: 60vw;
-        height: 85vh;
-        max-width: 2000px;
-        max-height: 2000px;
+        width: 100%;
+        height: 100%;
+        max-width: 100%;
+        max-height: 90vh;
         border: none;
         border-radius: 6px;
         object-fit: contain;
-        background: transparent
     }
 
-.lightbox-arrow {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 3rem;
-    color: #fff;
-    cursor: pointer;
-    user-select: none;
-    z-index: 26000;
-    padding: 6px 10px;
-    background: rgba(0,0,0,.25);
-    border-radius: 6px
+.lightbox-arrow.left {
+    left: 30px;
 }
 
-    .lightbox-arrow.left {
-        left: 20px
-    }
+.lightbox-arrow.right {
+    right: 30px;
+}
 
-    .lightbox-arrow.right {
-        right: 20px
-    }
-
-.lb-play {
+.lb-button, .lb-play, .lb-close {
     position: absolute;
-    inset: auto;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%,-50%);
-    width: 90px;
-    height: 90px;
-    border-radius: 50%;
+    background: rgba(0,0,0,0.6);
+    color: white;
     border: none;
-    background: rgba(0,0,0,.55);
-    color: #fff;
-    font-size: 40px;
-    display: none;
-    align-items: center;
-    justify-content: center;
+    border-radius: 8px;
+    cursor: pointer;
     z-index: 27000;
-    cursor: pointer
+    user-select: none;
+    transition: background-color 0.2s;
 }
 
-    .lb-play.show {
-        display: flex
+    .lb-button:hover, .lb-play:hover, .lb-close:hover {
+        background: rgba(0,0,0,0.8);
     }
 
 #lb-zoom {
-    position: absolute;
-    top: 15px;
+    top: 20px;
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(0,0,0,0.6);
-    color: white;
     font-size: 20px;
     padding: 8px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    z-index: 9999;
-    user-select: none;
-    display: none;
 }
 
     #lb-zoom.active {
         background: rgba(0,150,255,0.8);
     }
 
+.lb-close {
+    top: 20px;
+    right: 30px;
+    font-size: 20px;
+    padding: 8px 12px;
+}
+
+.lb-play {
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    font-size: 36px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+    .lb-play.show {
+        display: flex;
+    }
+
+/* ===================================== */
+/* === INTERAKTIVNÍ VRSTVA === */
+/* ===================================== */
 #interactive-layer {
     position: absolute;
     width: calc(min(90vw, 90vh * var(--spread-ratio)));
@@ -279,33 +287,154 @@ body {
     cursor: pointer;
     pointer-events: auto;
     transition: background-color 0.2s, border 0.2s;
+    border-radius: 4px;
 }
 
     .interactive-button:hover {
-        background: rgba(255, 255, 255, 0,15);
-        border: 1px solid white
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.7);
     }
 
 /* ===================================== */
-/* === NOVÁ PRAVIDLA PRO OBSAH STRÁNEK === */
+/* === VLASTNÍ UI ILUSTRACE === */
 /* ===================================== */
 
-/* Nový kontejner pro obrázek a GIF. Přebírá zodpovědnost za pozicování. */
-.page-content {
-    position: relative;
-    width: 100%;
-    height: 100%;
+/* --- Obecné nastavení pro tlačítka s ikonami --- */
+.nav-arrow,
+#lb-zoom {
+    background-color: transparent;
+    background-size: contain; /* Obrázek se přizpůsobí velikosti tlačítka */
+    background-repeat: no-repeat;
+    background-position: center;
+    border: none;
+    /* Můžeme upravit velikost tlačítek */
+    width: 50px;
+    height: 50px;
+    /* Odstraníme původní vlastnosti pro text */
+    font-size: 0;
+    padding: 0;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    opacity: 0.7;
 }
 
-/* Pravidla pro samotný GIF overlay. */
-.gif-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    pointer-events: none;
-    /* Zajistí, že GIF je VŽDY NAD statickým obrázkem uvnitř .page-content. */
-    z-index: 2;
+    .nav-arrow:hover,
+    #lb-zoom:hover {
+        background-color: transparent; /* Zabráníme zobrazení původní barvy při hoveru */
+        transform: scale(1.1); /* Lehké zvětšení při najetí myší */
+        opacity: 1;
+    }
+
+/* --- Přiřazení konkrétních obrázků --- */
+#arrowLeft {
+    background-image: url('assets/arrow-left.svg');
 }
+
+#arrowRight {
+    background-image: url('assets/arrow-right.svg');
+}
+
+#lb-zoom {
+    background-image: url('assets/zoom-icon.svg');
+}
+
+    #lb-zoom.active {
+        /* Můžeme přidat vizuální efekt pro aktivní lupu, např. filtr */
+        filter: drop-shadow(0 0 5px #00aaff);
+    }
+
+
+/* ===================================== */
+/* === VLASTNÍ LIŠTA S POSUVNÍKEM === */
+/* ===================================== */
+
+/* Kontejner pro celou lištu */
+/* Kontejner pro celou lištu */
+.slider-wrap {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50%;
+    max-width: 600px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    z-index: 11000;
+}
+
+/* ZMĚNA ZDE: Přidali jsme padding, který "rozšíří" dráhu pro jezdce. */
+/* Velikost paddingu by měla být polovina šířky tvého jezdce. */
+.custom-track {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 100%;
+    height: 10px;
+    background-image: url('assets/slider-track.svg');
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    pointer-events: none;
+    padding: 0 20px; /* Přidáno (20px je polovina šířky jezdce 40px) */
+    box-sizing: content-box; /* Důležité, aby se padding přičetl k šířce */
+}
+
+/* ZMĚNA ZDE: Přidali jsme margin, aby se neviditelný slider zarovnal s novou, širší dráhou. */
+#pageSlider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    background: transparent;
+    outline: none;
+    margin: 0 -20px; /* Přidáno (záporný margin o stejné hodnotě jako padding) */
+    padding: 0;
+}
+    /* Vzhled jezdce (thumb) pro Chrome, Safari, Edge */
+    #pageSlider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 40px; /* Šířka vaší ilustrace jezdce */
+        height: 40px; /* Výška vaší ilustrace jezdce */
+        background-image: url('assets/slider-thumb.svg');
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-color: transparent;
+        border: none;
+        cursor: grab;
+        transition: transform 0.2s ease;
+    }
+
+        #pageSlider::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+
+        #pageSlider::-webkit-slider-thumb:active {
+            cursor: grabbing;
+        }
+
+
+    /* Vzhled jezdce (thumb) pro Firefox */
+    #pageSlider::-moz-range-thumb {
+        width: 40px;
+        height: 40px;
+        background-image: url('assets/slider-thumb.svg');
+        background-size: contain;
+        background-color: transparent;
+        border: none;
+        cursor: grab;
+        transition: transform 0.2s ease;
+    }
+
+        #pageSlider::-moz-range-thumb:hover {
+            transform: scale(1.1);
+        }
+
+    /* Uděláme dráhu neviditelnou i pro Firefox */
+    #pageSlider::-moz-range-track {
+        width: 100%;
+        height: 8px;
+        background: transparent;
+        border: none;
+        border-radius: 5px;
+    }
