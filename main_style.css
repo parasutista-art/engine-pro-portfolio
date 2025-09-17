@@ -1,24 +1,24 @@
-﻿/* Styl inspirovaný webem Ostengruppe */
-@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400&display=swap');
-
-:root {
-    --background-color: #000000;
-    --text-color: #ffffff;
-}
+﻿@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400&display=swap');
 
 body {
-    background-color: var(--background-color);
-    color: var(--text-color);
+    background-color: #000;
+    color: #fff;
     font-family: 'Roboto Mono', monospace;
     margin: 0;
-    padding: 2rem; /* Menší okraje */
+    /* Centrovaní navigace na hlavní stránce */
     display: flex;
-    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     min-height: 100vh;
 }
 
+.nav-column {
+    padding: 2rem;
+    width: 320px;
+}
+
 .site-header {
-    margin-bottom: 1.5rem; /* Mezera mezi hlavičkou a navigací */
+    margin-bottom: 1.5rem;
 }
 
 h1 {
@@ -28,29 +28,21 @@ h1 {
     letter-spacing: 1px;
 }
 
-main {
-    flex-grow: 1;
-}
-
-/* Navigační lišta s projekty */
 .project-list ul {
-    display: flex;
-    flex-wrap: wrap; /* Zalamování na menších obrazovkách */
     list-style: none;
     padding: 0;
     margin: 0;
 }
 
 .project-list li {
-    margin-right: 2.5rem; /* Mezery mezi položkami */
-    margin-bottom: 0.5rem;
+    margin-bottom: 1rem;
     font-size: 1rem;
 }
 
 .project-list a {
-    color: var(--text-color);
+    color: #fff;
     text-decoration: none;
-    transition: opacity 0.2s ease;
+    transition: opacity 0.2s;
 }
 
     .project-list a:hover {
@@ -58,19 +50,19 @@ main {
         opacity: 0.7;
     }
 
-/* Patička */
+    .project-list a.active {
+        color: #888;
+        pointer-events: none;
+    }
+
 .site-footer {
-    margin-top: auto;
+    margin-top: 2rem;
     padding-top: 2rem;
     font-size: 0.9rem;
-    color: #aaa; /* Mírně potlačená barva pro méně důležité info */
+    color: #aaa;
+    border-top: 1px solid #333;
 }
 
     .site-footer a {
-        color: var(--text-color);
-        text-decoration: underline;
+        color: #fff;
     }
-
-        .site-footer a:hover {
-            text-decoration: none;
-        }

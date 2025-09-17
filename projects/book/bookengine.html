@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="cs">
 <head>
@@ -8,9 +9,7 @@
 </head>
 <body>
     <div class="main-container">
-        <div id="portfolio-nav" class="nav-column">
-            <div class="nav-loader">Načítání...</div>
-        </div>
+        <div id="nav-placeholder" class="nav-column"></div>
 
         <div class="book-viewport">
             <div id="book" class="book">
@@ -44,6 +43,13 @@
         <button id="lb-zoom" class="lb-button"></button>
         <button id="lightboxNext" class="nav-arrow right lightbox-arrow" aria-label="Další médium"></button>
     </div>
+
+
+    <script src="../../nav.js"></script>
+    <script>
+        // Cesta je nyní správně o dvě úrovně výš
+        createNav('../../', 'portfolio');
+    </script>
 
     <script src="buttons.js"></script>
     <script src="script.js"></script>
