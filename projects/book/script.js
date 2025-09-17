@@ -1,5 +1,39 @@
 // =================================================================
-//  INITIALIZATION & CONFIGURATION
+//  NOVÁ FUNKCE: Načtení navigace z hlavní stránky
+// =================================================================
+async function loadPortfolioNav() {
+    try {
+        // Cesta vede o dvě úrovně výš k hlavnímu index.html
+        const response = await fetch('../../index.html');
+        if (!response.ok) {
+            document.getElementById('portfolio-nav').innerHTML = 'Chyba při načítání navigace.';
+            return;
+        }
+
+        const htmlText = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(htmlText, 'text/html');
+
+        const header = doc.querySelector('.site-header');
+        const navList = doc.querySelector('.project-list');
+        const footer = doc.querySelector('.site-footer');
+        const navContainer = document.getElementById('portfolio-nav');
+
+        if (navContainer && header && navList && footer) {
+            navContainer.innerHTML = ''; // Vyčistí "Načítání..."
+            navContainer.appendChild(header);
+            navContainer.appendChild(navList);
+            navContainer.appendChild(footer);
+        }
+    } catch (error) {
+        console.error('Chyba při načítání navigace:', error);
+        document.getElementById('portfolio-nav').innerHTML = 'Navigaci se nepodařilo načíst.';
+    }
+}
+
+
+// =================================================================
+//  VÁŠ PŮVODNÍ FUNKČNÍ KÓD ZAČÍNÁ ZDE
 // =================================================================
 const CONFIG = {
     animationDuration: 800,
@@ -9,11 +43,10 @@ const CONFIG = {
 };
 
 const mediaOverlays = {
-    5: { type: 'webm', src: 'assets/page-5-overlay.webm' }, // Cesta přímo k .webm souboru
-    7: { type: 'gif', src: 'assets/page-7-overlay.gif' }
+    5: { type: 'webm', src: 'assets/page-5-overlay.webm' },
+    7: { type: 'webm', src: 'assets/page-7-overlay.webm' }
 };
 
-// DOM Elements
 const book = document.getElementById('book');
 const slider = document.getElementById('pageSlider');
 const interactiveLayer = document.getElementById('interactive-layer');
@@ -23,7 +56,6 @@ const lightboxPlayButton = document.getElementById('lb-play');
 const lightboxZoomButton = document.getElementById('lb-zoom');
 const papers = Array.from(document.querySelectorAll('.paper'));
 
-// Application State
 const state = {
     currentSpread: 0,
     maxSpread: papers.length,
@@ -41,9 +73,6 @@ let mediaItems = [
     { src: 'media/media/medium6_spread7_1114707280.vimeo' }, { src: 'media/medium7_spread8.jpg' }
 ];
 
-// =================================================================
-//  PAGE STRUCTURE & MEDIA OVERLAY ENGINE
-// =================================================================
 function wrapPageImages() {
     papers.forEach(paper => {
         paper.querySelectorAll('.front, .back').forEach(side => {
@@ -67,9 +96,7 @@ function setupMediaOverlays() {
         if (!paperEl) return;
         const contentWrapper = paperEl.querySelector(`${sideClass} .page-content`);
         if (!contentWrapper) return;
-
         let mediaElement;
-
         if (mediaData.type === 'webm') {
             mediaElement = document.createElement('video');
             mediaElement.className = 'media-overlay';
@@ -78,19 +105,15 @@ function setupMediaOverlays() {
             mediaElement.loop = true;
             mediaElement.playsInline = true;
             mediaElement.src = mediaData.src;
-        } else { // 'gif'
+        } else {
             mediaElement = document.createElement('img');
             mediaElement.className = 'media-overlay';
             mediaElement.src = mediaData.src;
         }
-
         contentWrapper.appendChild(mediaElement);
     });
 }
 
-// =================================================================
-//  CORE BOOK ENGINE (beze změn)
-// =================================================================
 function updateURL(spreadIndex) {
     const newHash = spreadIndex > 0 ? `spread=${spreadIndex}` : '';
     if (location.hash.substring(1) !== newHash) { location.hash = newHash; }
@@ -144,9 +167,6 @@ function goTo(spreadIndex) {
 function next() { goTo(state.currentSpread + 1); }
 function prev() { goTo(state.currentSpread - 1); }
 
-// =================================================================
-//  INTERACTIVE BUTTONS & LIGHTBOX (beze změn)
-// =================================================================
 function hideButtons() { if (interactiveLayer) { interactiveLayer.innerHTML = ''; } }
 function renderButtons(spreadIndex) {
     hideButtons();
@@ -229,9 +249,6 @@ function setupImageZoom(img) {
 function lightboxNext() { if (state.currentMediaIndex < mediaItems.length - 1) { showMedia(state.currentMediaIndex + 1); } }
 function lightboxPrev() { if (state.currentMediaIndex > 0) { showMedia(state.currentMediaIndex - 1); } }
 
-// =================================================================
-//  EVENT LISTENERS (beze změn)
-// =================================================================
 function handleHashChange() {
     const hash = location.hash;
     let targetSpread = 0;
@@ -283,10 +300,10 @@ function setupEventListeners() {
     }
 }
 
-// =================================================================
-//  APPLICATION START
-// =================================================================
 function main() {
+    // ZMĚNA ZDE: Zavoláme načtení navigace hned na začátku
+    loadPortfolioNav();
+
     slider.min = 0;
     slider.max = state.maxSpread;
     wrapPageImages();

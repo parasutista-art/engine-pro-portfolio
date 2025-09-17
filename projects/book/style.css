@@ -1,0 +1,370 @@
+﻿/* ===================================== */
+/* === ZÁKLADNÍ NASTAVENÍ & LAYOUT === */
+/* ===================================== */
+:root {
+    --page-ratio: 2480/3508;
+    --spread-ratio: calc(2 * var(--page-ratio));
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    background: #000;
+    overflow: hidden;
+    display: flex;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #fff;
+    user-select: none;
+}
+
+/* --- OPRAVENÝ LAYOUT --- */
+.main-container {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+}
+
+.nav-column {
+    width: 280px;
+    flex-shrink: 0;
+    padding: 2rem;
+    overflow-y: auto;
+    border-right: 1px solid #333;
+}
+
+.nav-loader {
+    color: #888;
+}
+
+.nav-column .site-header h1 {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 1rem;
+    margin: 0 0 1.5rem 0;
+    font-weight: 400;
+    letter-spacing: 1px;
+}
+
+.nav-column .project-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.nav-column .project-list li {
+    font-family: 'Roboto Mono', monospace;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+}
+
+.nav-column .project-list a {
+    color: #fff;
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+}
+
+    .nav-column .project-list a:hover {
+        text-decoration: underline;
+        opacity: 0.7;
+    }
+
+.nav-column .site-footer {
+    font-family: 'Roboto Mono', monospace;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    font-size: 0.9rem;
+    color: #aaa;
+    border-top: 1px solid #333;
+}
+
+    .nav-column .site-footer a {
+        color: #fff;
+    }
+
+.book-viewport {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    height: 100%;
+}
+
+/* ===================================== */
+/* === KNIHA & STRÁNKY (beze změny) === */
+/* ===================================== */
+.book {
+    position: relative;
+    width: calc(min(90vw, 90vh * var(--spread-ratio)));
+    height: calc(min(90vh, 90vw / var(--spread-ratio)));
+    transform-style: preserve-3d;
+    perspective: 2500px;
+    z-index: 100;
+}
+
+.paper {
+    position: absolute;
+    width: 50%;
+    height: 100%;
+    top: 0;
+    left: 50%;
+    transform-style: preserve-3d;
+    transform-origin: left center;
+}
+
+    .paper .front, .paper .back {
+        position: absolute;
+        inset: 0;
+        backface-visibility: hidden;
+        transform-style: preserve-3d;
+        background: #000;
+    }
+
+    .paper .back {
+        transform: rotateY(180deg);
+    }
+
+.page-content {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.page-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+    pointer-events: none;
+}
+
+.media-overlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+    z-index: 2;
+}
+
+/* ===================================== */
+/* === OVLÁDACÍ PRVKY (OPRAVENO) === */
+/* ===================================== */
+.nav-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 2rem;
+    font-weight: bold;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.3);
+    border: none;
+    cursor: pointer;
+    z-index: 20000;
+    padding: 10px 20px;
+    border-radius: 8px;
+    transition: all 0.2s;
+    line-height: 1;
+}
+
+    .nav-arrow:hover {
+        background: rgba(0, 0, 0, 0.6);
+        transform: translateY(-50%) scale(1.1);
+    }
+
+    .nav-arrow.left::before {
+        content: '←';
+    }
+
+    .nav-arrow.right::before {
+        content: '→';
+    }
+
+    .nav-arrow.left {
+        left: 20px;
+    }
+
+    .nav-arrow.right {
+        right: 20px;
+    }
+
+.lightbox-arrow.left::before {
+    content: '←';
+}
+
+.lightbox-arrow.right::before {
+    content: '→';
+}
+
+.lb-button {
+    position: absolute;
+    background: rgba(0,0,0,0.6);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    z-index: 27000;
+    transition: background-color 0.2s;
+}
+
+#lb-zoom {
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 20px;
+    padding: 8px 12px;
+}
+
+    #lb-zoom::before {
+        content: '🔍';
+    }
+
+    #lb-zoom.active {
+        background: rgba(0,150,255,0.8);
+    }
+
+/* --- POSUVNÍK (ZJEDNODUŠENO) --- */
+.slider-wrap {
+    position: absolute;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50%;
+    max-width: 600px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    z-index: 11000;
+}
+
+#pageSlider {
+    width: 100%;
+    cursor: grab;
+}
+
+    #pageSlider:active {
+        cursor: grabbing;
+    }
+
+
+/* ===================================== */
+/* === LIGHTBOX & INTERAKTIVNÍ VRSTVA (beze změny) === */
+/* ===================================== */
+.lightbox {
+    display: flex;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(15px);
+    justify-content: center;
+    align-items: center;
+    z-index: 25000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+    .lightbox.show {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+.lightbox-stage {
+    position: relative;
+    width: auto;
+    height: auto;
+    max-width: 80vw;
+    max-height: 90vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+    .lightbox-stage img, .lightbox-stage video, .lightbox-stage iframe {
+        width: 100%;
+        height: 100%;
+        max-width: 100%;
+        max-height: 90vh;
+        border: none;
+        border-radius: 6px;
+        object-fit: contain;
+    }
+
+.lightbox-arrow.left {
+    left: 30px;
+}
+
+.lightbox-arrow.right {
+    right: 30px;
+}
+
+.lb-close {
+    position: absolute;
+    background: rgba(0,0,0,0.6);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    z-index: 27000;
+    transition: background-color 0.2s;
+    top: 20px;
+    right: 30px;
+    font-size: 20px;
+    padding: 8px 12px;
+}
+
+    .lb-close:hover {
+        background: rgba(0,0,0,0.8);
+    }
+
+.lb-play {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    font-size: 36px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.6);
+    color: white;
+    border: none;
+    cursor: pointer;
+    z-index: 27000;
+}
+
+    .lb-play.show {
+        display: flex;
+    }
+
+#interactive-layer {
+    position: absolute;
+    width: calc(min(90vw, 90vh * var(--spread-ratio)));
+    height: calc(min(90vh, 90vw / var(--spread-ratio)));
+    pointer-events: none;
+    z-index: 1500;
+}
+
+.interactive-button {
+    position: absolute;
+    background: transparent;
+    cursor: pointer;
+    pointer-events: auto;
+    transition: background-color 0.2s, border 0.2s;
+    border-radius: 4px;
+}
+
+    .interactive-button:hover {
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.7);
+    }

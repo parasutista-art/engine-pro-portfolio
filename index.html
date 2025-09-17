@@ -1,67 +1,26 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Skicákové portfolio</title>
-    <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>matyaskunstmuller</title>
+    <link rel="stylesheet" href="main_style.css">
 </head>
 <body>
-    <div class="sidebar">
-        <h3>Dvojstránky</h3>
-        <button data-spread="0">Spread 0</button>
-        <button data-spread="1">Spread 1</button>
-        <button data-spread="2">Spread 2</button>
-        <button data-spread="3">Spread 3</button>
-        <button data-spread="4">Spread 4</button>
-        <button data-spread="5">Spread 5</button>
-        <button data-spread="6">Spread 6</button>
-        <button data-spread="7">Spread 7</button>
-        <button data-spread="8">Spread 8</button>
-        <button data-spread="9">Spread 9</button>
-        <button data-spread="10">Spread 10</button>
-        <button data-spread="11">Spread 11</button>
-    </div>
+    <header class="site-header">
+        <h1>Matyas Kunstmüller</h1>
+    </header>
 
-    <div class="book-viewport">
-        <div id="book" class="book">
-            <div id="p0" class="paper"><div class="front"><img class="page-image" src="assets/page-0.webp" alt=""></div><div class="back"><img class="page-image" src="assets/page-1.webp" alt=""></div></div>
-            <div id="p1" class="paper"><div class="front"><img class="page-image" src="assets/page-2.webp" alt=""></div><div class="back"><img class="page-image" src="assets/page-3.webp" alt=""></div></div>
-            <div id="p2" class="paper"><div class="front"><img class="page-image" src="assets/page-4.webp" alt=""></div><div class="back"><img class="page-image" src="assets/page-5.webp" alt=""></div></div>
-            <div id="p3" class="paper"><div class="front"><img class="page-image" src="assets/page-6.webp" alt=""></div><div class="back"><img class="page-image" src="assets/page-7.webp" alt=""></div></div>
-            <div id="p4" class="paper"><div class="front"><img class="page-image" src="assets/page-8.webp" alt=""></div><div class="back"><img class="page-image" src="assets/page-9.webp" alt=""></div></div>
-            <div id="p5" class="paper"><div class="front"><img class="page-image" src="assets/page-10.webp" alt=""></div><div class="back"><img class="page-image" src="assets/page-11.webp" alt=""></div></div>
-            <div id="p6" class="paper"><div class="front"><img class="page-image" src="assets/page-12.webp" alt=""></div><div class="back"><img class="page-image" src="assets/page-13.webp" alt=""></div></div>
-            <div id="p7" class="paper"><div class="front"><img class="page-image" src="assets/page-14.webp" alt=""></div><div class="back"><img class="page-image" src="assets/page-15.webp" alt=""></div></div>
-            <div id="p8" class="paper"><div class="front"><img class="page-image" src="assets/page-16.webp" alt=""></div><div class="back"><img class="page-image" src="assets/page-17.webp" alt=""></div></div>
-            <div id="p9" class="paper"><div class="front"><img class="page-image" src="assets/page-18.webp" alt=""></div><div class="back"><img class="page-image" src="assets/page-19.webp" alt=""></div></div>
-            <div id="p10" class="paper"><div class="front"><img class="page-image" src="assets/page-20.webp" alt=""></div><div class="back"><img class="page-image" src="assets/page-21.webp" alt=""></div></div>
-        </div>
+    <main>
+        <nav class="project-list">
+            <ul>
+                <li><a href="projects/book/index.html">portfolio</a> </li>
+                <li><a href="#">Projekt B</a> </li>
+                <li><a href="#">Projekt C</a> </li>
+            </ul>
+        </nav>
+    </main>
 
-        <div id="interactive-layer"></div>
-
-        <button id="arrowLeft" class="nav-arrow left" aria-label="Předchozí stránka"></button>
-        <button id="arrowRight" class="nav-arrow right" aria-label="Další stránka"></button>
-
-        <div class="slider-wrap">
-            <div class="custom-track"></div>
-            <input type="range" id="pageSlider" min="0" max="11" step="0.001" value="0" />
-        </div>
-    </div>
-
-    <div id="lightbox" class="lightbox" aria-hidden="true" role="dialog">
-        <button id="lightboxClose" class="lb-close" aria-label="Zavřít">&#10005;</button>
-        <button id="lightboxPrev" class="nav-arrow left lightbox-arrow" aria-label="Předchozí médium">&#10094;</button>
-
-        <div id="lightbox-stage" class="lightbox-stage">
-            <button id="lb-play" class="lb-play" aria-label="Přehrát video">▶</button>
-        </div>
-
-        <button id="lb-zoom" class="lb-button"></button>
-        <button id="lightboxNext" class="nav-arrow right lightbox-arrow" aria-label="Další médium">&#10095;</button>
-    </div>
-
-    <script src="buttons.js"></script>
-    <script src="script.js"></script>
+  
 </body>
 </html>
