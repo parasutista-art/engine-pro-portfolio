@@ -1,20 +1,20 @@
 function createNav(relativePath = '', activePage = '') {
-    // Definice odkazù
+    // Definice odkaz
     const links = {
-        portfolio: `<a href="${relativePath}projects/book/bookengine.html">Portfolio SŠ/VŠ</a> (2024)`,
-        projektB: `<a href="${relativePath}index.html">Projekt B</a> (2023)`,
-        projektC: `<a href="${relativePath}index.html">Projekt C</a> (2022)`
+        portfolio: `<a href="${relativePath}projects/book/bookengine.html">portfolio`,
+        projektB: `<a href="${relativePath}index.html">Projekt B`,
+        projektC: `<a href="${relativePath}index.html">Projekt C`
     };
 
-    // Zvýraznìní aktivní stránky
+    // Zvï¿½raznï¿½nï¿½ aktivnï¿½ strï¿½nky
     if (activePage === 'portfolio') {
-        links.portfolio = `<a href="#" class="active">Portfolio SŠ/VŠ</a> (2024)`;
+        links.portfolio = `<a href="#" class="active">portfolio`;
     }
 
-    // Celý HTML kód navigace jako text
+    // Celï¿½ HTML kï¿½d navigace jako text
     const navHTML = `
         <header class="site-header">
-            <h1>JMÉNO PØÍJMENÍ</h1>
+            <h1>Matyas KunstmÃ¼ller</h1>
         </header>
         <nav class="project-list">
             <ul>
@@ -24,11 +24,11 @@ function createNav(relativePath = '', activePage = '') {
             </ul>
         </nav>
         <footer class="site-footer">
-            <p>Design & Kód | <a href="${relativePath}index.html">Hlavní portfolio</a></p>
+            <p>bruh| <a href="${relativePath}index.html">DomovskÃ¡ strÃ¡nka</a></p>
         </footer>
     `;
 
-    // Najde kontejner a vloží do nìj HTML
+    // Najde kontejner a vloï¿½ï¿½ do nï¿½j HTML
     const placeholder = document.getElementById('nav-placeholder');
     if (placeholder) {
         placeholder.innerHTML = navHTML;

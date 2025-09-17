@@ -1,39 +1,5 @@
 // =================================================================
-//  NOVÁ FUNKCE: Načtení navigace z hlavní stránky
-// =================================================================
-async function loadPortfolioNav() {
-    try {
-        // Cesta vede o dvě úrovně výš k hlavnímu index.html
-        const response = await fetch('../../index.html');
-        if (!response.ok) {
-            document.getElementById('portfolio-nav').innerHTML = 'Chyba při načítání navigace.';
-            return;
-        }
-
-        const htmlText = await response.text();
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(htmlText, 'text/html');
-
-        const header = doc.querySelector('.site-header');
-        const navList = doc.querySelector('.project-list');
-        const footer = doc.querySelector('.site-footer');
-        const navContainer = document.getElementById('portfolio-nav');
-
-        if (navContainer && header && navList && footer) {
-            navContainer.innerHTML = ''; // Vyčistí "Načítání..."
-            navContainer.appendChild(header);
-            navContainer.appendChild(navList);
-            navContainer.appendChild(footer);
-        }
-    } catch (error) {
-        console.error('Chyba při načítání navigace:', error);
-        document.getElementById('portfolio-nav').innerHTML = 'Navigaci se nepodařilo načíst.';
-    }
-}
-
-
-// =================================================================
-//  VÁŠ PŮVODNÍ FUNKČNÍ KÓD ZAČÍNÁ ZDE
+//  KONFIGURACE A PROMĚNNÉ
 // =================================================================
 const CONFIG = {
     animationDuration: 800,
@@ -72,6 +38,11 @@ let mediaItems = [
     { src: 'media/medium3_spread4.gif' }, { src: 'media/medium5_spread6_1114653811.vimeo' },
     { src: 'media/media/medium6_spread7_1114707280.vimeo' }, { src: 'media/medium7_spread8.jpg' }
 ];
+
+
+// =================================================================
+//  FUNKCE PRO KNIHU A LIGHTBOX
+// =================================================================
 
 function wrapPageImages() {
     papers.forEach(paper => {
@@ -118,6 +89,7 @@ function updateURL(spreadIndex) {
     const newHash = spreadIndex > 0 ? `spread=${spreadIndex}` : '';
     if (location.hash.substring(1) !== newHash) { location.hash = newHash; }
 }
+
 function updateBook(progressValue) {
     papers.forEach((paper, i) => {
         const progress = progressValue - i;
@@ -129,7 +101,9 @@ function updateBook(progressValue) {
         paper.style.zIndex = zIndex;
     });
 }
+
 function easeOutCubic(x) { return 1 - Math.pow(1 - x, 3); }
+
 function animateTo(from, to, duration = CONFIG.animationDuration) {
     if (state.isAnimating) return;
     state.isAnimating = true;
@@ -159,15 +133,18 @@ function animateTo(from, to, duration = CONFIG.animationDuration) {
     }
     state.animationFrame = requestAnimationFrame(tick);
 }
+
 function goTo(spreadIndex) {
     if (spreadIndex !== state.currentSpread && !state.isAnimating) {
         animateTo(state.currentSpread, spreadIndex);
     }
 }
+
 function next() { goTo(state.currentSpread + 1); }
 function prev() { goTo(state.currentSpread - 1); }
 
 function hideButtons() { if (interactiveLayer) { interactiveLayer.innerHTML = ''; } }
+
 function renderButtons(spreadIndex) {
     hideButtons();
     const buttonsForSpread = buttonData.filter(btn => btn.spread === spreadIndex);
@@ -181,8 +158,18 @@ function renderButtons(spreadIndex) {
         interactiveLayer.appendChild(btn);
     });
 }
+
 function getFileExtension(path) { return path.split('.').pop().toLowerCase(); }
+
 function openLightbox(src) {
+    const match = src.match(/_spread(\d+)/);
+    if (match && match[1]) {
+        const targetSpread = parseInt(match[1], 10);
+        if (!isNaN(targetSpread) && targetSpread !== state.currentSpread) {
+            goTo(targetSpread);
+        }
+    }
+
     let mediaIndex = mediaItems.findIndex(m => m.src === src);
     if (mediaIndex === -1) { mediaItems.push({ src }); mediaIndex = mediaItems.length - 1; }
     state.currentMediaIndex = mediaIndex;
@@ -190,12 +177,14 @@ function openLightbox(src) {
     lightbox.classList.add('show');
     lightbox.setAttribute('aria-hidden', 'false');
 }
+
 function closeLightbox() {
     lightbox.classList.remove('show');
     lightbox.setAttribute('aria-hidden', 'true');
     lightboxStage.innerHTML = '';
     lightboxPlayButton.classList.remove('show');
 }
+
 function showMedia(index) {
     if (index < 0 || index >= mediaItems.length) return;
     state.currentMediaIndex = index;
@@ -228,6 +217,7 @@ function showMedia(index) {
         }
     }
 }
+
 function setupImageZoom(img) {
     lightboxZoomButton.style.display = 'block';
     lightboxZoomButton.classList.remove('active');
@@ -246,6 +236,7 @@ function setupImageZoom(img) {
     window.addEventListener("mousemove", e => { if (!zoomState.isDragging) return; zoomState.posX = e.clientX - zoomState.startX; zoomState.posY = e.clientY - zoomState.startY; applyTransform(); });
     window.addEventListener("mouseup", () => { if (zoomState.isDragging) { zoomState.isDragging = false; img.style.cursor = "grab"; } });
 }
+
 function lightboxNext() { if (state.currentMediaIndex < mediaItems.length - 1) { showMedia(state.currentMediaIndex + 1); } }
 function lightboxPrev() { if (state.currentMediaIndex > 0) { showMedia(state.currentMediaIndex - 1); } }
 
@@ -260,6 +251,7 @@ function handleHashChange() {
     }
     goTo(targetSpread);
 }
+
 function setupEventListeners() {
     document.getElementById('arrowLeft').addEventListener('click', prev);
     document.getElementById('arrowRight').addEventListener('click', next);
@@ -278,12 +270,7 @@ function setupEventListeners() {
         }
     });
     window.addEventListener('hashchange', handleHashChange);
-    document.querySelectorAll('.sidebar button[data-spread]').forEach(button => {
-        button.addEventListener('click', () => {
-            const page = button.getAttribute('data-spread');
-            location.hash = `spread=${page}`;
-        });
-    });
+
     function animateWheel() {
         if (Math.abs(state.wheelAccumulator) < 0.001) {
             state.isWheelAnimating = false;
@@ -300,10 +287,12 @@ function setupEventListeners() {
     }
 }
 
-function main() {
-    // ZMĚNA ZDE: Zavoláme načtení navigace hned na začátku
-    loadPortfolioNav();
 
+// =================================================================
+//  SPUŠTĚNÍ APLIKACE
+// =================================================================
+
+function main() {
     slider.min = 0;
     slider.max = state.maxSpread;
     wrapPageImages();

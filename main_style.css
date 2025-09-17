@@ -5,11 +5,6 @@ body {
     color: #fff;
     font-family: 'Roboto Mono', monospace;
     margin: 0;
-    /* Centrovaní navigace na hlavní stránce */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
 }
 
 .nav-column {
@@ -60,7 +55,7 @@ h1 {
     padding-top: 2rem;
     font-size: 0.9rem;
     color: #aaa;
-    border-top: 1px solid #333;
+    border-top: 0px solid #333;
 }
 
     .site-footer a {
