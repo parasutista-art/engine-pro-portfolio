@@ -189,6 +189,15 @@ function showMedia(index) {
     if (index < 0 || index >= mediaItems.length) return;
     state.currentMediaIndex = index;
     const { src } = mediaItems[index];
+
+    const match = src.match(/_spread(\d+)/);
+    if (match && match[1]) {
+        const targetSpread = parseInt(match[1], 10);
+        if (!isNaN(targetSpread) && targetSpread !== state.currentSpread) {
+            goTo(targetSpread);
+        }
+    }
+
     lightboxStage.innerHTML = '';
     lightboxZoomButton.style.display = 'none';
     lightboxPlayButton.classList.remove('show');
@@ -210,7 +219,7 @@ function showMedia(index) {
             const [, id, h, type] = idMatch;
             let embedUrl = '';
             if (type === 'youtube') embedUrl = `https://www.youtube-nocookie.com/embed/${id}?autoplay=0&controls=1&modestbranding=1&rel=0`;
-            else { const hParam = h ? `&h=${h}` : ''; embedUrl = `https://player.vimeo.com/video/${id}?autoplay=1&loop=1&title=0&byline=0${hParam}`; }
+            else { const hParam = h ? `&h=${h}` : ''; embedUrl = `https://player.vimeo.com/video/${id}?autoplay=1&loop=1&title=0&byline=0&transparent=1&dnt=1${hParam}`; }
             const iframe = document.createElement('iframe'); iframe.src = embedUrl;
             iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen';
             iframe.allowFullscreen = true; lightboxStage.appendChild(iframe);

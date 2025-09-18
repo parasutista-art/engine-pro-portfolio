@@ -1,9 +1,12 @@
 ﻿/* ===================================== */
 /* === ZÁKLADNÍ NASTAVENÍ & LAYOUT === */
 /* ===================================== */
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400&display=swap');
+
 :root {
     --page-ratio: 2480/3508;
     --spread-ratio: calc(2 * var(--page-ratio));
+    --nav-width: 320px; /* Šířka navigace definovaná jako proměnná */
 }
 
 * {
@@ -17,65 +20,65 @@ html, body {
 body {
     margin: 0;
     background: #000;
-    overflow: hidden;
+    overflow: hidden; /* Zabrání posouvání celé stránky */
     display: flex;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: 'Roboto Mono', monospace;
     color: #fff;
     user-select: none;
 }
 
-/* --- OPRAVENÝ LAYOUT --- */
-.main-container {
-    display: flex;
-    width: 100vw;
-    height: 100vh;
-}
-
+/* --- Postranní lišta (Navigace) --- */
 .nav-column {
-    width: 280px;
+    width: var(--nav-width);
     flex-shrink: 0;
     padding: 2rem;
     overflow-y: auto;
     border-right: 1px solid #333;
+    height: 100vh;
+    position: relative; /* Pro pozicování tlačítka */
+    transition: transform 0.4s ease-in-out; /* Animace sbalení */
 }
 
-.nav-loader {
-    color: #888;
+/* Styly pro navigaci z main_style.css */
+.site-header {
+    margin-bottom: 1.5rem;
 }
 
-.nav-column .site-header h1 {
-    font-family: 'Roboto Mono', monospace;
+h1 {
     font-size: 1rem;
-    margin: 0 0 1.5rem 0;
+    margin: 0;
     font-weight: 400;
     letter-spacing: 1px;
 }
 
-.nav-column .project-list ul {
+.project-list ul {
     list-style: none;
     padding: 0;
     margin: 0;
 }
 
-.nav-column .project-list li {
-    font-family: 'Roboto Mono', monospace;
+.project-list li {
     margin-bottom: 1rem;
     font-size: 1rem;
 }
 
-.nav-column .project-list a {
+.project-list a {
     color: #fff;
     text-decoration: none;
-    transition: opacity 0.2s ease;
+    transition: opacity 0.2s;
 }
 
-    .nav-column .project-list a:hover {
+    .project-list a:hover {
         text-decoration: underline;
         opacity: 0.7;
     }
 
-.nav-column .site-footer {
-    font-family: 'Roboto Mono', monospace;
+    .project-list a.active {
+        color: #888;
+        pointer-events: none;
+    }
+
+.site-footer {
     margin-top: 2rem;
     padding-top: 2rem;
     font-size: 0.9rem;
@@ -83,18 +86,112 @@ body {
     border-top: 1px solid #333;
 }
 
-    .nav-column .site-footer a {
+    .site-footer a {
         color: #fff;
     }
 
+
+/* --- Kontejner pro knihu (OPRAVENO) --- */
 .book-viewport {
     flex-grow: 1;
     display: flex;
     justify-content: center;
     align-items: center;
     position: relative;
-    height: 100%;
+    height: 100vh; /* Změněno na 100vh */
+    width: calc(100vw - var(--nav-width)); /* Výchozí šířka */
+    transition: width 0.4s ease-in-out; /* Animace roztažení */
 }
+
+/* --- Tlačítka pro ovládání lišty --- */
+.nav-toggle-btn {
+    position: fixed;
+    background: rgba(30, 30, 30, 0.8);
+    color: white;
+    border: 1px solid #555;
+    cursor: pointer;
+    z-index: 30000;
+    transition: opacity 0.3s, transform 0.3s;
+    border-radius: 8px;
+}
+
+    .nav-toggle-btn:hover {
+        background: #fff;
+        color: #000;
+    }
+
+#nav-toggle-collapse {
+    position: absolute;
+    bottom: 1rem;
+    left: 1rem;
+    font-size: 1.2rem;
+    padding: 5px 12px;
+}
+
+#nav-toggle-expand {
+    top: 1.5rem;
+    left: 1.5rem;
+    font-size: 1.5rem;
+    padding: 8px 12px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* --- Logika sbaleného stavu (Desktop) --- */
+body.nav-collapsed .nav-column {
+    transform: translateX(-100%);
+}
+
+body.nav-collapsed .book-viewport {
+    width: 100vw; /* Roztáhne kontejner knihy na celou šířku */
+}
+
+body.nav-collapsed #nav-toggle-expand {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+
+/* === Responzivní chování pro úzké obrazovky (telefony) === */
+@media (max-width: 800px) {
+    /* Lišta se bude překrývat přes obsah */
+    .nav-column {
+        position: fixed; /* Změna pozicování */
+        top: 0;
+        left: 0;
+        z-index: 29000;
+        background: #000;
+        /* Transform je již nastaven z desktopu, zde není třeba měnit */
+    }
+
+    /* Kontejner s knihou bude vždy na 100% šířky */
+    .book-viewport {
+        width: 100vw !important; /* !important, aby přebilo inline styl nebo jiné pravidlo */
+    }
+
+    /* V rozbaleném stavu se lišta vysune a překryje obsah */
+    body:not(.nav-collapsed) .nav-column {
+        transform: translateX(0);
+    }
+
+    /* Přesunutí šipek v lightboxu pod obrázek */
+    .lightbox-arrow {
+        top: auto;
+        bottom: 20px;
+        transform: translateY(0);
+    }
+
+        .lightbox-arrow.left {
+            left: 50%;
+            transform: translateX(-120%);
+        }
+
+        .lightbox-arrow.right {
+            right: 50%;
+            transform: translateX(120%);
+        }
+}
+
 
 /* ===================================== */
 /* === KNIHA & STRÁNKY (beze změny) === */
@@ -155,7 +252,7 @@ body {
 }
 
 /* ===================================== */
-/* === OVLÁDACÍ PRVKY (OPRAVENO) === */
+/* === OVLÁDACÍ PRVKY (beze změny) === */
 /* ===================================== */
 .nav-arrow {
     position: absolute;
@@ -230,7 +327,7 @@ body {
         background: rgba(0,150,255,0.8);
     }
 
-/* --- POSUVNÍK (ZJEDNODUŠENO) --- */
+/* --- POSUVNÍK --- */
 .slider-wrap {
     position: absolute;
     bottom: 30px;
@@ -287,14 +384,24 @@ body {
     justify-content: center;
 }
 
-    .lightbox-stage img, .lightbox-stage video, .lightbox-stage iframe {
-        width: 100%;
-        height: 100%;
-        max-width: 100%;
-        max-height: 90vh;
+    .lightbox-stage img, .lightbox-stage video {
+        display: block;
+        width: auto;
+        height: auto;
+        max-width: 95vw;
+        max-height: 95vh;
         border: none;
         border-radius: 6px;
         object-fit: contain;
+    }
+
+    .lightbox-stage iframe {
+        max-width: 90vw;
+        max-height: 85vh;
+        width: 160vh;
+        height: 85vh;
+        border: none;
+        background: transparent;
     }
 
 .lightbox-arrow.left {
@@ -349,6 +456,9 @@ body {
 
 #interactive-layer {
     position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     width: calc(min(90vw, 90vh * var(--spread-ratio)));
     height: calc(min(90vh, 90vw / var(--spread-ratio)));
     pointer-events: none;
