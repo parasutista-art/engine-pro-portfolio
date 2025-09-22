@@ -1,24 +1,43 @@
 ﻿@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400&display=swap');
 
-/* --- Základní nastavení --- */
+:root {
+    --nav-width: 320px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
 body {
     background-color: #000;
     color: #fff;
     font-family: 'Roboto Mono', monospace;
     margin: 0;
-    display: flex; /* Důležité pro layout s postranní lištou */
-    overflow: hidden; /* Zabrání nechtěnému posouvání stránky */
+    display: flex;
+    overflow: hidden;
+    height: 100vh;
 }
 
-/* --- Postranní lišta (Navigace) --- */
+/* --- Postranní lišta (přesně podle bookengine) --- */
 .nav-column {
+    width: var(--nav-width);
     padding: 2rem;
-    width: 320px;
-    flex-shrink: 0; /* Zabrání smrštění lišty */
+    flex-shrink: 0;
     height: 100vh;
-    position: relative; /* Pro pozicování tlačítka pro sbalení */
     border-right: 1px solid #333;
-    transition: transform 0.4s ease-in-out; /* Animace sbalení */
+    position: relative;
+    transition: margin-left 0.5s cubic-bezier(0.77, 0, 0.175, 1);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Hlavní obsahový sloupec vedle lišty */
+.content-column {
+    flex-grow: 1;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+    transition: width 0.5s cubic-bezier(0.77, 0, 0.175, 1);
 }
 
 /* --- Tlačítka pro ovládání lišty --- */
@@ -28,93 +47,83 @@ body {
     color: white;
     border: 1px solid #555;
     cursor: pointer;
-    z-index: 30000;
-    transition: opacity 0.3s, transform 0.3s;
+    z-index: 1000;
     border-radius: 8px;
+    font-size: 1.5rem;
+    padding: 8px 12px;
 }
 
-    .nav-toggle-btn:hover {
-        background: #fff;
-        color: #000;
-    }
-
-/* Tlačítko pro sbalení (šipka) */
 #nav-toggle-collapse {
-    position: absolute; /* Vztahuje se k .nav-column */
+    position: absolute;
     bottom: 1rem;
     left: 1rem;
     font-size: 1.2rem;
     padding: 5px 12px;
 }
 
-/* Tlačítko pro rozbalení (hamburger) */
 #nav-toggle-expand {
     top: 1.5rem;
     left: 1.5rem;
-    font-size: 1.5rem;
-    padding: 8px 12px;
     opacity: 0;
-    pointer-events: none; /* Skryté a neklikatelné ve výchozím stavu */
+    pointer-events: none;
+    transition: opacity 0.3s ease-in-out 0.3s;
 }
 
 /* --- Logika sbaleného stavu --- */
 body.nav-collapsed .nav-column {
-    transform: translateX(-100%); /* Skryje lištu mimo obrazovku */
+    margin-left: calc(-1 * var(--nav-width));
 }
 
 body.nav-collapsed #nav-toggle-expand {
-    opacity: 1; /* Zobrazí hamburger ikonu */
-    pointer-events: auto; /* Zpřístupní ji pro kliknutí */
+    opacity: 1;
+    pointer-events: auto;
 }
 
-
-/* === Původní styly (beze změny) === */
-.site-header {
-    margin-bottom: 1.5rem;
-}
-
-h1 {
-    font-size: 1rem;
+/* --- Styly pro navigaci (ZDE JE OPRAVA) --- */
+.site-header h1 {
+    font-size: 1rem; /* Vráceno na původní velikost */
     margin: 0;
     font-weight: 400;
     letter-spacing: 1px;
 }
 
-.project-list ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+.project-list {
+    margin-top: 1.5rem;
 }
 
-.project-list li {
-    margin-bottom: 1rem;
-    font-size: 1rem;
-}
-
-.project-list a {
-    color: #fff;
-    text-decoration: none;
-    transition: opacity 0.2s;
-}
-
-    .project-list a:hover {
-        text-decoration: underline;
-        opacity: 0.7;
+    .project-list ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
     }
 
-    .project-list a.active {
+    .project-list li {
+        margin-bottom: 0.5rem;
+    }
+
+    .project-list a {
         color: #888;
-        pointer-events: none;
+        text-decoration: none;
+        transition: color 0.2s;
+        font-size: 1.1rem; /* <<< OPRAVA: Písmo zmenšeno na decentní velikost */
     }
+
+        .project-list a:hover {
+            color: #fff;
+        }
+
+        .project-list a.active {
+            color: #fff;
+            pointer-events: none;
+        }
 
 .site-footer {
-    margin-top: 2rem;
-    padding-top: 2rem;
-    font-size: 0.9rem;
-    color: #aaa;
-    border-top: 1px solid #333;
+    margin-top: auto;
+    color: #666;
+    font-size: 0.8rem;
 }
 
     .site-footer a {
-        color: #fff;
+        color: #888;
+        text-decoration: none;
     }

@@ -36,7 +36,7 @@ body {
     border-right: 1px solid #333;
     height: 100vh;
     position: relative; /* Pro pozicování tlačítka */
-    transition: transform 0.4s ease-in-out; /* Animace sbalení */
+    transition: transform 0.4s ease-in-out, width 0.4s ease-in-out, padding 0.4s ease-in-out;
 }
 
 /* Styly pro navigaci z main_style.css */
@@ -140,6 +140,9 @@ h1 {
 /* --- Logika sbaleného stavu (Desktop) --- */
 body.nav-collapsed .nav-column {
     transform: translateX(-100%);
+    width: 0; /* PŘIDÁNO: Zmenší šířku na 0 */
+    padding: 0; /* PŘIDÁNO: Odstraní vnitřní okraje */
+    border-right: none; /* PŘIDÁNO: Skryje rámeček */
 }
 
 body.nav-collapsed .book-viewport {

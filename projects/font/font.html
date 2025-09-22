@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Variable Font - Blokkada VF</title>
+    <link rel="stylesheet" href="../../main_style.css" />
+    <link rel="stylesheet" href="font_style.css" />
+</head>
+<body>
+    <div id="nav-placeholder" class="nav-column"></div>
+
+    <main class="content-column">
+        <nav class="demo-nav">
+            <button class="demo-nav-btn active" data-target="demo1">1. Pískoviště</button>
+            <button class="demo-nav-btn" data-target="demo2">2. Interaktivní Věta (Tloušťka)</button>
+            <button class="demo-nav-btn" data-target="demo3">3. Interaktivní Věta (Výška)</button>
+            <button class="demo-nav-btn" data-target="demo4">4. Textová Stěna</button>
+        </nav>
+
+        <div class="demo-content">
+            <div id="demo1" class="demo-panel active">
+                <div class="sandbox-wrapper">
+                    <div id="sandbox-text" contenteditable="true" spellcheck="false">Blokkada</div>
+                </div>
+                <div class="sliders">
+                    <div class="slider-group"><label for="weight-slider">Tloušťka (wght)</label><input type="range" id="weight-slider" min="100" max="900" value="400"></div>
+                    <div class="slider-group"><label for="height-slider">Výška (hght)</label><input type="range" id="height-slider" min="400" max="800" value="500"></div>
+                </div>
+            </div>
+
+            <div id="demo2" class="demo-panel"><div class="interactive-sentence" id="sentence-weight">Každé písmeno reaguje na vaši přítomnost.</div></div>
+            <div id="demo3" class="demo-panel"><div class="interactive-sentence" id="sentence-height">Výška liter se dynamicky mění pod kurzorem.</div></div>
+
+            <div id="demo4" class="demo-panel">
+                <canvas id="lorem-wall-canvas"></canvas>
+                <div class="demo-text-overlay">
+                    <h2>Textová Stěna</h2>
+                    <p>Přejíždějte a klikejte na text pro interaktivní efekty.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../../nav.js"></script>
+    <script>createNav('../../', 'font');</script>
+    <script src="font_script.js"></script>
+</body>
+</html>
