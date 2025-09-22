@@ -7,13 +7,9 @@ function createNav(relativePath = '', activePage = '') {
     };
 
     // Zvýraznění aktivní stránky
-    if (activePage === 'font') {
-        links.font = `<a href="#" class="active">Variable Font</a>`;
-    } else if (activePage === 'portfolio') {
-        links.portfolio = `<a href="#" class="active">portfolio</a>`;
-    }
+    if (activePage === 'font') links.font = `<a href="#" class="active">Variable Font</a>`;
+    else if (activePage === 'portfolio') links.portfolio = `<a href="#" class="active">portfolio</a>`;
 
-    // HTML kód pro postranní lištu
     const navHTML = `
         <header class="site-header"><h1>Matyas Kunstmüller</h1></header>
         <nav class="project-list">
@@ -30,28 +26,30 @@ function createNav(relativePath = '', activePage = '') {
     `;
 
     const placeholder = document.getElementById('nav-placeholder');
-    if (placeholder) {
-        placeholder.innerHTML = navHTML;
-    }
+    if (placeholder) placeholder.innerHTML = navHTML;
 
-    // Vytvoření tlačítka pro rozbalení (musí být mimo #nav-placeholder)
     if (!document.getElementById('nav-toggle-expand')) {
         const expandButton = document.createElement('button');
         expandButton.id = 'nav-toggle-expand';
         expandButton.className = 'nav-toggle-btn';
         expandButton.setAttribute('aria-label', 'Zobrazit navigaci');
-        expandButton.innerHTML = '&#9776;'; // Hamburger icon
+        expandButton.innerHTML = '&#9776;';
         document.body.appendChild(expandButton);
     }
 
-    // Funkcionalita sklápění
     const body = document.body;
     const collapseBtn = document.getElementById('nav-toggle-collapse');
     const expandBtn = document.getElementById('nav-toggle-expand');
+    const mobileBreakpoint = 800;
 
     const collapseNav = () => body.classList.add('nav-collapsed');
     const expandNav = () => body.classList.remove('nav-collapsed');
 
     if (collapseBtn) collapseBtn.addEventListener('click', collapseNav);
     if (expandBtn) expandBtn.addEventListener('click', expandNav);
+
+    // Automatické sbalení na mobilních zařízeních při startu
+    if (window.innerWidth < mobileBreakpoint) {
+        collapseNav();
+    }
 }

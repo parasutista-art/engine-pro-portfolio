@@ -9,30 +9,40 @@
 </head>
 <body>
     <div id="nav-placeholder" class="nav-column"></div>
-
     <main class="content-column">
         <nav class="demo-nav">
             <button class="demo-nav-btn active" data-target="demo1">1. Pískoviště</button>
-            <button class="demo-nav-btn" data-target="demo2">2. Interaktivní Věta (Tloušťka)</button>
-            <button class="demo-nav-btn" data-target="demo3">3. Interaktivní Věta (Výška)</button>
-            <button class="demo-nav-btn" data-target="demo4">4. Textová Stěna</button>
+            <button class="demo-nav-btn" data-target="demo2">2. Interaktivní Text</button>
+            <button class="demo-nav-btn" data-target="demo3">3. Textová Stěna</button>
         </nav>
-
         <div class="demo-content">
             <div id="demo1" class="demo-panel active">
-                <div class="sandbox-wrapper">
-                    <div id="sandbox-text" contenteditable="true" spellcheck="false">Blokkada</div>
-                </div>
+                <div class="sandbox-wrapper"><div id="sandbox-text" contenteditable="true" spellcheck="false">Blokkada</div></div>
                 <div class="sliders">
-                    <div class="slider-group"><label for="weight-slider">Tloušťka (wght)</label><input type="range" id="weight-slider" min="100" max="900" value="400"></div>
-                    <div class="slider-group"><label for="height-slider">Výška (hght)</label><input type="range" id="height-slider" min="400" max="800" value="500"></div>
+                    <div class="slider-group"><label for="size-slider-1">Velikost</label><input type="range" id="size-slider-1" min="20" max="450" value="450"></div>
+                    <div class="slider-group"><label for="weight-slider-1">Tloušťka (wght)</label><input type="range" id="weight-slider-1" min="100" max="900" value="400"></div>
+                    <div class="slider-group"><label for="height-slider-1">Výška (hght)</label><input type="range" id="height-slider-1" min="400" max="800" value="500"></div>
                 </div>
             </div>
-
-            <div id="demo2" class="demo-panel"><div class="interactive-sentence" id="sentence-weight">Každé písmeno reaguje na vaši přítomnost.</div></div>
-            <div id="demo3" class="demo-panel"><div class="interactive-sentence" id="sentence-height">Výška liter se dynamicky mění pod kurzorem.</div></div>
-
-            <div id="demo4" class="demo-panel">
+            <div id="demo2" class="demo-panel">
+                <div class="interactive-sentence-wrapper"><div class="interactive-sentence" id="sentence-interactive" contenteditable="true" spellcheck="false">Text&nbsp; reaguje&nbsp; na&nbsp; myš</div></div>
+                <div class="sliders">
+                    <div class="slider-group"><label for="size-slider-2">Velikost</label><input type="range" id="size-slider-2" min="20" max="450" value="225"></div>
+                    <div class="slider-group switcher-group">
+                        <label>Ovlivnit osu:</label>
+                        <div class="switcher">
+                            <button class="switch-btn active" data-mode="wght">Tloušťka</button>
+                            <button class="switch-btn" data-mode="hght">Výška</button>
+                            <button class="switch-btn" data-mode="both">Obojí</button>
+                        </div>
+                    </div>
+                    <div class="slider-group">
+                        <label>Vlnová animace</label>
+                        <button class="control-btn" id="wave-toggle" aria-label="Spustit animaci">▶</button>
+                    </div>
+                </div>
+            </div>
+            <div id="demo3" class="demo-panel">
                 <canvas id="lorem-wall-canvas"></canvas>
                 <div class="demo-text-overlay">
                     <h2>Textová Stěna</h2>
@@ -41,7 +51,6 @@
             </div>
         </div>
     </main>
-
     <script src="../../nav.js"></script>
     <script>createNav('../../', 'font');</script>
     <script src="font_script.js"></script>
