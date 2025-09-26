@@ -11,27 +11,32 @@
     <div id="nav-placeholder" class="nav-column"></div>
     <main class="content-column">
         <nav class="demo-nav">
-            <button class="demo-nav-btn active" data-target="demo1">1. Pískoviště</button>
-            <button class="demo-nav-btn" data-target="demo2">2. Interaktivní Text</button>
-            <button class="demo-nav-btn" data-target="demo3">3. Textová Stěna</button>
+            <button class="demo-nav-btn active" data-target="demo1">1. Interaktivní Pískoviště</button>
+            <button class="demo-nav-btn" data-target="demo3">2. Textová Stěna</button>
         </nav>
         <div class="demo-content">
             <div id="demo1" class="demo-panel active">
-                <div class="sandbox-wrapper"><div id="sandbox-text" contenteditable="true" spellcheck="false">Blokkada</div></div>
-                <div class="sliders">
-                    <div class="slider-group"><label for="size-slider-1">Velikost</label><input type="range" id="size-slider-1" min="20" max="450" value="450"></div>
-                    <div class="slider-group"><label for="weight-slider-1">Tloušťka (wght)</label><input type="range" id="weight-slider-1" min="100" max="900" value="400"></div>
-                    <div class="slider-group"><label for="height-slider-1">Výška (hght)</label><input type="range" id="height-slider-1" min="400" max="800" value="500"></div>
+                <div class="sandbox-wrapper">
+                    <div id="interactive-text" contenteditable="true" spellcheck="false">BLOKKADA</div>
                 </div>
-            </div>
-            <div id="demo2" class="demo-panel">
-                <div class="interactive-sentence-wrapper"><div class="interactive-sentence" id="sentence-interactive" contenteditable="true" spellcheck="false">Text&nbsp; reaguje&nbsp; na&nbsp; myš</div></div>
                 <div class="sliders">
-                    <div class="slider-group"><label for="size-slider-2">Velikost</label><input type="range" id="size-slider-2" min="20" max="450" value="225"></div>
+                    <div class="slider-group">
+                        <label for="size-slider">Velikost</label>
+                        <input type="range" id="size-slider" min="20" max="450" value="450">
+                    </div>
+                    <div class="slider-group" id="weight-slider-group">
+                        <label for="weight-slider">Tloušťka (wght)</label>
+                        <input type="range" id="weight-slider" min="100" max="900" value="400">
+                    </div>
+                    <div class="slider-group" id="height-slider-group">
+                        <label for="height-slider">Výška (hght)</label>
+                        <input type="range" id="height-slider" min="400" max="800" value="500">
+                    </div>
                     <div class="slider-group switcher-group">
-                        <label>Ovlivnit osu:</label>
+                        <label>Reaktivita na myš:</label>
                         <div class="switcher">
-                            <button class="switch-btn active" data-mode="wght">Tloušťka</button>
+                            <button class="switch-btn active" data-mode="off">Vypnuto</button>
+                            <button class="switch-btn" data-mode="wght">Tloušťka</button>
                             <button class="switch-btn" data-mode="hght">Výška</button>
                             <button class="switch-btn" data-mode="both">Obojí</button>
                         </div>
@@ -51,6 +56,7 @@
             </div>
         </div>
     </main>
+    <div id="disabled-slider-tooltip">Ovládání je deaktivováno, protože je zapnutá interaktivita myši.</div>
     <script src="../../nav.js"></script>
     <script>createNav('../../', 'font');</script>
     <script src="font_script.js"></script>

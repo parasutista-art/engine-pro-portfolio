@@ -85,20 +85,31 @@ p {
 
 .slider-group {
     flex: 1;
-    min-width: 200px;
+    min-width: 180px;
 }
+
+    .slider-group.disabled label {
+        opacity: 0.4;
+    }
 
 label {
     display: block;
     margin-bottom: 0.5rem;
     color: #aaa;
+    transition: opacity 0.3s;
 }
 
 input[type="range"] {
     width: 100%;
+    transition: opacity 0.3s;
 }
 
-/* --- Demo 1: Pískoviště --- */
+    input[type="range"]:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+    }
+
+/* --- Demo 1: Interaktivní pískoviště --- */
 .sandbox-wrapper {
     flex-grow: 1;
     display: flex;
@@ -111,54 +122,19 @@ input[type="range"] {
     overflow: hidden;
 }
 
-#sandbox-text {
+#interactive-text {
     font-family: 'Blokkada VF', sans-serif;
     outline: none;
     width: 100%;
     text-align: center;
-    line-height: 1.2; /* OPRAVA */
-}
-
-/* --- Demo 2: Interaktivní Text --- */
-#demo2 {
-    padding-bottom: 120px; /* Místo pro pevné ovládací prvky */
-}
-
-.interactive-sentence-wrapper {
-    flex-grow: 1;
-    display: flex;
-    position: relative;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    min-height: 0;
-}
-
-.interactive-sentence {
-    font-family: 'Blokkada VF', sans-serif;
-    text-align: center;
-    cursor: default;
-    outline: none;
-    line-height: 1.2; /* OPRAVA */
+    line-height: 1.2;
     padding: 0 1rem;
 }
 
-    .interactive-sentence span {
+    #interactive-text span {
         display: inline-block;
         transition: font-variation-settings 0.4s cubic-bezier(0.22, 1, 0.36, 1);
     }
-
-/* Pevné ovládací prvky pro demo 2 */
-#demo2 .sliders {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 1.5rem 2rem;
-    background: #000;
-    margin: 0;
-    border-top: 1px solid #333;
-}
 
 .switcher {
     display: flex;
@@ -205,6 +181,21 @@ input[type="range"] {
     .control-btn.playing {
         padding-left: 0;
     }
+
+/* --- Tooltip pro deaktivované slidery --- */
+#disabled-slider-tooltip {
+    position: fixed;
+    display: none;
+    background: #eee;
+    color: #111;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    z-index: 1000;
+    pointer-events: none;
+    transform: translate(15px, 15px);
+    white-space: nowrap;
+}
 
 /* --- Demo 3: Textová Stěna --- */
 #demo3 {
