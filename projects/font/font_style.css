@@ -38,6 +38,7 @@ p {
     margin-bottom: 2rem;
     border-bottom: 1px solid #333;
     flex-shrink: 0;
+    flex-wrap: wrap;
 }
 
 .demo-nav-btn {
@@ -77,8 +78,8 @@ p {
 .sliders {
     padding-top: 1.5rem;
     display: flex;
-    gap: 2rem;
-    align-items: center;
+    gap: 1.5rem 2rem;
+    align-items: flex-end; /* Opravuje oříznutí tlačítka */
     flex-wrap: wrap;
     flex-shrink: 0;
 }
@@ -97,6 +98,7 @@ label {
     margin-bottom: 0.5rem;
     color: #aaa;
     transition: opacity 0.3s;
+    font-size: 0.9rem; /* Zmenšení textu */
 }
 
 input[type="range"] {
@@ -152,6 +154,7 @@ input[type="range"] {
     cursor: pointer;
     transition: background 0.2s, color 0.2s;
     flex-grow: 1;
+    font-size: 0.8rem; /* Zmenšení textu */
 }
 
     .switch-btn.active {
@@ -201,6 +204,7 @@ input[type="range"] {
 #demo3 {
     position: relative;
     overflow: hidden;
+    border-radius: 8px; /* Zaoblení rohů */
 }
 
 #lorem-wall-canvas {
@@ -213,12 +217,34 @@ input[type="range"] {
     cursor: pointer;
 }
 
-.demo-text-overlay {
-    position: relative;
-    z-index: 2;
-    background: rgba(0,0,0,0.6);
-    padding: 1.5rem;
-    border-radius: 8px;
-    margin: 1rem;
-    align-self: flex-start;
+/* --- Responzivita pro mobily --- */
+@media (max-width: 768px) {
+    .content-column {
+        padding: 1rem;
+    }
+
+    .demo-nav-btn {
+        font-size: 0.9rem;
+        padding: 0.6rem 0.8rem;
+    }
+
+    .sliders {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1.2rem;
+    }
+
+    .slider-group {
+        min-width: 0;
+        width: 100%;
+    }
+
+    .switcher-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .switcher {
+        width: 100%;
+    }
 }
