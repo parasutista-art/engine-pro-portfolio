@@ -5,10 +5,10 @@
 }
 
 .content-column {
-    padding: 2rem 3rem;
+    padding: 1.5rem;
     display: flex;
     flex-direction: column;
-    height: 100vh; /* Zajistí, že sloupec zabere celou výšku */
+    height: 100%; /* Změna na 100% pro přizpůsobení wrapperu */
     box-sizing: border-box;
 }
 
@@ -22,21 +22,21 @@
 /* --- Navigace Demoverzí --- */
 .demo-nav {
     display: flex;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
     border-bottom: 1px solid #333;
     flex-shrink: 0;
     flex-wrap: wrap;
 }
 
 .demo-nav-btn {
-    padding: 0.8rem 1.5rem;
+    padding: 0.5rem 1rem;
     cursor: pointer;
     background: transparent;
     border: none;
     color: #888;
     font-family: 'Roboto Mono', monospace;
-    font-size: 1rem;
-    border-bottom: 3px solid transparent;
+    font-size: 0.9rem;
+    border-bottom: 2px solid transparent;
     transition: color 0.2s, border-bottom-color 0.2s;
 }
 
@@ -61,20 +61,20 @@
     }
 
 .sliders {
-    padding-top: 1.5rem;
+    padding-top: 1rem;
     display: flex;
-    gap: 1.5rem 2rem;
+    gap: 1rem 1.5rem;
     align-items: flex-end;
     flex-wrap: wrap;
     flex-shrink: 0;
 }
 
 .slider-group {
-    flex: 1 1 200px;
+    flex: 1 1 180px;
 }
 
     .slider-group.switcher-group {
-        flex: 2 1 300px;
+        flex: 2 1 280px;
     }
 
     .slider-group.disabled label {
@@ -83,10 +83,9 @@
 
 label {
     display: block;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.4rem;
     color: #aaa;
-    transition: opacity 0.3s;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
 }
 
 input[type="range"] {
@@ -109,7 +108,7 @@ input[type="range"] {
     border-radius: 8px;
     background-color: #111;
     padding: 1rem;
-    min-height: 300px;
+    min-height: 200px;
 }
 
 #interactive-text {
@@ -117,13 +116,9 @@ input[type="range"] {
     outline: none;
     width: 100%;
     text-align: center;
-    line-height: 1.2;
-    padding: 0 1rem;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    -webkit-hyphens: auto;
-    -ms-hyphens: auto;
-    hyphens: auto;
+    line-height: 1;
+    padding: 0 0.5rem;
+    word-break: break-all;
 }
 
     #interactive-text span {
@@ -143,11 +138,11 @@ input[type="range"] {
     background: transparent;
     color: #888;
     border: none;
-    padding: 0.5rem 1rem;
+    padding: 0.4rem 0.8rem;
     cursor: pointer;
     transition: background 0.2s, color 0.2s;
     flex-grow: 1;
-    font-size: 0.8rem;
+    font-size: 0.7rem;
 }
 
     .switch-btn.active {
@@ -160,10 +155,10 @@ input[type="range"] {
     color: #fff;
     border: 1px solid #555;
     border-radius: 8px;
-    width: 50px;
-    height: 38px;
+    width: 40px;
+    height: 34px;
     cursor: pointer;
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -214,7 +209,12 @@ input[type="range"] {
 /* --- Responzivita pro mobily --- */
 @media (max-width: 800px) {
     .content-column {
-        padding: 1.5rem;
+        padding: 1rem;
+    }
+
+    .demo-nav-btn {
+        font-size: 0.8rem;
+        padding: 0.6rem 0.7rem;
     }
 
     .wave-button-group {

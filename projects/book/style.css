@@ -6,103 +6,34 @@
 :root {
     --page-ratio: 2480/3508;
     --spread-ratio: calc(2 * var(--page-ratio));
-    --nav-width: 320px; /* Šířka navigace definovaná jako proměnná */
+    /* Proměnná --nav-width byla odstraněna, používá se ta z main_style.css */
 }
 
 * {
     box-sizing: border-box;
 }
 
+/*
+   Styly pro BODY a .nav-column byly odstraněny,
+   protože jsou nyní řízeny globálně souborem main_style.css.
+   Díky tomu bude vzhled a chování lišty konzistentní napříč projekty.
+*/
 html, body {
     height: 100%;
 }
 
-body {
-    margin: 0;
-    background: #000;
-    overflow: hidden; /* Zabrání posouvání celé stránky */
-    display: flex;
-    font-family: 'Roboto Mono', monospace;
-    color: #fff;
-    user-select: none;
-}
-
-/* --- Postranní lišta (Navigace) --- */
-.nav-column {
-    width: var(--nav-width);
-    flex-shrink: 0;
-    padding: 2rem;
-    overflow-y: auto;
-    border-right: 1px solid #333;
-    height: 100vh;
-    position: relative; /* Pro pozicování tlačítka */
-    transition: transform 0.4s ease-in-out, width 0.4s ease-in-out, padding 0.4s ease-in-out;
-}
-
-/* Styly pro navigaci z main_style.css */
-.site-header {
-    margin-bottom: 1.5rem;
-}
-
-h1 {
-    font-size: 1rem;
-    margin: 0;
-    font-weight: 400;
-    letter-spacing: 1px;
-}
-
-.project-list ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.project-list li {
-    margin-bottom: 1rem;
-    font-size: 1rem;
-}
-
-.project-list a {
-    color: #fff;
-    text-decoration: none;
-    transition: opacity 0.2s;
-}
-
-    .project-list a:hover {
-        text-decoration: underline;
-        opacity: 0.7;
-    }
-
-    .project-list a.active {
-        color: #888;
-        pointer-events: none;
-    }
-
-.site-footer {
-    margin-top: 2rem;
-    padding-top: 2rem;
-    font-size: 0.9rem;
-    color: #aaa;
-    border-top: 1px solid #333;
-}
-
-    .site-footer a {
-        color: #fff;
-    }
-
-
-/* --- Kontejner pro knihu (OPRAVENO) --- */
+/* --- Hlavní obsah (wrapper pro knihu) --- */
 .book-viewport {
     flex-grow: 1;
+    position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
-    position: relative;
-    height: 100vh; /* Změněno na 100vh */
-    width: calc(100vw - var(--nav-width)); /* Výchozí šířka */
-    transition: width 0.4s ease-in-out; /* Animace roztažení */
+    min-width: 0;
+    overflow: hidden; /* Důležité, aby obsah nepřetékal */
 }
 
+/* ... zbytek souboru style.css pokračuje beze změny ... */
 /* --- Tlačítka pro ovládání lišty --- */
 .nav-toggle-btn {
     position: fixed;

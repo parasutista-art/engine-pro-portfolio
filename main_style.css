@@ -1,7 +1,7 @@
 ﻿@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400&display=swap');
 
 :root {
-    --nav-width: 250px;
+    --nav-width: 220px;
     --nav-width-collapsed: 0px;
     --nav-strip-width: 40px;
     --nav-transition-speed: 0.3s;
@@ -13,41 +13,41 @@
 }
 
 body {
-    background-color: #121212;
+    background-color: #000;
     color: #fff;
     font-family: 'Roboto Mono', monospace;
     margin: 0;
-    overflow-x: hidden;
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
 }
 
-/* --- Postranní lišta (společné styly) --- */
+/* --- Postranní lišta --- */
 .nav-column {
     width: var(--nav-width);
-    padding: 1.5rem;
+    padding: 1rem;
+    flex-shrink: 0;
     height: 100vh;
     border-right: 1px solid #333;
-    position: fixed; /* Klíčové pro starou logiku */
-    left: 0;
-    top: 0;
     display: flex;
     flex-direction: column;
     z-index: 1000;
-    background-color: #121212;
-    transition: left var(--nav-transition-speed) var(--nav-transition-timing);
+    background-color: #000;
+    transition: width var(--nav-transition-speed) var(--nav-transition-timing);
+    overflow: hidden;
 }
 
 body.nav-collapsed .nav-column {
-    left: calc(-1 * var(--nav-width));
+    width: var(--nav-width-collapsed);
+    padding: 1rem 0;
 }
 
-/* --- Hlavní obsah --- */
-.content-column {
-    margin-left: var(--nav-width); /* Odsazení pro navigační lištu */
-    transition: margin-left var(--nav-transition-speed) var(--nav-transition-timing);
-}
-
-body.nav-collapsed .content-column {
-    margin-left: var(--nav-width-collapsed);
+/* --- Hlavní obsah (wrapper) --- */
+.page-wrapper, .book-viewport, main.content-column {
+    flex-grow: 1;
+    height: 100vh;
+    overflow-y: auto;
+    min-width: 0;
 }
 
 
@@ -71,30 +71,34 @@ body.nav-collapsed .nav-toggle-strip-container {
     position: absolute;
     top: 0;
     height: 100%;
-    width: 2px;
     background-color: #fff;
     transition: all 0.3s ease-in-out;
+    width: 2px;
 }
 
     .nav-toggle-strip.strip-1 {
-        left: 20px;
+        left: 5px; /* Upravena pozice */
         background-color: #555;
     }
 
     .nav-toggle-strip.strip-2 {
-        left: 27px;
+        left: 10px; /* Upravena pozice (blíže) */
         opacity: 0;
     }
 
-body.nav-collapsed .nav-toggle-strip.strip-1 {
-    left: 0; /* Dotýká se hrany */
-    background-color: #fff;
+body.nav-collapsed .nav-toggle-strip {
+    width: 1px;
 }
 
-body.nav-collapsed .nav-toggle-strip.strip-2 {
-    left: 5px; /* Blízko první čáry */
-    opacity: 1;
-}
+    body.nav-collapsed .nav-toggle-strip.strip-1 {
+        left: 0;
+        background-color: #fff;
+    }
+
+    body.nav-collapsed .nav-toggle-strip.strip-2 {
+        left: 8px;
+        opacity: 1;
+    }
 
 .nav-toggle-strip-container:hover .nav-toggle-strip.strip-1 {
     background-color: #fff;
@@ -103,10 +107,11 @@ body.nav-collapsed .nav-toggle-strip.strip-2 {
 
 /* --- Obsah navigační lišty --- */
 .site-header h1 {
-    font-size: 1rem;
+    font-size: 0.9rem;
     margin: 0 0 1rem 0;
     font-weight: 400;
     display: inline-block;
+    white-space: nowrap;
 }
 
 .project-list ul {
@@ -119,7 +124,8 @@ body.nav-collapsed .nav-toggle-strip.strip-2 {
     text-decoration: none;
     color: #888;
     display: block;
-    padding: 0.5rem 0;
+    padding: 0.4rem 0;
+    font-size: 0.9rem;
     transition: color 0.2s;
     white-space: nowrap;
 }
@@ -132,7 +138,7 @@ body.nav-collapsed .nav-toggle-strip.strip-2 {
 .site-footer {
     margin-top: auto;
     color: #666;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     white-space: nowrap;
 }
 
@@ -147,11 +153,21 @@ body.nav-collapsed .nav-toggle-strip.strip-2 {
 
 /* --- Mobilní zobrazení --- */
 @media (max-width: 800px) {
-    .content-column {
-        margin-left: 0; /* Na mobilu nemá obsah odsazení */
+    .nav-column {
+        position: fixed;
+        left: calc(-1 * var(--nav-width));
+        transition: left var(--nav-transition-speed) var(--nav-transition-timing);
     }
 
-    body.nav-collapsed .content-column {
-        margin-left: 0;
+    body:not(.nav-collapsed) .nav-column {
+        left: 0;
+    }
+
+    .nav-toggle-strip-container {
+        left: 0;
+    }
+
+    body:not(.nav-collapsed) .nav-toggle-strip-container {
+        left: var(--nav-width);
     }
 }

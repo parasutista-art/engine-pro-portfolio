@@ -74,7 +74,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function applyStylesToText(settings) { letters.forEach(span => { span.style.fontVariationSettings = settings; }); }
-        function updateText() { textElement.style.fontSize = `${sizeSlider.value}px`; applyStylesToText(getBaseVariationSettings()); }
+
+        function updateText() {
+            // Automatická úprava velikosti na mobilu, aby se text nerozdělil
+            if (isMobile) {
+                textElement.style.fontSize = '1px'; // Reset
+                const containerWidth = textElement.parentElement.clientWidth;
+                const textWidth = textElement.scrollWidth;
+                const newSize = Math.floor(containerWidth / textWidth * 1);
+                sizeSlider.value = Math.min(newSize, 120); // Omezení max velikosti na mobilu
+            }
+            textElement.style.fontSize = `${sizeSlider.value}px`;
+            applyStylesToText(getBaseVariationSettings());
+        }
 
         function wrapLetters() {
             const text = textElement.textContent;
@@ -103,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 span.style.fontVariationSettings = `'wght' ${wghtValue}, 'hght' ${hghtValue}`;
             });
         }
-        
+
         function handleMouseLeave() { if (activeMode === 'off' || animationFrameId) return; updateText(); }
 
         function waveAnimation() {
@@ -119,28 +131,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function stopWaveAnimation() { if (animationFrameId) { cancelAnimationFrame(animationFrameId); animationFrameId = null; waveToggle.innerHTML = '▶'; waveToggle.classList.remove('playing'); updateText(); } }
         function startWaveAnimation() { if (!animationFrameId) { waveToggle.innerHTML = '❚❚'; waveToggle.classList.add('playing'); waveAnimation(); } }
-        
+
         function setupTooltip(group, slider) {
             if (isMobile) return;
             group.addEventListener('mouseover', () => { if (slider.disabled) tooltip.style.display = 'block'; });
             group.addEventListener('mousemove', (e) => { if (slider.disabled) { tooltip.style.left = `${e.clientX}px`; tooltip.style.top = `${e.clientY}px`; } });
             group.addEventListener('mouseout', () => { tooltip.style.display = 'none'; });
         }
-        
+
         sizeSlider.addEventListener('input', updateText);
         weightSlider.addEventListener('input', updateText);
         heightSlider.addEventListener('input', updateText);
         textElement.addEventListener('input', () => { const pos = getCaretPosition(textElement); wrapLetters(); setCaretPosition(textElement, pos); });
         document.body.addEventListener('mousemove', handleMouseMove);
-        
+
         waveToggle.addEventListener('click', () => { if (animationFrameId) stopWaveAnimation(); else startWaveAnimation(); });
-        
+
         switcher.addEventListener('click', e => {
             if (e.target.classList.contains('switch-btn')) {
                 switcher.querySelector('.active').classList.remove('active');
                 e.target.classList.add('active');
                 activeMode = e.target.dataset.mode;
-                
+
                 if (activeMode !== 'off') {
                     startWaveAnimation();
                 } else {
@@ -157,27 +169,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
         setupTooltip(weightSliderGroup, weightSlider);
         setupTooltip(heightSliderGroup, heightSlider);
-        
-        sizeSlider.value = sizeSlider.max;
-        wrapLetters();
+
+        wrapLetters(); // Musí být před nastavením hodnoty
 
         if (isMobile) {
-            document.querySelector('.switcher-group .switch-btn[data-mode="off"]').click();
+            updateText(); // Spustí automatickou úpravu velikosti
+            document.querySelector('.switcher-group .switch-btn[data-mode="both"]').click();
         } else {
+            sizeSlider.value = sizeSlider.max;
+            updateText();
             document.querySelector('.switcher-group .switch-btn[data-mode="both"]').click();
         }
     })();
 
-    // --- DEMO 3: STĚNA (Finální optimalizace 3.0) ---
+    // --- DEMO 3: STĚNA ---
     (function initializeLoremWall() {
         const canvas = document.getElementById('lorem-wall-canvas');
         if (!canvas) return;
         const button = document.querySelector('button[data-target="demo3"]');
-        
+
         const init = () => {
             if (canvas.dataset.initialized) return;
             canvas.dataset.initialized = 'true';
-            
+
             const ctx = canvas.getContext('2d', { alpha: false });
             const FONT_SIZE = isMobile ? 40 : 50;
             const BASE_WEIGHT = 100, MAX_WEIGHT = 900;
@@ -185,7 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let letters = [];
             let ripples = [];
             let lastFrameTime = 0;
-            const FRAME_INTERVAL = 1000 / 12; // Mírné zvýšení pro plynulost
+            const FRAME_INTERVAL = 1000 / 12;
 
             async function setup() {
                 await document.fonts.load(`1em "Blokkada VF"`);
@@ -195,10 +209,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 ctx.scale(dpr, dpr);
                 letters = [];
                 ctx.font = `normal ${BASE_WEIGHT} ${FONT_SIZE}px 'Blokkada VF'`;
-                
-                // Mírné zvětšení mezer pro snížení počtu písmen
+
                 const spaceWidth = ctx.measureText(' ').width * 2;
-                const lineHeight = FONT_SIZE * 1.2;
+                const lineHeight = FONT_SIZE * 1.3;
 
                 for (let y = FONT_SIZE * 0.8; y < rect.height + FONT_SIZE; y += lineHeight) {
                     let x = Math.random() * -150;
@@ -206,28 +219,28 @@ document.addEventListener('DOMContentLoaded', () => {
                         for (let i = 0; i < word.length; i++) {
                             const char = word[i];
                             const charWidth = ctx.measureText(char).width;
-                            letters.push({ char, x, y, currentWeight: BASE_WEIGHT, needsUpdate: true });
+                            letters.push({ char, x, y, currentWeight: BASE_WEIGHT });
                             x += charWidth;
                         }
                         x += spaceWidth;
                     }
                 }
-                
-                if (!canvas.dataset.animated) { 
-                    requestAnimationFrame(animate); 
+
+                if (!canvas.dataset.animated) {
+                    requestAnimationFrame(animate);
                     canvas.dataset.animated = "true";
                 }
             }
-            
+
             function gaussian(x, peak, width) { return Math.exp(-Math.pow(x - peak, 2) / (2 * Math.pow(width, 2))); }
-            
+
             function animate(timestamp) {
                 requestAnimationFrame(animate);
                 if (timestamp - lastFrameTime < FRAME_INTERVAL) return;
                 lastFrameTime = timestamp;
 
                 ctx.fillStyle = '#000'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-                
+
                 ripples.forEach((ripple, index) => {
                     ripple.radius += ripple.speed;
                     if (ripple.radius > ripple.maxRadius) ripples.splice(index, 1);
@@ -237,11 +250,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 letters.forEach(letter => {
                     let totalInfluence = 0;
-                    
+
                     for (const ripple of ripples) {
-                        const distSq = Math.pow(letter.x - ripple.x, 2) + Math.pow(letter.y - ripple.y, 2);
-                        const waveZoneSq = Math.pow(ripple.radius + ripple.width, 2);
-                        
+                        const distSq = (letter.x - ripple.x) ** 2 + (letter.y - ripple.y) ** 2;
+                        const waveZoneSq = (ripple.radius + ripple.width) ** 2;
+
                         if (distSq < waveZoneSq) {
                             const dist = Math.sqrt(distSq);
                             const influence = gaussian(dist, ripple.radius, ripple.width / 2);
@@ -250,35 +263,31 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
                     const targetWeight = BASE_WEIGHT + (MAX_WEIGHT - BASE_WEIGHT) * totalInfluence;
-                    
+
                     if (Math.abs(targetWeight - letter.currentWeight) > 1) {
-                        letter.currentWeight += (targetWeight - letter.currentWeight) * 0.25;
-                        letter.needsUpdate = true;
-                    } else {
-                        letter.needsUpdate = false;
+                        letter.currentWeight += (targetWeight - letter.currentWeight) * 0.3;
                     }
 
-                    const weight = Math.round(letter.currentWeight);
+                    const weight = Math.round(letter.currentWeight / 10) * 10;
                     const colorVal = Math.round(80 + 175 * totalInfluence);
-                    const font = `normal ${weight} ${FONT_SIZE}px 'Blokkada VF'`;
-                    const color = `rgb(${colorVal},${colorVal},${colorVal})`;
-                    const styleKey = `${font}|${color}`;
-                    
+                    const styleKey = `${weight}|${colorVal}`;
+
                     if (!renderGroups.has(styleKey)) {
-                        renderGroups.set(styleKey, { font, color, items: [] });
+                        renderGroups.set(styleKey, { weight, colorVal, items: [] });
                     }
                     renderGroups.get(styleKey).items.push(letter);
                 });
 
                 for (const group of renderGroups.values()) {
-                    ctx.font = group.font;
-                    ctx.fillStyle = group.color;
+                    ctx.font = `normal ${group.weight} ${FONT_SIZE}px 'Blokkada VF'`;
+                    const c = group.colorVal;
+                    ctx.fillStyle = `rgb(${c},${c},${c})`;
                     for (const item of group.items) {
                         ctx.fillText(item.char, item.x, item.y);
                     }
                 }
             }
-            
+
             canvas.addEventListener('click', e => {
                 const rect = canvas.getBoundingClientRect();
                 const maxRadius = Math.max(rect.width, rect.height) + 200;
@@ -291,13 +300,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     maxRadius,
                 });
             });
-            
+
             const resizeObserver = new ResizeObserver(() => { setTimeout(setup, 50); });
             resizeObserver.observe(canvas.parentElement);
-            
+
             setup();
         };
-        
+
         button?.addEventListener('click', init, { once: true });
         if (document.getElementById('demo3').classList.contains('active')) { init(); }
     })();

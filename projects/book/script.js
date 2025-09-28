@@ -33,252 +33,188 @@ const state = {
     currentMediaIndex: 0,
 };
 
-let mediaItems = [
-    { src: 'media/medium1_spread3.jpg' }, { src: 'media/medium2_spread4.gif' },
-    { src: 'media/medium3_spread4.gif' }, { src: 'media/medium5_spread6_1114653811.vimeo' },
-    { src: 'media/media/medium6_spread7_1114707280.vimeo' }, { src: 'media/medium7_spread8.jpg' }
-];
+let mediaItems = [];
 
 
 // =================================================================
-//  FUNKCE PRO KNIHU A LIGHTBOX
+//  HLAVNÍ FUNKCE KNIHY
 // =================================================================
 
-function wrapPageImages() {
-    papers.forEach(paper => {
-        paper.querySelectorAll('.front, .back').forEach(side => {
-            const image = side.querySelector('.page-image');
-            if (image) {
-                const wrapper = document.createElement('div');
-                wrapper.className = 'page-content';
-                side.appendChild(wrapper);
-                wrapper.appendChild(image);
-            }
-        });
-    });
-}
-
-function setupMediaOverlays() {
-    Object.entries(mediaOverlays).forEach(([pageNumStr, mediaData]) => {
-        const pageNumber = parseInt(pageNumStr, 10);
-        const paperIndex = Math.floor(pageNumber / 2);
-        const sideClass = (pageNumber % 2 === 1) ? '.back' : '.front';
-        const paperEl = papers[paperIndex];
-        if (!paperEl) return;
-        const contentWrapper = paperEl.querySelector(`${sideClass} .page-content`);
-        if (!contentWrapper) return;
-        let mediaElement;
-        if (mediaData.type === 'webm') {
-            mediaElement = document.createElement('video');
-            mediaElement.className = 'media-overlay';
-            mediaElement.autoplay = true;
-            mediaElement.muted = true;
-            mediaElement.loop = true;
-            mediaElement.playsInline = true;
-            mediaElement.src = mediaData.src;
-        } else {
-            mediaElement = document.createElement('img');
-            mediaElement.className = 'media-overlay';
-            mediaElement.src = mediaData.src;
-        }
-        contentWrapper.appendChild(mediaElement);
-    });
-}
-
-function updateURL(spreadIndex) {
-    const newHash = spreadIndex > 0 ? `spread=${spreadIndex}` : '';
-    if (location.hash.substring(1) !== newHash) { location.hash = newHash; }
-}
-
-function updateBook(progressValue) {
+/**
+ * OPRAVENO: Aktualizuje rotaci a z-index stránek.
+ * Nová logika pro z-index řeší problikávání stránek po dokončení animace.
+ */
+function updateBook(spread) {
     papers.forEach((paper, i) => {
-        const progress = progressValue - i;
-        let zIndex, transform;
-        if (progress <= 0) { transform = 'rotateY(0deg)'; zIndex = papers.length - i; }
-        else if (progress >= 1) { transform = 'rotateY(-180deg)'; zIndex = i; }
-        else { transform = `rotateY(${-180 * progress}deg)`; zIndex = papers.length + 1; }
-        paper.style.transform = transform;
+        const progress = Math.max(0, Math.min(1, spread - i));
+        const rotation = -progress * 180;
+        paper.style.transform = `rotateY(${rotation}deg)`;
+
+        // Stránky, které jsou již otočené (vlevo), dostanou z-index podle svého pořadí.
+        // Stránky vpravo si zachovají reverzní pořadí, aby se správně překrývaly.
+        const zIndex = spread > i ? i : state.maxSpread - i;
         paper.style.zIndex = zIndex;
     });
+    renderButtons(Math.floor(spread));
 }
 
-function easeOutCubic(x) { return 1 - Math.pow(1 - x, 3); }
 
-function animateTo(from, to, duration = CONFIG.animationDuration) {
-    if (state.isAnimating) return;
-    state.isAnimating = true;
-    if (state.animationFrame) cancelAnimationFrame(state.animationFrame);
-    hideButtons();
-    const target = Math.max(0, Math.min(state.maxSpread, to));
-    const diff = target - from;
-    const startTime = performance.now();
-    function tick(currentTime) {
-        let elapsed = (currentTime - startTime) / duration;
-        if (elapsed > 1) elapsed = 1;
-        const easedProgress = easeOutCubic(elapsed);
-        const currentValue = from + diff * easedProgress;
-        slider.value = currentValue;
-        updateBook(currentValue);
-        if (elapsed < 1) {
-            state.animationFrame = requestAnimationFrame(tick);
+function renderButtons(spread) {
+    interactiveLayer.innerHTML = '';
+    const relevantButtons = buttonData.filter(btn => btn.spread === spread);
+    relevantButtons.forEach(data => {
+        const button = document.createElement(data.url ? 'a' : 'button');
+        button.className = 'interactive-button';
+        Object.assign(button.style, data.styles);
+        if (data.url) {
+            button.href = data.url;
+            button.target = '_blank';
+            button.setAttribute('aria-label', 'Otevřít odkaz v nové kartě');
         } else {
-            state.currentSpread = target;
-            slider.value = state.currentSpread;
-            updateBook(state.currentSpread);
-            updateURL(state.currentSpread);
-            state.animationFrame = null;
-            state.isAnimating = false;
-            renderButtons(state.currentSpread);
+            button.setAttribute('aria-label', `Zobrazit médium ${data.mediaSrc}`);
+            button.addEventListener('click', () => {
+                const mediaIndex = mediaItems.findIndex(item => item.src === data.mediaSrc);
+                if (mediaIndex !== -1) {
+                    openLightbox(mediaIndex);
+                }
+            });
         }
-    }
-    state.animationFrame = requestAnimationFrame(tick);
-}
-
-function goTo(spreadIndex) {
-    if (spreadIndex !== state.currentSpread && !state.isAnimating) {
-        animateTo(state.currentSpread, spreadIndex);
-    }
-}
-
-function next() { goTo(state.currentSpread + 1); }
-function prev() { goTo(state.currentSpread - 1); }
-
-function hideButtons() { if (interactiveLayer) { interactiveLayer.innerHTML = ''; } }
-
-function renderButtons(spreadIndex) {
-    hideButtons();
-    const buttonsForSpread = buttonData.filter(btn => btn.spread === spreadIndex);
-    buttonsForSpread.forEach(data => {
-        const btn = document.createElement('div');
-        btn.className = 'interactive-button';
-        Object.assign(btn.style, data.styles);
-        if (data.clipPath) { btn.style.clipPath = data.clipPath; }
-        const action = data.url ? () => window.open(data.url, '_blank') : () => openLightbox(data.mediaSrc);
-        btn.addEventListener('click', action);
-        interactiveLayer.appendChild(btn);
+        interactiveLayer.appendChild(button);
     });
 }
 
-function getFileExtension(path) { return path.split('.').pop().toLowerCase(); }
 
-function openLightbox(src) {
-    const match = src.match(/_spread(\d+)/);
-    if (match && match[1]) {
-        const targetSpread = parseInt(match[1], 10);
-        if (!isNaN(targetSpread) && targetSpread !== state.currentSpread) {
-            goTo(targetSpread);
-        }
-    }
+// =================================================================
+//  LIGHTBOX (ZOBRAZENÍ MÉDIÍ)
+// =================================================================
 
-    let mediaIndex = mediaItems.findIndex(m => m.src === src);
-    if (mediaIndex === -1) { mediaItems.push({ src }); mediaIndex = mediaItems.length - 1; }
-    state.currentMediaIndex = mediaIndex;
-    showMedia(state.currentMediaIndex);
-    lightbox.classList.add('show');
-    lightbox.setAttribute('aria-hidden', 'false');
+function openLightbox(index) {
+    state.currentMediaIndex = index;
+    lightbox.removeAttribute('aria-hidden');
+    document.body.style.overflow = 'hidden';
+    loadMedia(index);
 }
 
 function closeLightbox() {
-    lightbox.classList.remove('show');
     lightbox.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
     lightboxStage.innerHTML = '';
-    lightboxPlayButton.classList.remove('show');
 }
 
-function showMedia(index) {
-    if (index < 0 || index >= mediaItems.length) return;
+function loadMedia(index) {
     state.currentMediaIndex = index;
-    const { src } = mediaItems[index];
-
-    const match = src.match(/_spread(\d+)/);
-    if (match && match[1]) {
-        const targetSpread = parseInt(match[1], 10);
-        if (!isNaN(targetSpread) && targetSpread !== state.currentSpread) {
-            goTo(targetSpread);
-        }
-    }
-
     lightboxStage.innerHTML = '';
-    lightboxZoomButton.style.display = 'none';
-    lightboxPlayButton.classList.remove('show');
-    const extension = getFileExtension(src);
-    if (['jpg', 'jpeg', 'png', 'webp', 'avif'].includes(extension)) {
-        const img = document.createElement('img'); img.src = src; img.draggable = false;
-        lightboxStage.appendChild(img); setupImageZoom(img);
-    } else if (extension === 'gif') {
-        const img = document.createElement('img'); img.src = src; img.draggable = false;
-        lightboxStage.appendChild(img);
-    } else if (['mp4', 'webm', 'ogg'].includes(extension)) {
-        const video = document.createElement('video'); video.src = src; video.controls = true;
-        video.playsInline = true; lightboxStage.appendChild(video);
-        lightboxPlayButton.classList.add('show');
-        lightboxPlayButton.onclick = () => { lightboxPlayButton.classList.remove('show'); video.play(); };
-    } else if (['youtube', 'vimeo'].includes(extension)) {
-        const idMatch = src.match(/_([0-9]{6,})(?:-h([A-Za-z0-9]+))?\.(youtube|vimeo)$/i);
-        if (idMatch) {
-            const [, id, h, type] = idMatch;
-            let embedUrl = '';
-            if (type === 'youtube') embedUrl = `https://www.youtube-nocookie.com/embed/${id}?autoplay=0&controls=1&modestbranding=1&rel=0`;
-            else { const hParam = h ? `&h=${h}` : ''; embedUrl = `https://player.vimeo.com/video/${id}?autoplay=1&loop=1&title=0&byline=0&transparent=1&dnt=1${hParam}`; }
-            const iframe = document.createElement('iframe'); iframe.src = embedUrl;
-            iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen';
-            iframe.allowFullscreen = true; lightboxStage.appendChild(iframe);
+    const media = mediaItems[index];
+    const srcParts = media.src.split('.');
+    const extension = srcParts.pop();
+    const isVimeo = extension === 'vimeo';
+
+    if (isVimeo) {
+        const vimeoId = srcParts.join('.').split('_').pop();
+        lightboxStage.innerHTML = `<iframe src="https://player.vimeo.com/video/${vimeoId}?autoplay=1&loop=1&autopause=0&muted=1" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
+        lightboxPlayButton.classList.remove('show');
+        lightboxZoomButton.style.display = 'none';
+    } else {
+        const isVideo = ['mp4', 'webm', 'gif'].includes(extension);
+        const content = document.createElement(isVideo ? 'video' : 'img');
+        content.src = media.src;
+        if (content.tagName === 'VIDEO') {
+            Object.assign(content, { autoplay: true, loop: true, muted: true, playsInline: true });
+            lightboxPlayButton.classList.add('show');
+            lightboxPlayButton.textContent = '❚❚';
+        } else {
+            lightboxPlayButton.classList.remove('show');
         }
+        lightboxStage.appendChild(content);
+        lightboxZoomButton.style.display = 'block';
+        lightboxZoomButton.textContent = '⛶';
+        Object.assign(content.dataset, { scale: 1, x: 0, y: 0 });
     }
 }
 
-function setupImageZoom(img) {
-    lightboxZoomButton.style.display = 'block';
-    lightboxZoomButton.classList.remove('active');
-    let zoomState = { isActive: false, scale: 1, posX: 0, posY: 0, isDragging: false, startX: 0, startY: 0 };
-    const applyTransform = () => { img.style.transform = `translate(${zoomState.posX}px, ${zoomState.posY}px) scale(${zoomState.scale})`; };
-    const resetZoom = () => { zoomState.scale = 1; zoomState.posX = 0; zoomState.posY = 0; applyTransform(); };
-    lightboxZoomButton.onclick = () => {
-        zoomState.isActive = !zoomState.isActive;
-        lightboxZoomButton.classList.toggle('active', zoomState.isActive);
-        img.style.cursor = zoomState.isActive ? 'grab' : 'default';
-        if (!zoomState.isActive) resetZoom();
-    };
-    img.addEventListener("wheel", e => { if (!zoomState.isActive) return; e.preventDefault(); const delta = e.deltaY > 0 ? -0.1 : 0.1; zoomState.scale = Math.min(Math.max(1, zoomState.scale + delta), CONFIG.maxZoomScale); applyTransform(); });
-    img.addEventListener("dblclick", () => { if (!zoomState.isActive) return; zoomState.scale = zoomState.scale > 1 ? 1 : 2; if (zoomState.scale === 1) resetZoom(); else applyTransform(); });
-    img.addEventListener("mousedown", e => { if (!zoomState.isActive || zoomState.scale <= 1) return; zoomState.isDragging = true; zoomState.startX = e.clientX - zoomState.posX; zoomState.startY = e.clientY - zoomState.posY; img.style.cursor = "grabbing"; });
-    window.addEventListener("mousemove", e => { if (!zoomState.isDragging) return; zoomState.posX = e.clientX - zoomState.startX; zoomState.posY = e.clientY - zoomState.startY; applyTransform(); });
-    window.addEventListener("mouseup", () => { if (zoomState.isDragging) { zoomState.isDragging = false; img.style.cursor = "grab"; } });
-}
-
-function lightboxNext() { if (state.currentMediaIndex < mediaItems.length - 1) { showMedia(state.currentMediaIndex + 1); } }
-function lightboxPrev() { if (state.currentMediaIndex > 0) { showMedia(state.currentMediaIndex - 1); } }
-
-function handleHashChange() {
-    const hash = location.hash;
-    let targetSpread = 0;
-    if (hash.startsWith('#spread=')) {
-        const spreadFromUrl = parseInt(hash.substring(8), 10);
-        if (!isNaN(spreadFromUrl) && spreadFromUrl >= 0 && spreadFromUrl <= state.maxSpread) {
-            targetSpread = spreadFromUrl;
-        }
-    }
-    goTo(targetSpread);
-}
-
-function setupEventListeners() {
-    document.getElementById('arrowLeft').addEventListener('click', prev);
-    document.getElementById('arrowRight').addEventListener('click', next);
-    slider.addEventListener('input', () => { if (!state.isAnimating) { hideButtons(); updateBook(parseFloat(slider.value)); } });
-    slider.addEventListener('change', () => { if (!state.isAnimating) { const target = Math.round(parseFloat(slider.value)); animateTo(parseFloat(slider.value), target, CONFIG.snapDuration); } });
-    window.addEventListener('wheel', e => { if (lightbox.classList.contains('show')) return; e.preventDefault(); state.wheelAccumulator += e.deltaY * CONFIG.wheelSensitivity; if (!state.isWheelAnimating) { hideButtons(); state.isWheelAnimating = true; animateWheel(); } }, { passive: false });
-    book.addEventListener('touchstart', e => { if (e.touches.length === 1) { state.touchStartX = e.touches[0].clientX; state.touchStartY = e.touches[0].clientY; } });
-    book.addEventListener('touchend', e => { if (state.touchStartX === null) return; const dx = e.changedTouches[0].clientX - state.touchStartX; const dy = e.changedTouches[0].clientY - state.touchStartY; if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) { if (dx < 0) next(); else prev(); } state.touchStartX = null; state.touchStartY = null; });
-    document.getElementById('lightboxPrev').addEventListener('click', lightboxPrev);
-    document.getElementById('lightboxNext').addEventListener('click', lightboxNext);
+function setupLightboxControls() {
     document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
-    lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLightbox(); });
-    window.addEventListener('keydown', e => {
-        if (lightbox.classList.contains('show')) {
-            if (e.key === 'Escape') closeLightbox(); if (e.key === 'ArrowRight') lightboxNext(); if (e.key === 'ArrowLeft') lightboxPrev();
+    document.getElementById('lightboxPrev').addEventListener('click', () => {
+        const newIndex = (state.currentMediaIndex - 1 + mediaItems.length) % mediaItems.length;
+        loadMedia(newIndex);
+    });
+    document.getElementById('lightboxNext').addEventListener('click', () => {
+        const newIndex = (state.currentMediaIndex + 1) % mediaItems.length;
+        loadMedia(newIndex);
+    });
+
+    lightboxPlayButton.addEventListener('click', () => {
+        const video = lightboxStage.querySelector('video');
+        if (video) {
+            video.paused ? (video.play(), lightboxPlayButton.textContent = '❚❚') : (video.pause(), lightboxPlayButton.textContent = '▶');
         }
     });
-    window.addEventListener('hashchange', handleHashChange);
+
+    let isZoomed = false;
+    lightboxZoomButton.addEventListener('click', () => {
+        const mediaElement = lightboxStage.querySelector('img, video');
+        if (mediaElement) {
+            isZoomed = !isZoomed;
+            mediaElement.style.transform = isZoomed ? 'scale(2)' : 'scale(1)';
+            mediaElement.style.cursor = isZoomed ? 'zoom-out' : '';
+        }
+    });
+}
+
+
+// =================================================================
+//  ZPRACOVÁNÍ VSTUPU A UDÁLOSTÍ
+// =================================================================
+
+function setupEventListeners() {
+    slider.addEventListener('input', () => updateBook(parseFloat(slider.value)));
+    document.getElementById('arrowLeft').addEventListener('click', () => changeSpread(-1));
+    document.getElementById('arrowRight').addEventListener('click', () => changeSpread(1));
+    setupWheel();
+    setupLightboxControls();
+}
+
+function changeSpread(delta) {
+    if (state.isAnimating) return;
+    const current = Math.round(parseFloat(slider.value));
+    const target = Math.max(0, Math.min(state.maxSpread, current + delta));
+    if (current !== target) {
+        animateTo(parseFloat(slider.value), target, CONFIG.animationDuration);
+    }
+}
+
+function animateTo(start, end, duration) {
+    state.isAnimating = true;
+    const startTime = performance.now();
+    const frame = (currentTime) => {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const ease = 0.5 * (1 - Math.cos(Math.PI * progress));
+        const currentVal = start + (end - start) * ease;
+        slider.value = currentVal;
+        updateBook(currentVal);
+        if (progress < 1) {
+            requestAnimationFrame(frame);
+        } else {
+            state.isAnimating = false;
+            slider.value = end;
+            updateBook(end);
+            renderButtons(end);
+            history.pushState(null, '', `#spread=${end}`);
+        }
+    };
+    requestAnimationFrame(frame);
+}
+
+function setupWheel() {
+    book.parentElement.addEventListener('wheel', e => {
+        e.preventDefault();
+        state.wheelAccumulator += e.deltaY * CONFIG.wheelSensitivity;
+        if (!state.isWheelAnimating) {
+            state.isWheelAnimating = true;
+            animateWheel();
+        }
+    }, { passive: false });
 
     function animateWheel() {
         if (Math.abs(state.wheelAccumulator) < 0.001) {
@@ -291,17 +227,49 @@ function setupEventListeners() {
         const step = state.wheelAccumulator * 0.15;
         state.wheelAccumulator -= step;
         const nextVal = Math.max(0, Math.min(state.maxSpread, current + step));
-        slider.value = nextVal; updateBook(nextVal);
+        slider.value = nextVal;
+        updateBook(nextVal);
         requestAnimationFrame(animateWheel);
     }
 }
 
+// =================================================================
+//  POMOCNÉ FUNKCE
+// =================================================================
+
+function wrapPageImages() {
+    document.querySelectorAll('.page-image').forEach(img => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'page-image-wrapper';
+        img.parentNode.insertBefore(wrapper, img);
+        wrapper.appendChild(img);
+    });
+}
+
+function setupMediaOverlays() {
+    for (const pageNum in mediaOverlays) {
+        const overlayData = mediaOverlays[pageNum];
+        const pageElement = document.querySelector(`#p${Math.floor((pageNum - 1) / 2)} ${pageNum % 2 !== 0 ? '.back' : '.front'} .page-image-wrapper`);
+        if (pageElement) {
+            const video = document.createElement('video');
+            video.className = 'media-overlay';
+            Object.assign(video, { src: overlayData.src, autoplay: true, muted: true, loop: true, playsInline: true });
+            pageElement.appendChild(video);
+        }
+    }
+}
 
 // =================================================================
 //  SPUŠTĚNÍ APLIKACE
 // =================================================================
 
 function main() {
+    createNav('../../', 'portfolio');
+
+    mediaItems = buttonData
+        .filter(item => item.mediaSrc)
+        .map(item => ({ src: item.mediaSrc }));
+
     slider.min = 0;
     slider.max = state.maxSpread;
     wrapPageImages();

@@ -31,10 +31,8 @@ function createNav(relativePath = '', activePage = '') {
 
     const body = document.body;
 
-    // Odebrání starých tlačítek, pokud existují
     document.querySelector('.nav-toggle-strip-container')?.remove();
 
-    // Vytvoření kontejneru pro nové lišty
     const stripContainer = document.createElement('div');
     stripContainer.className = 'nav-toggle-strip-container';
 
@@ -52,8 +50,7 @@ function createNav(relativePath = '', activePage = '') {
         body.classList.toggle('nav-collapsed');
     });
 
-    // Automatické sbalení na menších obrazovkách
-    if (window.innerWidth <= 800) {
+    if (activePage !== 'main' && window.innerWidth <= 800) {
         body.classList.add('nav-collapsed');
     }
 }
