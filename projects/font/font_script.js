@@ -68,8 +68,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function getBaseVariationSettings() {
             let wght = weightSlider.value, hght = heightSlider.value;
-            if (activeMode === 'wght' || activeMode === 'both') wght = MIN_WGHT;
-            if (activeMode === 'hght' || activeMode === 'both') hght = MIN_HGHT;
+            if (['wght', 'both'].includes(activeMode)) wght = MIN_WGHT;
+            if (['hght', 'both'].includes(activeMode)) hght = MIN_HGHT;
             return `'wght' ${wght}, 'hght' ${hght}`;
         }
 
@@ -110,8 +110,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const time = Date.now() * 0.002;
             letters.forEach((span, index) => {
                 const influence = (Math.sin(time - index * 0.2) + 1) / 2;
-                const wghtValue = (activeMode === 'wght' || activeMode === 'both') ? MIN_WGHT + (900 - MIN_WGHT) * influence : weightSlider.value;
-                const hghtValue = (activeMode === 'hght' || activeMode === 'both') ? MIN_HGHT + (800 - MIN_HGHT) * influence : heightSlider.value;
+                const wghtValue = (['wght', 'both'].includes(activeMode)) ? MIN_WGHT + (900 - MIN_WGHT) * influence : weightSlider.value;
+                const hghtValue = (['hght', 'both'].includes(activeMode)) ? MIN_HGHT + (800 - MIN_HGHT) * influence : heightSlider.value;
                 span.style.fontVariationSettings = `'wght' ${wghtValue}, 'hght' ${hghtValue}`;
             });
             animationFrameId = requestAnimationFrame(waveAnimation);
@@ -141,19 +141,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 e.target.classList.add('active');
                 activeMode = e.target.dataset.mode;
 
-                // Mobilní logika pro animaci
-                if (isMobile) {
-                    if (activeMode !== 'off') {
-                        startWaveAnimation();
-                    } else {
-                        stopWaveAnimation();
-                    }
+                if (activeMode !== 'off') {
+                    startWaveAnimation();
+                } else {
+                    stopWaveAnimation();
                 }
 
-                // Desktop logika
-                if (activeMode === 'off' && animationFrameId && !isMobile) { stopWaveAnimation(); }
-                weightSlider.disabled = ['wght', 'both'].includes(activeMode) && !isMobile; // Na mobilu nikdy nedeaktivovat
-                heightSlider.disabled = ['hght', 'both'].includes(activeMode) && !isMobile;
+                weightSlider.disabled = ['wght', 'both'].includes(activeMode);
+                heightSlider.disabled = ['hght', 'both'].includes(activeMode);
                 weightSliderGroup.classList.toggle('disabled', weightSlider.disabled);
                 heightSliderGroup.classList.toggle('disabled', heightSlider.disabled);
                 updateText();
@@ -162,11 +157,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         setupTooltip(weightSliderGroup, weightSlider);
         setupTooltip(heightSliderGroup, heightSlider);
-        if (isMobile) { sizeSlider.value = 90; }
+
+        sizeSlider.value = sizeSlider.max;
         wrapLetters();
+
+        if (isMobile) {
+            document.querySelector('.switcher-group .switch-btn[data-mode="off"]').click();
+        } else {
+            document.querySelector('.switcher-group .switch-btn[data-mode="both"]').click();
+        }
     })();
 
-    // --- DEMO 3: STĚNA (Přepracované vlny) ---
+    // --- DEMO 3: STĚNA (Finální optimalizace 3.0) ---
     (function initializeLoremWall() {
         const canvas = document.getElementById('lorem-wall-canvas');
         if (!canvas) return;
@@ -177,13 +179,13 @@ document.addEventListener('DOMContentLoaded', () => {
             canvas.dataset.initialized = 'true';
 
             const ctx = canvas.getContext('2d', { alpha: false });
-            const FONT_SIZE = isMobile ? 40 : 50; // Menší text na mobilu
+            const FONT_SIZE = isMobile ? 40 : 50;
             const BASE_WEIGHT = 100, MAX_WEIGHT = 900;
             const word = "BLOKKADA";
             let letters = [];
             let ripples = [];
             let lastFrameTime = 0;
-            const FRAME_INTERVAL = 1000 / 24; // Stabilní FPS
+            const FRAME_INTERVAL = 1000 / 12; // Mírné zvýšení pro plynulost
 
             async function setup() {
                 await document.fonts.load(`1em "Blokkada VF"`);
@@ -194,16 +196,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 letters = [];
                 ctx.font = `normal ${BASE_WEIGHT} ${FONT_SIZE}px 'Blokkada VF'`;
 
-                const spaceWidth = ctx.measureText(' ').width * 1.5;
-                const lineHeight = FONT_SIZE * 1.0;
+                // Mírné zvětšení mezer pro snížení počtu písmen
+                const spaceWidth = ctx.measureText(' ').width * 2;
+                const lineHeight = FONT_SIZE * 1.2;
 
-                for (let y = FONT_SIZE * 0.8; y < rect.height; y += lineHeight) {
-                    let x = Math.random() * -100;
-                    while (x < rect.width) {
+                for (let y = FONT_SIZE * 0.8; y < rect.height + FONT_SIZE; y += lineHeight) {
+                    let x = Math.random() * -150;
+                    while (x < rect.width + FONT_SIZE) {
                         for (let i = 0; i < word.length; i++) {
                             const char = word[i];
                             const charWidth = ctx.measureText(char).width;
-                            letters.push({ char: char, x: x + (Math.random() - 0.5) * 3, y: y, currentWeight: BASE_WEIGHT, });
+                            letters.push({ char, x, y, currentWeight: BASE_WEIGHT, needsUpdate: true });
                             x += charWidth;
                         }
                         x += spaceWidth;
@@ -216,10 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
-            // Funkce pro Gaussovu křivku - definuje profil vlny
-            function gaussian(x, peak, width) {
-                return Math.exp(-Math.pow(x - peak, 2) / (2 * Math.pow(width, 2)));
-            }
+            function gaussian(x, peak, width) { return Math.exp(-Math.pow(x - peak, 2) / (2 * Math.pow(width, 2))); }
 
             function animate(timestamp) {
                 requestAnimationFrame(animate);
@@ -227,41 +227,67 @@ document.addEventListener('DOMContentLoaded', () => {
                 lastFrameTime = timestamp;
 
                 ctx.fillStyle = '#000'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+
                 ripples.forEach((ripple, index) => {
                     ripple.radius += ripple.speed;
                     if (ripple.radius > ripple.maxRadius) ripples.splice(index, 1);
                 });
 
+                const renderGroups = new Map();
+
                 letters.forEach(letter => {
                     let totalInfluence = 0;
-                    ripples.forEach(ripple => {
-                        const distFromEpicenter = Math.hypot(letter.x - ripple.x, letter.y - ripple.y);
-                        // Použijeme Gaussovu křivku pro plynulý profil vlny
-                        const influence = gaussian(distFromEpicenter, ripple.radius, ripple.width / 2);
-                        if (influence > totalInfluence) totalInfluence = influence;
-                    });
 
-                    const targetWeight = BASE_WEIGHT + (MAX_WEIGHT - BASE_WEIGHT) * totalInfluence;
-                    if (Math.abs(targetWeight - letter.currentWeight) > 1) {
-                        letter.currentWeight += (targetWeight - letter.currentWeight) * 0.2;
+                    for (const ripple of ripples) {
+                        const distSq = Math.pow(letter.x - ripple.x, 2) + Math.pow(letter.y - ripple.y, 2);
+                        const waveZoneSq = Math.pow(ripple.radius + ripple.width, 2);
+
+                        if (distSq < waveZoneSq) {
+                            const dist = Math.sqrt(distSq);
+                            const influence = gaussian(dist, ripple.radius, ripple.width / 2);
+                            if (influence > totalInfluence) totalInfluence = influence;
+                        }
                     }
 
-                    ctx.font = `normal ${letter.currentWeight} ${FONT_SIZE}px 'Blokkada VF'`;
-                    const colorValue = 80 + 175 * totalInfluence;
-                    ctx.fillStyle = `rgb(${colorValue}, ${colorValue}, ${colorValue})`;
-                    ctx.fillText(letter.char, letter.x, letter.y);
+                    const targetWeight = BASE_WEIGHT + (MAX_WEIGHT - BASE_WEIGHT) * totalInfluence;
+
+                    if (Math.abs(targetWeight - letter.currentWeight) > 1) {
+                        letter.currentWeight += (targetWeight - letter.currentWeight) * 0.25;
+                        letter.needsUpdate = true;
+                    } else {
+                        letter.needsUpdate = false;
+                    }
+
+                    const weight = Math.round(letter.currentWeight);
+                    const colorVal = Math.round(80 + 175 * totalInfluence);
+                    const font = `normal ${weight} ${FONT_SIZE}px 'Blokkada VF'`;
+                    const color = `rgb(${colorVal},${colorVal},${colorVal})`;
+                    const styleKey = `${font}|${color}`;
+
+                    if (!renderGroups.has(styleKey)) {
+                        renderGroups.set(styleKey, { font, color, items: [] });
+                    }
+                    renderGroups.get(styleKey).items.push(letter);
                 });
+
+                for (const group of renderGroups.values()) {
+                    ctx.font = group.font;
+                    ctx.fillStyle = group.color;
+                    for (const item of group.items) {
+                        ctx.fillText(item.char, item.x, item.y);
+                    }
+                }
             }
 
             canvas.addEventListener('click', e => {
                 const rect = canvas.getBoundingClientRect();
-                const maxRadius = Math.max(rect.width, rect.height) + 100;
+                const maxRadius = Math.max(rect.width, rect.height) + 200;
                 ripples.push({
                     x: e.clientX - rect.left,
                     y: e.clientY - rect.top,
                     radius: 0,
-                    speed: 15,
-                    width: isMobile ? 40 : 60, // Šířka vlny
+                    speed: 35,
+                    width: isMobile ? 80 : 120,
                     maxRadius,
                 });
             });

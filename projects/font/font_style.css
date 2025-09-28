@@ -73,9 +73,13 @@
 }
 
 .slider-group {
-    flex: 1;
-    min-width: 180px;
+    flex: 1 1 200px; /* Flexibilní růst a smršťování s minimální šířkou */
 }
+
+    .slider-group.switcher-group {
+        flex: 2 1 300px; /* Dovolí přepínači zabrat více místa */
+    }
+
 
     .slider-group.disabled label {
         opacity: 0.4;
@@ -116,7 +120,7 @@ input[type="range"] {
     font-family: 'Blokkada VF', sans-serif;
     outline: none;
     width: 100%;
-    text-align: center; /* Změněno zpět na střed */
+    text-align: center;
     line-height: 1.2;
     padding: 0 1rem;
     word-wrap: break-word;
@@ -224,24 +228,6 @@ input[type="range"] {
         font-size: 0.8rem;
     }
 
-    .sliders {
-        flex-direction: row;
-        flex-wrap: wrap;
-        gap: 1rem 1.5rem;
-        align-items: flex-end;
-    }
-
-    .slider-group {
-        flex-grow: 1;
-        flex-basis: calc(50% - 1rem);
-        min-width: 140px;
-    }
-
-        .slider-group.switcher-group {
-            flex-basis: 100%;
-        }
-
-    /* Skryjeme pouze tlačítko vlny, přepínač zůstává */
     .wave-button-group {
         display: none;
     }

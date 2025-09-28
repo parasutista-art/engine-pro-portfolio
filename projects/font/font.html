@@ -11,8 +11,9 @@
     <div id="nav-placeholder" class="nav-column"></div>
     <main class="content-column">
         <nav class="demo-nav">
-            <button class="demo-nav-btn active" data-target="demo1">1. Sandbox</button>
-            <button class="demo-nav-btn" data-target="demo3">2. Stěna</button>
+            <button class="demo-nav-btn active" data-target="demo1">Sandbox</button>
+            <button class="demo-nav-btn" data-target="demo3">Stěna</button>
+            <button class="demo-nav-btn" data-target="demo-about">O fontu</button>
         </nav>
         <div class="demo-content">
             <div id="demo1" class="demo-panel active">
@@ -33,7 +34,7 @@
                         <input type="range" id="height-slider" min="400" max="800" value="500">
                     </div>
                     <div class="slider-group switcher-group">
-                        <label>Reaktivita na myš:</label>
+                        <label>Interakce:</label>
                         <div class="switcher">
                             <button class="switch-btn active" data-mode="off">Vypnuto</button>
                             <button class="switch-btn" data-mode="wght">Tloušťka</button>
@@ -42,7 +43,7 @@
                         </div>
                     </div>
                     <div class="slider-group wave-button-group">
-                        <label>Vlnová animace</label>
+                        <label>Animace:</label>
                         <button class="control-btn" id="wave-toggle" aria-label="Spustit animaci">▶</button>
                     </div>
                 </div>
@@ -50,9 +51,11 @@
             <div id="demo3" class="demo-panel">
                 <canvas id="lorem-wall-canvas"></canvas>
             </div>
+            <div id="demo-about" class="demo-panel">
+            </div>
         </div>
     </main>
-    <div id="disabled-slider-tooltip">Ovládání je deaktivováno, protože je zapnutá interaktivita myši.</div>
+    <div id="disabled-slider-tooltip">Ovládání je deaktivováno, protože je zapnutá interaktivita.</div>
     <script src="../../nav.js"></script>
     <script>createNav('../../', 'font');</script>
     <script src="font_script.js"></script>
