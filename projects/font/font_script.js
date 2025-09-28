@@ -32,8 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const MIN_WGHT = 100;
         const MIN_HGHT = 400;
-        
-        // --- Funkce pro opravu kurzoru ---
+
+        // --- Oprava pozice kurzoru při psaní ---
         function getCaretPosition(element) {
             let position = 0;
             const selection = window.getSelection();
@@ -64,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     } else { charCount += len; }
                 } else { for (const child of node.childNodes) { traverse(child); } }
             }
-            traverse(element);
+            if (element.childNodes.length > 0) traverse(element);
         }
 
         function getBaseVariationSettings() {
@@ -76,7 +76,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function applyStylesToText(settings) {
-            textElement.style.fontVariationSettings = settings;
             letters.forEach(span => { span.style.fontVariationSettings = settings; });
         }
 
@@ -101,11 +100,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function handleMouseMove(e) {
             if (activeMode === 'off' || animationFrameId) return;
-            const rect = textElement.getBoundingClientRect();
-            if (e.clientX < rect.left || e.clientX > rect.right || e.clientY < rect.top || e.clientY > rect.bottom) { handleMouseLeave(); return; }
             const hoveredEl = document.elementFromPoint(e.clientX, e.clientY);
-            if (!letters.includes(hoveredEl)) return;
+            if (!textElement.contains(hoveredEl)) { handleMouseLeave(); return; }
+
             const hoveredIndex = letters.indexOf(hoveredEl);
+            if (hoveredIndex === -1) return;
+
             letters.forEach((span, index) => {
                 const distance = Math.abs(index - hoveredIndex);
                 const influence = Math.max(0, 1 - distance / 10);
@@ -114,9 +114,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 span.style.fontVariationSettings = `'wght' ${wghtValue}, 'hght' ${hghtValue}`;
             });
         }
-        
+
         function handleTouchMove(e) { if (e.touches.length > 0) { handleMouseMove({ clientX: e.touches[0].clientX, clientY: e.touches[0].clientY }); } }
         function handleMouseLeave() { if (activeMode === 'off' || animationFrameId) return; updateText(); }
+
         function waveAnimation() {
             const time = Date.now() * 0.002;
             letters.forEach((span, index) => {
@@ -127,52 +128,59 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             animationFrameId = requestAnimationFrame(waveAnimation);
         }
+
         function stopWaveAnimation() {
-            if (animationFrameId) {
-                cancelAnimationFrame(animationFrameId);
-                animationFrameId = null;
-                waveToggle.innerHTML = '▶';
-                waveToggle.classList.remove('playing');
-                updateText();
-            }
+            if (animationFrameId) { cancelAnimationFrame(animationFrameId); animationFrameId = null; waveToggle.innerHTML = '▶'; waveToggle.classList.remove('playing'); updateText(); }
         }
+
         function toggleWaveAnimation() {
-            if (animationFrameId) { stopWaveAnimation(); } 
+            if (animationFrameId) { stopWaveAnimation(); }
             else {
-                if (activeMode === 'off') { const bothBtn = switcher.querySelector('[data-mode="both"]'); if (bothBtn) bothBtn.click(); }
+                if (activeMode === 'off') { switcher.querySelector('[data-mode="both"]')?.click(); }
                 waveToggle.innerHTML = '❚❚'; waveToggle.classList.add('playing'); waveAnimation();
             }
         }
+
+        function setupTooltip(group, slider) {
+            group.addEventListener('mouseover', () => { if (slider.disabled) tooltip.style.display = 'block'; });
+            group.addEventListener('mousemove', (e) => {
+                if (slider.disabled) { tooltip.style.left = `${e.clientX}px`; tooltip.style.top = `${e.clientY}px`; }
+            });
+            group.addEventListener('mouseout', () => { tooltip.style.display = 'none'; });
+        }
+
         sizeSlider.addEventListener('input', updateText);
         weightSlider.addEventListener('input', updateText);
         heightSlider.addEventListener('input', updateText);
+
         textElement.addEventListener('input', () => { const pos = getCaretPosition(textElement); wrapLetters(); setCaretPosition(textElement, pos); });
+
         document.body.addEventListener('mousemove', handleMouseMove);
         document.body.addEventListener('touchmove', handleTouchMove, { passive: true });
-        document.body.addEventListener('mouseleave', handleMouseLeave);
         document.body.addEventListener('touchend', handleMouseLeave);
+
         waveToggle.addEventListener('click', toggleWaveAnimation);
+
         switcher.addEventListener('click', e => {
             if (e.target.classList.contains('switch-btn')) {
-                switcher.querySelector('.active').classList.remove('active'); e.target.classList.add('active'); activeMode = e.target.dataset.mode;
+                switcher.querySelector('.active').classList.remove('active');
+                e.target.classList.add('active');
+                activeMode = e.target.dataset.mode;
                 if (activeMode === 'off' && animationFrameId) { stopWaveAnimation(); }
-                weightSlider.disabled = (activeMode === 'wght' || activeMode === 'both');
-                heightSlider.disabled = (activeMode === 'hght' || activeMode === 'both');
+                weightSlider.disabled = ['wght', 'both'].includes(activeMode);
+                heightSlider.disabled = ['hght', 'both'].includes(activeMode);
                 weightSliderGroup.classList.toggle('disabled', weightSlider.disabled);
                 heightSliderGroup.classList.toggle('disabled', heightSlider.disabled);
                 updateText();
             }
         });
 
-        // --- Inicializace ---
-        const isMobile = window.innerWidth <= 768;
-        if (isMobile) { sizeSlider.value = 90; } // Menší výchozí velikost na mobilu
+        setupTooltip(weightSliderGroup, weightSlider);
+        setupTooltip(heightSliderGroup, heightSlider);
+
+        if (window.innerWidth <= 768) { sizeSlider.value = 90; }
 
         wrapLetters();
-        updateText();
-        const bothButton = switcher.querySelector('[data-mode="both"]');
-        if (bothButton) { bothButton.click(); }
-        waveToggle.click();
     })();
 
     // --- DEMO 3: STĚNA ---
@@ -180,16 +188,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const canvas = document.getElementById('lorem-wall-canvas');
         if (!canvas) return;
         const button = document.querySelector('button[data-target="demo3"]');
+
         const init = () => {
             if (canvas.dataset.initialized) return;
             canvas.dataset.initialized = 'true';
+
             const ctx = canvas.getContext('2d', { alpha: false });
-            const FONT_SIZE = 60; // Zmenšený text
+            const FONT_SIZE = 60;
             const BASE_WEIGHT = 100; const MAX_WEIGHT = 900;
             const word = "BLOKKADA";
             let letters = [];
             let mouse = { x: -9999, y: -9999, radius: 200 };
             let ripples = [];
+
             async function setup() {
                 await document.fonts.load(`1em "Blokkada VF"`);
                 const dpr = window.devicePixelRatio || 1;
@@ -199,23 +210,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 const margin = 50;
                 const charWidth = FONT_SIZE * 0.65;
                 const wordWidth = word.length * charWidth;
-                const wordSpacing = FONT_SIZE * 0.7; // Zmenšená mezera mezi slovy
+                const wordSpacing = FONT_SIZE * 0.7;
                 const lineHeight = FONT_SIZE * 0.9;
+
                 for (let y = FONT_SIZE / 2; y < rect.height + margin; y += lineHeight) {
                     const rowIndex = Math.floor(y / lineHeight);
                     const rowOffset = rowIndex % 2 === 0 ? 0 : -wordWidth / 2;
                     let currentX = -margin + rowOffset;
                     while (currentX < rect.width + margin) {
-                        for (let i = 0; i < word.length; i++) { letters.push({ char: word[i], x: currentX + (i * charWidth), y: y, currentWeight: BASE_WEIGHT, }); }
+                        for (let i = 0; i < word.length; i++) { letters.push({ char: word[i], x: currentX + (i * charWidth), y: y, currentWeight: BASE_WEIGHT }); }
                         currentX += wordWidth + wordSpacing;
                     }
                 }
-                if (!canvas.dataset.animated) { 
-                    animate(); canvas.dataset.animated = "true";
+
+                if (!canvas.dataset.animated) {
+                    animate();
+                    canvas.dataset.animated = "true";
                     const maxRadius = Math.max(rect.width, rect.height) + 200;
-                    ripples.push({ x: rect.width / 2, y: rect.height / 2, radius: 0, speed: 20, width: 200, maxRadius, });
+                    ripples.push({ x: rect.width / 2, y: rect.height / 2, radius: 0, speed: 20, width: 200, maxRadius });
                 }
             }
+
             function animate() {
                 ctx.fillStyle = '#000'; ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ripples.forEach((ripple, index) => { ripple.radius += ripple.speed; if (ripple.radius > ripple.maxRadius) ripples.splice(index, 1); });
@@ -237,18 +252,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 requestAnimationFrame(animate);
             }
+
             function handleInteractionMove(e) { const rect = canvas.getBoundingClientRect(); mouse.x = e.clientX - rect.left; mouse.y = e.clientY - rect.top; }
             function handleTouchInteractionMove(e) { if (e.touches.length > 0) { const rect = canvas.getBoundingClientRect(); mouse.x = e.touches[0].clientX - rect.left; mouse.y = e.touches[0].clientY - rect.top; } }
             function handleInteractionEnd() { mouse.x = -9999; mouse.y = -9999; }
+
             canvas.addEventListener('mousemove', handleInteractionMove);
             canvas.addEventListener('mouseleave', handleInteractionEnd);
             canvas.addEventListener('touchmove', handleTouchInteractionMove, { passive: true });
             canvas.addEventListener('touchend', handleInteractionEnd);
             canvas.addEventListener('touchcancel', handleInteractionEnd);
-            canvas.addEventListener('click', e => { const rect = canvas.getBoundingClientRect(); const maxRadius = Math.max(rect.width, rect.height) + 200; ripples.push({ x: e.clientX - rect.left, y: e.clientY - rect.top, radius: 0, speed: 25, width: 250, maxRadius, }); });
+
+            canvas.addEventListener('click', e => { const rect = canvas.getBoundingClientRect(); const maxRadius = Math.max(rect.width, rect.height) + 200; ripples.push({ x: e.clientX - rect.left, y: e.clientY - rect.top, radius: 0, speed: 25, width: 250, maxRadius }); });
+
             window.addEventListener('resize', setup);
             setup();
         };
+
         button?.addEventListener('click', init, { once: true });
         if (document.getElementById('demo3').classList.contains('active')) { init(); }
     })();
