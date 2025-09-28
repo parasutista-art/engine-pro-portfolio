@@ -116,9 +116,14 @@ input[type="range"] {
     font-family: 'Blokkada VF', sans-serif;
     outline: none;
     width: 100%;
-    text-align: center;
+    text-align: center; /* Změněno zpět na střed */
     line-height: 1.2;
     padding: 0 1rem;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    -webkit-hyphens: auto;
+    -ms-hyphens: auto;
+    hyphens: auto;
 }
 
     #interactive-text span {
@@ -236,8 +241,8 @@ input[type="range"] {
             flex-basis: 100%;
         }
 
+    /* Skryjeme pouze tlačítko vlny, přepínač zůstává */
     .wave-button-group {
-        flex-basis: auto;
-        flex-grow: 1;
+        display: none;
     }
 }
