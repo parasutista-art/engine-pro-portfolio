@@ -33,25 +33,27 @@ const state = {
     currentMediaIndex: 0,
 };
 
-let mediaItems = [];
+// OPRAVA ZDE: Seznam médií sjednocen pro správné fungování GIFů a Vimea.
+let mediaItems = [
+    { src: 'media/medium1_spread3.jpg' },
+    { src: 'media/medium2_spread4.gif' },
+    { src: 'media/medium3_spread4.gif' },
+    { src: 'media/medium5_spread6_1114653811.vimeo' },
+    { src: 'media/medium6_spread7_1114707280.vimeo' },
+    { src: 'media/medium7_spread8.jpg' }
+];
 
 
 // =================================================================
 //  HLAVNÍ FUNKCE KNIHY
 // =================================================================
 
-/**
- * OPRAVENO: Aktualizuje rotaci a z-index stránek.
- * Nová logika pro z-index řeší problikávání stránek po dokončení animace.
- */
 function updateBook(spread) {
     papers.forEach((paper, i) => {
         const progress = Math.max(0, Math.min(1, spread - i));
         const rotation = -progress * 180;
         paper.style.transform = `rotateY(${rotation}deg)`;
 
-        // Stránky, které jsou již otočené (vlevo), dostanou z-index podle svého pořadí.
-        // Stránky vpravo si zachovají reverzní pořadí, aby se správně překrývaly.
         const zIndex = spread > i ? i : state.maxSpread - i;
         paper.style.zIndex = zIndex;
     });
@@ -63,23 +65,26 @@ function renderButtons(spread) {
     interactiveLayer.innerHTML = '';
     const relevantButtons = buttonData.filter(btn => btn.spread === spread);
     relevantButtons.forEach(data => {
-        const button = document.createElement(data.url ? 'a' : 'button');
-        button.className = 'interactive-button';
-        Object.assign(button.style, data.styles);
+        const element = document.createElement(data.url ? 'a' : 'div');
+        element.className = 'interactive-button';
+
         if (data.url) {
-            button.href = data.url;
-            button.target = '_blank';
-            button.setAttribute('aria-label', 'Otevřít odkaz v nové kartě');
+            element.href = data.url;
+            element.target = '_blank';
+            element.setAttribute('aria-label', 'Otevřít odkaz v nové kartě');
         } else {
-            button.setAttribute('aria-label', `Zobrazit médium ${data.mediaSrc}`);
-            button.addEventListener('click', () => {
+            element.setAttribute('role', 'button');
+            element.setAttribute('aria-label', `Zobrazit médium ${data.mediaSrc}`);
+            element.addEventListener('click', () => {
                 const mediaIndex = mediaItems.findIndex(item => item.src === data.mediaSrc);
                 if (mediaIndex !== -1) {
                     openLightbox(mediaIndex);
                 }
             });
         }
-        interactiveLayer.appendChild(button);
+
+        Object.assign(element.style, data.styles);
+        interactiveLayer.appendChild(element);
     });
 }
 
@@ -90,13 +95,13 @@ function renderButtons(spread) {
 
 function openLightbox(index) {
     state.currentMediaIndex = index;
-    lightbox.removeAttribute('aria-hidden');
+    lightbox.classList.add('show');
     document.body.style.overflow = 'hidden';
     loadMedia(index);
 }
 
 function closeLightbox() {
-    lightbox.setAttribute('aria-hidden', 'true');
+    lightbox.classList.remove('show');
     document.body.style.overflow = '';
     lightboxStage.innerHTML = '';
 }
@@ -168,6 +173,16 @@ function setupLightboxControls() {
 
 function setupEventListeners() {
     slider.addEventListener('input', () => updateBook(parseFloat(slider.value)));
+
+    slider.addEventListener('change', () => {
+        const currentValue = parseFloat(slider.value);
+        const targetSpread = Math.round(currentValue);
+
+        if (Math.abs(currentValue - targetSpread) > 0.001) {
+            animateTo(currentValue, targetSpread, CONFIG.snapDuration);
+        }
+    });
+
     document.getElementById('arrowLeft').addEventListener('click', () => changeSpread(-1));
     document.getElementById('arrowRight').addEventListener('click', () => changeSpread(1));
     setupWheel();
@@ -265,10 +280,6 @@ function setupMediaOverlays() {
 
 function main() {
     createNav('../../', 'portfolio');
-
-    mediaItems = buttonData
-        .filter(item => item.mediaSrc)
-        .map(item => ({ src: item.mediaSrc }));
 
     slider.min = 0;
     slider.max = state.maxSpread;
