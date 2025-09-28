@@ -4,12 +4,11 @@
     font-weight: 100 900;
 }
 
-/* --- Layout specifický pro tuto stránku --- */
 .content-column {
     padding: 2rem 3rem;
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    height: 100vh; /* Zajistí, že sloupec zabere celou výšku */
     box-sizing: border-box;
 }
 
@@ -55,8 +54,6 @@
     display: none;
     flex-grow: 1;
     flex-direction: column;
-    min-height: 0;
-    position: relative;
 }
 
     .demo-panel.active {
@@ -73,13 +70,12 @@
 }
 
 .slider-group {
-    flex: 1 1 200px; /* Flexibilní růst a smršťování s minimální šířkou */
+    flex: 1 1 200px;
 }
 
     .slider-group.switcher-group {
-        flex: 2 1 300px; /* Dovolí přepínači zabrat více místa */
+        flex: 2 1 300px;
     }
-
 
     .slider-group.disabled label {
         opacity: 0.4;
@@ -113,7 +109,7 @@ input[type="range"] {
     border-radius: 8px;
     background-color: #111;
     padding: 1rem;
-    overflow: hidden;
+    min-height: 300px;
 }
 
 #interactive-text {
@@ -198,6 +194,8 @@ input[type="range"] {
     position: relative;
     overflow: hidden;
     border-radius: 8px;
+    min-height: 400px;
+    flex-grow: 1;
 }
 
 #lorem-wall-canvas {
@@ -214,21 +212,16 @@ input[type="range"] {
 }
 
 /* --- Responzivita pro mobily --- */
-@media (max-width: 768px) {
+@media (max-width: 800px) {
     .content-column {
-        padding: 1rem;
-    }
-
-    .demo-nav-btn {
-        font-size: 0.8rem;
-        padding: 0.6rem 0.7rem;
-    }
-
-    label {
-        font-size: 0.8rem;
+        padding: 1.5rem;
     }
 
     .wave-button-group {
         display: none;
+    }
+
+    .slider-group.switcher-group {
+        display: block;
     }
 }

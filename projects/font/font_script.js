@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 span.style.fontVariationSettings = `'wght' ${wghtValue}, 'hght' ${hghtValue}`;
             });
         }
-
+        
         function handleMouseLeave() { if (activeMode === 'off' || animationFrameId) return; updateText(); }
 
         function waveAnimation() {
@@ -119,28 +119,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function stopWaveAnimation() { if (animationFrameId) { cancelAnimationFrame(animationFrameId); animationFrameId = null; waveToggle.innerHTML = '▶'; waveToggle.classList.remove('playing'); updateText(); } }
         function startWaveAnimation() { if (!animationFrameId) { waveToggle.innerHTML = '❚❚'; waveToggle.classList.add('playing'); waveAnimation(); } }
-
+        
         function setupTooltip(group, slider) {
             if (isMobile) return;
             group.addEventListener('mouseover', () => { if (slider.disabled) tooltip.style.display = 'block'; });
             group.addEventListener('mousemove', (e) => { if (slider.disabled) { tooltip.style.left = `${e.clientX}px`; tooltip.style.top = `${e.clientY}px`; } });
             group.addEventListener('mouseout', () => { tooltip.style.display = 'none'; });
         }
-
+        
         sizeSlider.addEventListener('input', updateText);
         weightSlider.addEventListener('input', updateText);
         heightSlider.addEventListener('input', updateText);
         textElement.addEventListener('input', () => { const pos = getCaretPosition(textElement); wrapLetters(); setCaretPosition(textElement, pos); });
         document.body.addEventListener('mousemove', handleMouseMove);
-
+        
         waveToggle.addEventListener('click', () => { if (animationFrameId) stopWaveAnimation(); else startWaveAnimation(); });
-
+        
         switcher.addEventListener('click', e => {
             if (e.target.classList.contains('switch-btn')) {
                 switcher.querySelector('.active').classList.remove('active');
                 e.target.classList.add('active');
                 activeMode = e.target.dataset.mode;
-
+                
                 if (activeMode !== 'off') {
                     startWaveAnimation();
                 } else {
@@ -157,7 +157,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         setupTooltip(weightSliderGroup, weightSlider);
         setupTooltip(heightSliderGroup, heightSlider);
-
+        
         sizeSlider.value = sizeSlider.max;
         wrapLetters();
 
@@ -173,11 +173,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const canvas = document.getElementById('lorem-wall-canvas');
         if (!canvas) return;
         const button = document.querySelector('button[data-target="demo3"]');
-
+        
         const init = () => {
             if (canvas.dataset.initialized) return;
             canvas.dataset.initialized = 'true';
-
+            
             const ctx = canvas.getContext('2d', { alpha: false });
             const FONT_SIZE = isMobile ? 40 : 50;
             const BASE_WEIGHT = 100, MAX_WEIGHT = 900;
@@ -195,7 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 ctx.scale(dpr, dpr);
                 letters = [];
                 ctx.font = `normal ${BASE_WEIGHT} ${FONT_SIZE}px 'Blokkada VF'`;
-
+                
                 // Mírné zvětšení mezer pro snížení počtu písmen
                 const spaceWidth = ctx.measureText(' ').width * 2;
                 const lineHeight = FONT_SIZE * 1.2;
@@ -212,22 +212,22 @@ document.addEventListener('DOMContentLoaded', () => {
                         x += spaceWidth;
                     }
                 }
-
-                if (!canvas.dataset.animated) {
-                    requestAnimationFrame(animate);
+                
+                if (!canvas.dataset.animated) { 
+                    requestAnimationFrame(animate); 
                     canvas.dataset.animated = "true";
                 }
             }
-
+            
             function gaussian(x, peak, width) { return Math.exp(-Math.pow(x - peak, 2) / (2 * Math.pow(width, 2))); }
-
+            
             function animate(timestamp) {
                 requestAnimationFrame(animate);
                 if (timestamp - lastFrameTime < FRAME_INTERVAL) return;
                 lastFrameTime = timestamp;
 
                 ctx.fillStyle = '#000'; ctx.fillRect(0, 0, canvas.width, canvas.height);
-
+                
                 ripples.forEach((ripple, index) => {
                     ripple.radius += ripple.speed;
                     if (ripple.radius > ripple.maxRadius) ripples.splice(index, 1);
@@ -237,11 +237,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 letters.forEach(letter => {
                     let totalInfluence = 0;
-
+                    
                     for (const ripple of ripples) {
                         const distSq = Math.pow(letter.x - ripple.x, 2) + Math.pow(letter.y - ripple.y, 2);
                         const waveZoneSq = Math.pow(ripple.radius + ripple.width, 2);
-
+                        
                         if (distSq < waveZoneSq) {
                             const dist = Math.sqrt(distSq);
                             const influence = gaussian(dist, ripple.radius, ripple.width / 2);
@@ -250,7 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
 
                     const targetWeight = BASE_WEIGHT + (MAX_WEIGHT - BASE_WEIGHT) * totalInfluence;
-
+                    
                     if (Math.abs(targetWeight - letter.currentWeight) > 1) {
                         letter.currentWeight += (targetWeight - letter.currentWeight) * 0.25;
                         letter.needsUpdate = true;
@@ -263,7 +263,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const font = `normal ${weight} ${FONT_SIZE}px 'Blokkada VF'`;
                     const color = `rgb(${colorVal},${colorVal},${colorVal})`;
                     const styleKey = `${font}|${color}`;
-
+                    
                     if (!renderGroups.has(styleKey)) {
                         renderGroups.set(styleKey, { font, color, items: [] });
                     }
@@ -278,7 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             }
-
+            
             canvas.addEventListener('click', e => {
                 const rect = canvas.getBoundingClientRect();
                 const maxRadius = Math.max(rect.width, rect.height) + 200;
@@ -291,13 +291,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     maxRadius,
                 });
             });
-
+            
             const resizeObserver = new ResizeObserver(() => { setTimeout(setup, 50); });
             resizeObserver.observe(canvas.parentElement);
-
+            
             setup();
         };
-
+        
         button?.addEventListener('click', init, { once: true });
         if (document.getElementById('demo3').classList.contains('active')) { init(); }
     })();

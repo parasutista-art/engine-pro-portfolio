@@ -2,7 +2,7 @@ function createNav(relativePath = '', activePage = '') {
     // Definice odkazů
     const links = {
         portfolio: `<a href="${relativePath}projects/book/bookengine.html">portfolio</a>`,
-        font: `<a href="${relativePath}projects/font/font.html">Variable Font</a>`,
+        font: `<a href="${relativePath}projects/font/font.html\">Variable Font</a>`,
         projektC: `<a href="${relativePath}index.html">Projekt C</a>`
     };
 
@@ -22,34 +22,38 @@ function createNav(relativePath = '', activePage = '') {
         <footer class="site-footer">
             <p>bruh| <a href="${relativePath}index.html">Domovská stránka</a></p>
         </footer>
-        <button id="nav-toggle-collapse" class="nav-toggle-btn" aria-label="Skrýt navigaci">←</button>
     `;
 
     const placeholder = document.getElementById('nav-placeholder');
-    if (placeholder) placeholder.innerHTML = navHTML;
-
-    if (!document.getElementById('nav-toggle-expand')) {
-        const expandButton = document.createElement('button');
-        expandButton.id = 'nav-toggle-expand';
-        expandButton.className = 'nav-toggle-btn';
-        expandButton.setAttribute('aria-label', 'Zobrazit navigaci');
-        expandButton.innerHTML = '&#9776;';
-        document.body.appendChild(expandButton);
+    if (placeholder) {
+        placeholder.innerHTML = navHTML;
     }
 
     const body = document.body;
-    const collapseBtn = document.getElementById('nav-toggle-collapse');
-    const expandBtn = document.getElementById('nav-toggle-expand');
-    const mobileBreakpoint = 800;
 
-    const collapseNav = () => body.classList.add('nav-collapsed');
-    const expandNav = () => body.classList.remove('nav-collapsed');
+    // Odebrání starých tlačítek, pokud existují
+    document.querySelector('.nav-toggle-strip-container')?.remove();
 
-    if (collapseBtn) collapseBtn.addEventListener('click', collapseNav);
-    if (expandBtn) expandBtn.addEventListener('click', expandNav);
+    // Vytvoření kontejneru pro nové lišty
+    const stripContainer = document.createElement('div');
+    stripContainer.className = 'nav-toggle-strip-container';
 
-    // Automatické sbalení na mobilních zařízeních při startu
-    if (window.innerWidth < mobileBreakpoint) {
-        collapseNav();
+    const strip1 = document.createElement('div');
+    strip1.className = 'nav-toggle-strip strip-1';
+
+    const strip2 = document.createElement('div');
+    strip2.className = 'nav-toggle-strip strip-2';
+
+    stripContainer.appendChild(strip1);
+    stripContainer.appendChild(strip2);
+    body.appendChild(stripContainer);
+
+    stripContainer.addEventListener('click', () => {
+        body.classList.toggle('nav-collapsed');
+    });
+
+    // Automatické sbalení na menších obrazovkách
+    if (window.innerWidth <= 800) {
+        body.classList.add('nav-collapsed');
     }
 }
