@@ -1,4 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+
     // --- LOGIKA PŘEPÍNÁNÍ ZÁLOŽEK ---
     const navButtons = document.querySelectorAll('.demo-nav-btn');
     const demoPanels = document.querySelectorAll('.demo-panel');
@@ -29,11 +31,8 @@ document.addEventListener('DOMContentLoaded', () => {
         let letters = [];
         let animationFrameId = null;
         let activeMode = 'off';
+        const MIN_WGHT = 100, MIN_HGHT = 400;
 
-        const MIN_WGHT = 100;
-        const MIN_HGHT = 400;
-
-        // --- Oprava pozice kurzoru při psaní ---
         function getCaretPosition(element) {
             let position = 0;
             const selection = window.getSelection();
@@ -68,22 +67,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function getBaseVariationSettings() {
-            let wght = weightSlider.value; let hght = heightSlider.value;
+            let wght = weightSlider.value, hght = heightSlider.value;
             if (activeMode === 'wght') wght = MIN_WGHT;
             else if (activeMode === 'hght') hght = MIN_HGHT;
             else if (activeMode === 'both') { wght = MIN_WGHT; hght = MIN_HGHT; }
             return `'wght' ${wght}, 'hght' ${hght}`;
         }
 
-        function applyStylesToText(settings) {
-            letters.forEach(span => { span.style.fontVariationSettings = settings; });
-        }
-
-        function updateText() {
-            textElement.style.fontSize = `${sizeSlider.value}px`;
-            const baseSettings = getBaseVariationSettings();
-            applyStylesToText(baseSettings);
-        }
+        function applyStylesToText(settings) { letters.forEach(span => { span.style.fontVariationSettings = settings; }); }
+        function updateText() { textElement.style.fontSize = `${sizeSlider.value}px`; applyStylesToText(getBaseVariationSettings()); }
 
         function wrapLetters() {
             const text = textElement.textContent;
@@ -102,10 +94,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (activeMode === 'off' || animationFrameId) return;
             const hoveredEl = document.elementFromPoint(e.clientX, e.clientY);
             if (!textElement.contains(hoveredEl)) { handleMouseLeave(); return; }
-
             const hoveredIndex = letters.indexOf(hoveredEl);
             if (hoveredIndex === -1) return;
-
             letters.forEach((span, index) => {
                 const distance = Math.abs(index - hoveredIndex);
                 const influence = Math.max(0, 1 - distance / 10);
@@ -129,43 +119,27 @@ document.addEventListener('DOMContentLoaded', () => {
             animationFrameId = requestAnimationFrame(waveAnimation);
         }
 
-        function stopWaveAnimation() {
-            if (animationFrameId) { cancelAnimationFrame(animationFrameId); animationFrameId = null; waveToggle.innerHTML = '▶'; waveToggle.classList.remove('playing'); updateText(); }
-        }
-
-        function toggleWaveAnimation() {
-            if (animationFrameId) { stopWaveAnimation(); }
-            else {
-                if (activeMode === 'off') { switcher.querySelector('[data-mode="both"]')?.click(); }
-                waveToggle.innerHTML = '❚❚'; waveToggle.classList.add('playing'); waveAnimation();
-            }
-        }
+        function stopWaveAnimation() { if (animationFrameId) { cancelAnimationFrame(animationFrameId); animationFrameId = null; waveToggle.innerHTML = '▶'; waveToggle.classList.remove('playing'); updateText(); } }
+        function toggleWaveAnimation() { if (animationFrameId) { stopWaveAnimation(); } else { if (activeMode === 'off') { switcher.querySelector('[data-mode="both"]')?.click(); } waveToggle.innerHTML = '❚❚'; waveToggle.classList.add('playing'); waveAnimation(); } }
 
         function setupTooltip(group, slider) {
+            if (isMobile) return; // Deaktivace tooltipu na mobilu
             group.addEventListener('mouseover', () => { if (slider.disabled) tooltip.style.display = 'block'; });
-            group.addEventListener('mousemove', (e) => {
-                if (slider.disabled) { tooltip.style.left = `${e.clientX}px`; tooltip.style.top = `${e.clientY}px`; }
-            });
+            group.addEventListener('mousemove', (e) => { if (slider.disabled) { tooltip.style.left = `${e.clientX}px`; tooltip.style.top = `${e.clientY}px`; } });
             group.addEventListener('mouseout', () => { tooltip.style.display = 'none'; });
         }
 
         sizeSlider.addEventListener('input', updateText);
         weightSlider.addEventListener('input', updateText);
         heightSlider.addEventListener('input', updateText);
-
         textElement.addEventListener('input', () => { const pos = getCaretPosition(textElement); wrapLetters(); setCaretPosition(textElement, pos); });
-
         document.body.addEventListener('mousemove', handleMouseMove);
         document.body.addEventListener('touchmove', handleTouchMove, { passive: true });
         document.body.addEventListener('touchend', handleMouseLeave);
-
         waveToggle.addEventListener('click', toggleWaveAnimation);
-
         switcher.addEventListener('click', e => {
             if (e.target.classList.contains('switch-btn')) {
-                switcher.querySelector('.active').classList.remove('active');
-                e.target.classList.add('active');
-                activeMode = e.target.dataset.mode;
+                switcher.querySelector('.active').classList.remove('active'); e.target.classList.add('active'); activeMode = e.target.dataset.mode;
                 if (activeMode === 'off' && animationFrameId) { stopWaveAnimation(); }
                 weightSlider.disabled = ['wght', 'both'].includes(activeMode);
                 heightSlider.disabled = ['hght', 'both'].includes(activeMode);
@@ -177,13 +151,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         setupTooltip(weightSliderGroup, weightSlider);
         setupTooltip(heightSliderGroup, heightSlider);
-
-        if (window.innerWidth <= 768) { sizeSlider.value = 90; }
-
+        if (isMobile) { sizeSlider.value = 90; }
         wrapLetters();
     })();
 
-    // --- DEMO 3: STĚNA ---
+    // --- DEMO 3: STĚNA (Optimalizovaná verze) ---
     (function initializeLoremWall() {
         const canvas = document.getElementById('lorem-wall-canvas');
         if (!canvas) return;
@@ -194,63 +166,77 @@ document.addEventListener('DOMContentLoaded', () => {
             canvas.dataset.initialized = 'true';
 
             const ctx = canvas.getContext('2d', { alpha: false });
-            const FONT_SIZE = 60;
-            const BASE_WEIGHT = 100; const MAX_WEIGHT = 900;
+            const FONT_SIZE = 50;
+            const BASE_WEIGHT = 100, MAX_WEIGHT = 900;
             const word = "BLOKKADA";
             let letters = [];
-            let mouse = { x: -9999, y: -9999, radius: 200 };
+            let mouse = { x: -9999, y: -9999, radius: isMobile ? 150 : 200 };
             let ripples = [];
+            let lastFrameTime = 0;
+            const FRAME_INTERVAL = 1000 / 24; // Omezení na 24 FPS
 
             async function setup() {
                 await document.fonts.load(`1em "Blokkada VF"`);
                 const dpr = window.devicePixelRatio || 1;
                 const rect = canvas.parentElement.getBoundingClientRect();
                 canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
-                ctx.scale(dpr, dpr); letters = [];
-                const margin = 50;
-                const charWidth = FONT_SIZE * 0.65;
-                const wordWidth = word.length * charWidth;
-                const wordSpacing = FONT_SIZE * 0.7;
-                const lineHeight = FONT_SIZE * 0.9;
+                ctx.scale(dpr, dpr);
+                letters = [];
+                ctx.font = `normal ${BASE_WEIGHT} ${FONT_SIZE}px 'Blokkada VF'`;
 
-                for (let y = FONT_SIZE / 2; y < rect.height + margin; y += lineHeight) {
-                    const rowIndex = Math.floor(y / lineHeight);
-                    const rowOffset = rowIndex % 2 === 0 ? 0 : -wordWidth / 2;
-                    let currentX = -margin + rowOffset;
-                    while (currentX < rect.width + margin) {
-                        for (let i = 0; i < word.length; i++) { letters.push({ char: word[i], x: currentX + (i * charWidth), y: y, currentWeight: BASE_WEIGHT }); }
-                        currentX += wordWidth + wordSpacing;
+                const spaceWidth = ctx.measureText(' ').width * 2;
+                const lineHeight = FONT_SIZE * 1.1;
+
+                for (let y = FONT_SIZE; y < rect.height; y += lineHeight) {
+                    let x = Math.random() * -100;
+                    while (x < rect.width) {
+                        for (let i = 0; i < word.length; i++) {
+                            const char = word[i];
+                            const charWidth = ctx.measureText(char).width;
+                            letters.push({
+                                char: char,
+                                baseX: x + (Math.random() - 0.5) * 5, // Přidání jitteru
+                                baseY: y + (Math.random() - 0.5) * 5,
+                                currentWeight: BASE_WEIGHT,
+                            });
+                            x += charWidth; // Posun o skutečnou šířku znaku (kerning)
+                        }
+                        x += spaceWidth;
                     }
                 }
 
                 if (!canvas.dataset.animated) {
-                    animate();
+                    requestAnimationFrame(animate);
                     canvas.dataset.animated = "true";
                     const maxRadius = Math.max(rect.width, rect.height) + 200;
                     ripples.push({ x: rect.width / 2, y: rect.height / 2, radius: 0, speed: 20, width: 200, maxRadius });
                 }
             }
 
-            function animate() {
+            function animate(timestamp) {
+                requestAnimationFrame(animate);
+                if (timestamp - lastFrameTime < FRAME_INTERVAL) return;
+                lastFrameTime = timestamp;
+
                 ctx.fillStyle = '#000'; ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ripples.forEach((ripple, index) => { ripple.radius += ripple.speed; if (ripple.radius > ripple.maxRadius) ripples.splice(index, 1); });
+
                 letters.forEach(letter => {
-                    const dxMouse = letter.x - mouse.x; const dyMouse = letter.y - mouse.y; const distMouse = Math.sqrt(dxMouse * dxMouse + dyMouse * dyMouse);
+                    const dxMouse = letter.baseX - mouse.x; const dyMouse = letter.baseY - mouse.y; const distMouse = Math.sqrt(dxMouse * dxMouse + dyMouse * dyMouse);
                     let totalInfluence = 0;
                     if (distMouse < mouse.radius) { totalInfluence = Math.pow(1 - (distMouse / mouse.radius), 1.5); }
                     ripples.forEach(ripple => {
-                        const dxRipple = letter.x - ripple.x; const dyRipple = letter.y - ripple.y; const distRipple = Math.sqrt(dxRipple * dxRipple + dyRipple * dyRipple);
+                        const dxRipple = letter.baseX - ripple.x; const dyRipple = letter.baseY - ripple.y; const distRipple = Math.sqrt(dxRipple * dxRipple + dyRipple * dyRipple);
                         const waveFront = Math.abs(distRipple - ripple.radius);
                         if (waveFront < ripple.width) { const normalizedPos = waveFront / ripple.width; const smoothstep = 0.5 - 0.5 * Math.cos(normalizedPos * Math.PI); totalInfluence = Math.max(totalInfluence, smoothstep); }
                     });
                     const targetWeight = BASE_WEIGHT + (MAX_WEIGHT - BASE_WEIGHT) * totalInfluence;
-                    letter.currentWeight += (targetWeight - letter.currentWeight) * 0.1;
+                    letter.currentWeight += (targetWeight - letter.currentWeight) * 0.15; // Mírně rychlejší reakce
                     ctx.font = `normal ${letter.currentWeight} ${FONT_SIZE}px 'Blokkada VF'`;
                     const colorValue = 80 + 175 * totalInfluence;
                     ctx.fillStyle = `rgb(${colorValue}, ${colorValue}, ${colorValue})`;
-                    ctx.fillText(letter.char, letter.x, letter.y);
+                    ctx.fillText(letter.char, letter.baseX, letter.baseY);
                 });
-                requestAnimationFrame(animate);
             }
 
             function handleInteractionMove(e) { const rect = canvas.getBoundingClientRect(); mouse.x = e.clientX - rect.left; mouse.y = e.clientY - rect.top; }
@@ -262,10 +248,15 @@ document.addEventListener('DOMContentLoaded', () => {
             canvas.addEventListener('touchmove', handleTouchInteractionMove, { passive: true });
             canvas.addEventListener('touchend', handleInteractionEnd);
             canvas.addEventListener('touchcancel', handleInteractionEnd);
-
             canvas.addEventListener('click', e => { const rect = canvas.getBoundingClientRect(); const maxRadius = Math.max(rect.width, rect.height) + 200; ripples.push({ x: e.clientX - rect.left, y: e.clientY - rect.top, radius: 0, speed: 25, width: 250, maxRadius }); });
 
-            window.addEventListener('resize', setup);
+            // Sledování změny velikosti kontejneru pro správné překreslení
+            const resizeObserver = new ResizeObserver(() => {
+                // Krátké zpoždění, aby se layout stihl ustálit
+                setTimeout(setup, 50);
+            });
+            resizeObserver.observe(canvas.parentElement);
+
             setup();
         };
 
