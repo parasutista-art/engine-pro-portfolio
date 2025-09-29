@@ -11,11 +11,11 @@ const buttonData = [
             width: '25%',
             height: '50%'
         }
-        
     },
+    // Spread 4
     {
         spread: 4,
-        mediaSrc: 'media/medium2_spread4.gif',
+        mediaSrc: 'media/medium2_spread4.webm',
         styles: {
             top: '38%',
             left: '11%',
@@ -25,7 +25,7 @@ const buttonData = [
     },
     {
         spread: 4,
-        mediaSrc: 'media/medium3_spread4.gif',
+        mediaSrc: 'media/medium3_spread4.webm',
         styles: {
             top: '66% ',
             left: '11%',
@@ -43,17 +43,21 @@ const buttonData = [
             height: '8%'
         }
     },
-    // Spread 5
+    // ZÁZNAM PRO SPREAD 5 BYL ODSTRANÌN
+    // Zbývající data pro správnou funkci lightboxu
     {
-        spread: 5,
-        mediaSrc: 'media/medium4_spread5.youtube',
-        styles: {
-            top: '40%',
-            left: '30%',
-            width: '40%',
-            height: '40%'
-        },
-        clipPath: 'circle(50% at 50% 50%)' // Pøíklad kruhu
+        spread: 6,
+        mediaSrc: 'media/medium5_spread6_1114653811.vimeo',
+        styles: {}
+    },
+    {
+        spread: 7,
+        mediaSrc: 'media/medium6_spread7_1114707280.vimeo',
+        styles: {}
+    },
+    {
+        spread: 8,
+        mediaSrc: 'media/medium7_spread8.jpg',
+        styles: {}
     }
-    // ... a tak dále pro všechna další tlaèítka
 ];

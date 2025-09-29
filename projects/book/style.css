@@ -6,23 +6,16 @@
 :root {
     --page-ratio: 2480/3508;
     --spread-ratio: calc(2 * var(--page-ratio));
-    /* Proměnná --nav-width byla odstraněna, používá se ta z main_style.css */
 }
 
 * {
     box-sizing: border-box;
 }
 
-/*
-   Styly pro BODY a .nav-column byly odstraněny,
-   protože jsou nyní řízeny globálně souborem main_style.css.
-   Díky tomu bude vzhled a chování lišty konzistentní napříč projekty.
-*/
 html, body {
     height: 100%;
 }
 
-/* --- Hlavní obsah (wrapper pro knihu) --- */
 .book-viewport {
     flex-grow: 1;
     position: relative;
@@ -30,105 +23,11 @@ html, body {
     justify-content: center;
     align-items: center;
     min-width: 0;
-    overflow: hidden; /* Důležité, aby obsah nepřetékal */
+    overflow: hidden;
 }
-
-/* ... zbytek souboru style.css pokračuje beze změny ... */
-/* --- Tlačítka pro ovládání lišty --- */
-.nav-toggle-btn {
-    position: fixed;
-    background: rgba(30, 30, 30, 0.8);
-    color: white;
-    border: 1px solid #555;
-    cursor: pointer;
-    z-index: 30000;
-    transition: opacity 0.3s, transform 0.3s;
-    border-radius: 8px;
-}
-
-    .nav-toggle-btn:hover {
-        background: #fff;
-        color: #000;
-    }
-
-#nav-toggle-collapse {
-    position: absolute;
-    bottom: 1rem;
-    left: 1rem;
-    font-size: 1.2rem;
-    padding: 5px 12px;
-}
-
-#nav-toggle-expand {
-    top: 1.5rem;
-    left: 1.5rem;
-    font-size: 1.5rem;
-    padding: 8px 12px;
-    opacity: 0;
-    pointer-events: none;
-}
-
-/* --- Logika sbaleného stavu (Desktop) --- */
-body.nav-collapsed .nav-column {
-    transform: translateX(-100%);
-    width: 0; /* PŘIDÁNO: Zmenší šířku na 0 */
-    padding: 0; /* PŘIDÁNO: Odstraní vnitřní okraje */
-    border-right: none; /* PŘIDÁNO: Skryje rámeček */
-}
-
-body.nav-collapsed .book-viewport {
-    width: 100vw; /* Roztáhne kontejner knihy na celou šířku */
-}
-
-body.nav-collapsed #nav-toggle-expand {
-    opacity: 1;
-    pointer-events: auto;
-}
-
-
-/* === Responzivní chování pro úzké obrazovky (telefony) === */
-@media (max-width: 800px) {
-    /* Lišta se bude překrývat přes obsah */
-    .nav-column {
-        position: fixed; /* Změna pozicování */
-        top: 0;
-        left: 0;
-        z-index: 29000;
-        background: #000;
-        /* Transform je již nastaven z desktopu, zde není třeba měnit */
-    }
-
-    /* Kontejner s knihou bude vždy na 100% šířky */
-    .book-viewport {
-        width: 100vw !important; /* !important, aby přebilo inline styl nebo jiné pravidlo */
-    }
-
-    /* V rozbaleném stavu se lišta vysune a překryje obsah */
-    body:not(.nav-collapsed) .nav-column {
-        transform: translateX(0);
-    }
-
-    /* Přesunutí šipek v lightboxu pod obrázek */
-    .lightbox-arrow {
-        top: auto;
-        bottom: 20px;
-        transform: translateY(0);
-    }
-
-        .lightbox-arrow.left {
-            left: 50%;
-            transform: translateX(-120%);
-        }
-
-        .lightbox-arrow.right {
-            right: 50%;
-            transform: translateX(120%);
-        }
-}
-
 
 /* ===================================== */
-/* === KNIHA & STRÁNKY (beze změny) === */
+/* === KNIHA & STRÁNKY === */
 /* ===================================== */
 .book {
     position: relative;
@@ -137,6 +36,7 @@ body.nav-collapsed #nav-toggle-expand {
     transform-style: preserve-3d;
     perspective: 2500px;
     z-index: 100;
+    touch-action: pan-y;
 }
 
 .paper {
@@ -186,7 +86,7 @@ body.nav-collapsed #nav-toggle-expand {
 }
 
 /* ===================================== */
-/* === OVLÁDACÍ PRVKY (beze změny) === */
+/* === OVLÁDACÍ PRVKY === */
 /* ===================================== */
 .nav-arrow {
     position: absolute;
@@ -198,16 +98,17 @@ body.nav-collapsed #nav-toggle-expand {
     background: rgba(0, 0, 0, 0.3);
     border: none;
     cursor: pointer;
-    z-index: 20000;
+    z-index: 2000;
     padding: 10px 20px;
     border-radius: 8px;
-    transition: all 0.2s;
+    transition: background-color 0.2s; /* Změněno: Plynulá změna pouze u pozadí */
     line-height: 1;
 }
 
+    /* OPRAVA: Efekt najetí myší již nezpůsobuje posun */
     .nav-arrow:hover {
         background: rgba(0, 0, 0, 0.6);
-        transform: translateY(-50%) scale(1.1);
+        /* Vlastnost transform byla odstraněna */
     }
 
     .nav-arrow.left::before {
@@ -272,7 +173,7 @@ body.nav-collapsed #nav-toggle-expand {
     height: 40px;
     display: flex;
     align-items: center;
-    z-index: 11000;
+    z-index: 1100;
 }
 
 #pageSlider {
@@ -284,9 +185,8 @@ body.nav-collapsed #nav-toggle-expand {
         cursor: grabbing;
     }
 
-
 /* ===================================== */
-/* === LIGHTBOX & INTERAKTIVNÍ VRSTVA (beze změny) === */
+/* === LIGHTBOX & INTERAKTIVNÍ VRSTVA === */
 /* ===================================== */
 .lightbox {
     display: flex;
@@ -338,14 +238,6 @@ body.nav-collapsed #nav-toggle-expand {
         background: transparent;
     }
 
-.lightbox-arrow.left {
-    left: 30px;
-}
-
-.lightbox-arrow.right {
-    right: 30px;
-}
-
 .lb-close {
     position: absolute;
     background: rgba(0,0,0,0.6);
@@ -363,29 +255,6 @@ body.nav-collapsed #nav-toggle-expand {
 
     .lb-close:hover {
         background: rgba(0,0,0,0.8);
-    }
-
-.lb-play {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    font-size: 36px;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0,0,0,0.6);
-    color: white;
-    border: none;
-    cursor: pointer;
-    z-index: 27000;
-}
-
-    .lb-play.show {
-        display: flex;
     }
 
 #interactive-layer {
@@ -412,3 +281,46 @@ body.nav-collapsed #nav-toggle-expand {
         background: rgba(255, 255, 255, 0.15);
         border: 1px solid rgba(255, 255, 255, 0.7);
     }
+
+/* ===================================== */
+/* === RESPONZIVNÍ ÚPRAVY === */
+/* ===================================== */
+@media (max-width: 800px) {
+    .lightbox-arrow {
+        top: auto;
+        bottom: 20px;
+        transform: translateY(0);
+    }
+
+        .lightbox-arrow.left {
+            left: 50%;
+            transform: translateX(-120%);
+        }
+
+        .lightbox-arrow.right {
+            right: 50%;
+            transform: translateX(120%);
+        }
+
+    @media (orientation: portrait) {
+        .nav-arrow {
+            top: auto;
+            bottom: 80px;
+            transform: translateY(0);
+        }
+
+            .nav-arrow.left {
+                left: 50%;
+                transform: translateX(-120%);
+            }
+
+            .nav-arrow.right {
+                right: 50%;
+                transform: translateX(120%);
+            }
+
+            .nav-arrow:hover {
+                transform: none; /* Zrušení posunu i zde */
+            }
+    }
+}

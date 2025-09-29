@@ -76,14 +76,6 @@ document.addEventListener('DOMContentLoaded', () => {
         function applyStylesToText(settings) { letters.forEach(span => { span.style.fontVariationSettings = settings; }); }
 
         function updateText() {
-            // Automatická úprava velikosti na mobilu, aby se text nerozdělil
-            if (isMobile) {
-                textElement.style.fontSize = '1px'; // Reset
-                const containerWidth = textElement.parentElement.clientWidth;
-                const textWidth = textElement.scrollWidth;
-                const newSize = Math.floor(containerWidth / textWidth * 1);
-                sizeSlider.value = Math.min(newSize, 120); // Omezení max velikosti na mobilu
-            }
             textElement.style.fontSize = `${sizeSlider.value}px`;
             applyStylesToText(getBaseVariationSettings());
         }
@@ -170,13 +162,12 @@ document.addEventListener('DOMContentLoaded', () => {
         setupTooltip(weightSliderGroup, weightSlider);
         setupTooltip(heightSliderGroup, heightSlider);
 
-        wrapLetters(); // Musí být před nastavením hodnoty
+        wrapLetters();
 
         if (isMobile) {
-            updateText(); // Spustí automatickou úpravu velikosti
             document.querySelector('.switcher-group .switch-btn[data-mode="both"]').click();
         } else {
-            sizeSlider.value = sizeSlider.max;
+            // Zajistí, že se po načtení použije maximální hodnota z HTML
             updateText();
             document.querySelector('.switcher-group .switch-btn[data-mode="both"]').click();
         }

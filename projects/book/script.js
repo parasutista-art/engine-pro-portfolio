@@ -19,7 +19,6 @@ const interactiveLayer = document.getElementById('interactive-layer');
 const lightbox = document.getElementById('lightbox');
 const lightboxStage = document.getElementById('lightbox-stage');
 const lightboxPlayButton = document.getElementById('lb-play');
-const lightboxZoomButton = document.getElementById('lb-zoom');
 const papers = Array.from(document.querySelectorAll('.paper'));
 
 const state = {
@@ -31,19 +30,21 @@ const state = {
     isWheelAnimating: false,
     touchStartX: null, touchStartY: null,
     currentMediaIndex: 0,
+    isLightboxOpen: false
 };
 
-// OPRAVA ZDE: Seznam médií sjednocen pro správné fungování GIFů a Vimea.
+// ZÁZNAM PRO medium4 BYL ODSTRANĚN
 let mediaItems = [
     { src: 'media/medium1_spread3.jpg' },
-    { src: 'media/medium2_spread4.gif' },
-    { src: 'media/medium3_spread4.gif' },
+    { src: 'media/medium2_spread4.webm' },
+    { src: 'media/medium3_spread4.webm' },
     { src: 'media/medium5_spread6_1114653811.vimeo' },
     { src: 'media/medium6_spread7_1114707280.vimeo' },
-    { src: 'media/medium7_spread8.jpg' }
+    { src: 'media/medium7_spread8.jpg' },
 ];
 
-
+let currentVideo = null;
+let vimeoPlayer = null;
 // =================================================================
 //  HLAVNÍ FUNKCE KNIHY
 // =================================================================
@@ -94,13 +95,14 @@ function renderButtons(spread) {
 // =================================================================
 
 function openLightbox(index) {
-    state.currentMediaIndex = index;
+    state.isLightboxOpen = true;
     lightbox.classList.add('show');
     document.body.style.overflow = 'hidden';
     loadMedia(index);
 }
 
 function closeLightbox() {
+    state.isLightboxOpen = false;
     lightbox.classList.remove('show');
     document.body.style.overflow = '';
     lightboxStage.innerHTML = '';
@@ -110,43 +112,41 @@ function loadMedia(index) {
     state.currentMediaIndex = index;
     lightboxStage.innerHTML = '';
     const media = mediaItems[index];
+
+    // Tato část synchronizuje knihu na pozadí s aktuálním médiem
+    const button = buttonData.find(b => b.mediaSrc === media.src);
+    if (button) {
+        const targetSpread = button.spread;
+        if (state.currentSpread !== targetSpread) {
+            animateTo(parseFloat(slider.value), targetSpread, CONFIG.animationDuration);
+        }
+    }
+
     const srcParts = media.src.split('.');
-    const extension = srcParts.pop();
-    const isVimeo = extension === 'vimeo';
+    const type = srcParts[srcParts.length - 1];
+    const isVimeo = type === 'vimeo';
 
     if (isVimeo) {
-        const vimeoId = srcParts.join('.').split('_').pop();
+        const vimeoId = media.src.split('_').pop().split('.')[0];
         lightboxStage.innerHTML = `<iframe src="https://player.vimeo.com/video/${vimeoId}?autoplay=1&loop=1&autopause=0&muted=1" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
         lightboxPlayButton.classList.remove('show');
-        lightboxZoomButton.style.display = 'none';
     } else {
-        const isVideo = ['mp4', 'webm', 'gif'].includes(extension);
+        const isVideo = ['mp4', 'webm', 'gif'].includes(type);
         const content = document.createElement(isVideo ? 'video' : 'img');
         content.src = media.src;
+
         if (content.tagName === 'VIDEO') {
             Object.assign(content, { autoplay: true, loop: true, muted: true, playsInline: true });
-            lightboxPlayButton.classList.add('show');
-            lightboxPlayButton.textContent = '❚❚';
-        } else {
             lightboxPlayButton.classList.remove('show');
         }
         lightboxStage.appendChild(content);
-        lightboxZoomButton.style.display = 'block';
-        lightboxZoomButton.textContent = '⛶';
-        Object.assign(content.dataset, { scale: 1, x: 0, y: 0 });
     }
 }
 
 function setupLightboxControls() {
     document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
-    document.getElementById('lightboxPrev').addEventListener('click', () => {
-        const newIndex = (state.currentMediaIndex - 1 + mediaItems.length) % mediaItems.length;
-        loadMedia(newIndex);
-    });
-    document.getElementById('lightboxNext').addEventListener('click', () => {
-        const newIndex = (state.currentMediaIndex + 1) % mediaItems.length;
-        loadMedia(newIndex);
-    });
+    document.getElementById('lightboxPrev').addEventListener('click', () => changeMedia(-1));
+    document.getElementById('lightboxNext').addEventListener('click', () => changeMedia(1));
 
     lightboxPlayButton.addEventListener('click', () => {
         const video = lightboxStage.querySelector('video');
@@ -154,16 +154,11 @@ function setupLightboxControls() {
             video.paused ? (video.play(), lightboxPlayButton.textContent = '❚❚') : (video.pause(), lightboxPlayButton.textContent = '▶');
         }
     });
+}
 
-    let isZoomed = false;
-    lightboxZoomButton.addEventListener('click', () => {
-        const mediaElement = lightboxStage.querySelector('img, video');
-        if (mediaElement) {
-            isZoomed = !isZoomed;
-            mediaElement.style.transform = isZoomed ? 'scale(2)' : 'scale(1)';
-            mediaElement.style.cursor = isZoomed ? 'zoom-out' : '';
-        }
-    });
+function changeMedia(delta) {
+    const newIndex = (state.currentMediaIndex + delta + mediaItems.length) % mediaItems.length;
+    loadMedia(newIndex);
 }
 
 
@@ -185,6 +180,18 @@ function setupEventListeners() {
 
     document.getElementById('arrowLeft').addEventListener('click', () => changeSpread(-1));
     document.getElementById('arrowRight').addEventListener('click', () => changeSpread(1));
+
+    document.addEventListener('keydown', (e) => {
+        if (state.isLightboxOpen) {
+            if (e.key === 'ArrowLeft') changeMedia(-1);
+            if (e.key === 'ArrowRight') changeMedia(1);
+            if (e.key === 'Escape') closeLightbox();
+        } else {
+            if (e.key === 'ArrowLeft') changeSpread(-1);
+            if (e.key === 'ArrowRight') changeSpread(1);
+        }
+    });
+
     setupWheel();
     setupLightboxControls();
 }
@@ -199,7 +206,9 @@ function changeSpread(delta) {
 }
 
 function animateTo(start, end, duration) {
+    if (state.isAnimating) return;
     state.isAnimating = true;
+
     const startTime = performance.now();
     const frame = (currentTime) => {
         const elapsed = currentTime - startTime;
@@ -215,6 +224,7 @@ function animateTo(start, end, duration) {
             slider.value = end;
             updateBook(end);
             renderButtons(end);
+            state.currentSpread = end;
             history.pushState(null, '', `#spread=${end}`);
         }
     };
