@@ -91,7 +91,7 @@ html, body {
 .nav-arrow {
     position: absolute;
     top: 50%;
-    transform: translateY(-50%);
+    transform: translateY(-50%); /* Tato transformace zůstává, ale nemění se při hoveru */
     font-size: 2rem;
     font-weight: bold;
     color: #fff;
@@ -101,14 +101,13 @@ html, body {
     z-index: 2000;
     padding: 10px 20px;
     border-radius: 8px;
-    transition: background-color 0.2s; /* Změněno: Plynulá změna pouze u pozadí */
+    transition: background-color 0.2s; /* Plynulá změna pouze u pozadí */
     line-height: 1;
 }
 
-    /* OPRAVA: Efekt najetí myší již nezpůsobuje posun */
+    /* OPRAVA: Efekt najetí myší již nezpůsobuje žádný posun ani změnu velikosti */
     .nav-arrow:hover {
         background: rgba(0, 0, 0, 0.6);
-        /* Vlastnost transform byla odstraněna */
     }
 
     .nav-arrow.left::before {
@@ -317,10 +316,6 @@ html, body {
             .nav-arrow.right {
                 right: 50%;
                 transform: translateX(120%);
-            }
-
-            .nav-arrow:hover {
-                transform: none; /* Zrušení posunu i zde */
             }
     }
 }
