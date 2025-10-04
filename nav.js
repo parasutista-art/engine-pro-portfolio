@@ -2,8 +2,8 @@ function createNav(relativePath = '', activePage = '') {
     const links = {
         main: `<a href="${relativePath}index.html" class="name-link">Matyas Kunstmüller</a>`,
         portfolio: `<a href="${relativePath}projects/book/bookengine.html">portfolio</a>`,
-        font: `<a href="${relativePath}projects/font/font.html">Blokkada</a>`,
-        projektC: `<a href="${relativePath}index.html">Projekt C</a>`
+        font: `<a href="${relativePath}projects/font/font.html">blokkada</a>`,
+        projektC: `<a href="${relativePath}index.html">projekt C</a>`
     };
 
     if (activePage === 'font') links.font = `<a href="#" class="active">Blokkada</a>`;

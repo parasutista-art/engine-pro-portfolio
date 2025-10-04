@@ -11,15 +11,16 @@
     flex-direction: column;
     height: 100%;
     box-sizing: border-box;
-    /* Důležité pro mobilní zobrazení */
     min-height: 0;
+    min-width: 0; /* OPRAVA: Zabraňuje roztahování sloupce obsahem */
 }
 
 .demo-content {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
-    min-height: 0; /* Klíčová oprava pro flexbox stretching */
+    min-height: 0;
+    min-width: 0; /* OPRAVA: Zabraňuje roztahování demo panelu */
 }
 
 /* --- Panely Demoverzí --- */
@@ -205,4 +206,11 @@
     display: block;
     width: 100%;
     height: 100%;
+}
+
+.wall-controls {
+    display: flex;
+    justify-content: flex-start; /* Zarovnání vlevo */
+    gap: 10px;
+    margin-bottom: 1rem;
 }

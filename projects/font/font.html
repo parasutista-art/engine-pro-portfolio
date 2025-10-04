@@ -15,31 +15,31 @@
             <button class="demo-nav-btn" data-target="demo3">Stěna</button>
             <button class="demo-nav-btn" data-target="demo-about">O fontu</button>
         </nav>
+        <div class="wall-controls">
+            <button id="wall-animation-toggle" class="control-btn">▶</button>
+            <button id="wall-sound-toggle" class="control-btn">🔇</button>
+        </div>
         <div class="demo-content">
             <div id="demo1" class="demo-panel active">
                 <div class="sandbox-wrapper">
                     <div id="interactive-text" contenteditable="true" spellcheck="false">BLOKKADA</div>
                 </div>
                 <div class="sliders">
-                    <div class="slider-group">
-                        <label for="size-slider">Velikost</label>
-                        <input type="range" id="size-slider" min="20" max="800" value="150">
-                    </div>
-                    <div class="slider-group" id="weight-slider-group">
-                        <label for="weight-slider">Tloušťka (wght)</label>
+                    <div id="weight-slider-group" class="slider-group">
+                        <label>Tloušťka (wght)</label>
                         <input type="range" id="weight-slider" min="100" max="900" value="400">
                     </div>
-                    <div class="slider-group" id="height-slider-group">
-                        <label for="height-slider">Výška (hght)</label>
+                    <div id="height-slider-group" class="slider-group">
+                        <label>Výška (hght)</label>
                         <input type="range" id="height-slider" min="400" max="800" value="500">
                     </div>
                     <div class="slider-group switcher-group">
                         <label>Interakce:</label>
                         <div class="switcher">
-                            <button class="switch-btn active" data-mode="off">Vypnuto</button>
+                            <button class="switch-btn" data-mode="off">Vypnuto</button>
                             <button class="switch-btn" data-mode="wght">Tloušťka</button>
                             <button class="switch-btn" data-mode="hght">Výška</button>
-                            <button class="switch-btn" data-mode="both">Obojí</button>
+                            <button class="switch-btn active" data-mode="both">Obojí</button>
                         </div>
                     </div>
                     <div class="slider-group wave-button-group">
