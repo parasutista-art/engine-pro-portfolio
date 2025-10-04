@@ -1,4 +1,35 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+
+    // --- LOGIKA PŘEPÍNÁNÍ ZÁLOŽEK A OVLÁDACÍCH TLAČÍTEK ---
+    const navButtons = document.querySelectorAll('.demo-nav-btn');
+    const demoPanels = document.querySelectorAll('.demo-panel');
+    const wallControls = document.querySelector('.wall-controls');
+
+    function updateWallControlsVisibility(targetId) {
+        if (wallControls) {
+            wallControls.style.display = (targetId === 'demo3') ? 'flex' : 'none';
+        }
+    }
+
+    navButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            navButtons.forEach(btn => btn.classList.remove('active'));
+            demoPanels.forEach(panel => panel.classList.remove('active'));
+
+            button.classList.add('active');
+            const targetId = button.getAttribute('data-target');
+            document.getElementById(targetId)?.classList.add('active');
+
+            updateWallControlsVisibility(targetId);
+        });
+    });
+
+    const initialActiveButton = document.querySelector('.demo-nav-btn.active');
+    if (initialActiveButton) {
+        updateWallControlsVisibility(initialActiveButton.getAttribute('data-target'));
+    }
+
     // --- DEMO 1: SANDBOX (PLNĚ FUNKČNÍ) ---
     (function setupInteractiveDemo1() {
         const textElement = document.getElementById('interactive-text');
@@ -32,7 +63,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!textElement.textContent.trim()) { textElement.style.fontSize = '10px'; return; }
 
             textElement.style.visibility = 'hidden';
-
             let minFont = 10;
             let maxFont = container.clientHeight;
             let bestSize = minFont;
@@ -41,7 +71,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 let midFont = Math.floor((minFont + maxFont) / 2);
                 if (midFont <= 0) break;
                 textElement.style.fontSize = midFont + 'px';
-
                 if (textElement.scrollWidth <= maxWidth) {
                     bestSize = midFont;
                     minFont = midFont + 1;
@@ -65,29 +94,22 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             textElement.innerHTML = '';
             letters = text.split('').map(char => { const span = document.createElement('span'); span.textContent = char; if (char.trim() === '') span.style.whiteSpace = 'pre'; textElement.appendChild(span); return span; });
-
             if (shouldUpdate) {
                 updateText();
             }
         }
 
-        // --- OPRAVA: Funkce sjednocena pro myš i dotyk ---
         function handleInteraction(e) {
             if (activeMode === 'off' || animationFrameId) return;
-
-            // Získá souřadnice z myši nebo dotyku
             const point = e.touches ? e.touches[0] : e;
             if (!point) return;
-
             const hoveredEl = document.elementFromPoint(point.clientX, point.clientY);
-
             if (!textElement.contains(hoveredEl)) {
                 handleInteractionEnd();
                 return;
             }
             const hoveredIndex = letters.indexOf(hoveredEl);
             if (hoveredIndex === -1) return;
-
             letters.forEach((span, index) => {
                 const distance = Math.abs(index - hoveredIndex);
                 const influence = Math.max(0, 1 - distance / 10);
@@ -97,7 +119,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // --- OPRAVA: Funkce pro ukončení interakce (myš i dotyk) ---
         function handleInteractionEnd() {
             if (activeMode === 'off' || animationFrameId) return;
             updateText();
@@ -123,7 +144,6 @@ document.addEventListener('DOMContentLoaded', () => {
         heightSlider.addEventListener('input', updateText);
         textElement.addEventListener('input', () => { const pos = getCaretPosition(textElement); wrapLetters(); setCaretPosition(textElement, pos); });
 
-        // --- OPRAVA: Přidány listenery pro myš i dotyk ---
         document.body.addEventListener('mousemove', handleInteraction);
         document.body.addEventListener('touchmove', handleInteraction, { passive: true });
         document.body.addEventListener('mouseleave', handleInteractionEnd);
@@ -164,35 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 100);
     })();
 
-    // Zbytek kódu (navigace, demo 3) zůstává beze změny
-    const navButtons = document.querySelectorAll('.demo-nav-btn');
-    const demoPanels = document.querySelectorAll('.demo-panel');
-    const wallControls = document.querySelector('.wall-controls');
-
-    function updateWallControlsVisibility(targetId) {
-        if (wallControls) {
-            wallControls.style.display = (targetId === 'demo3') ? 'flex' : 'none';
-        }
-    }
-
-    navButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            navButtons.forEach(btn => btn.classList.remove('active'));
-            demoPanels.forEach(panel => panel.classList.remove('active'));
-
-            button.classList.add('active');
-            const targetId = button.getAttribute('data-target');
-            document.getElementById(targetId)?.classList.add('active');
-
-            updateWallControlsVisibility(targetId);
-        });
-    });
-
-    const initialActiveButton = document.querySelector('.demo-nav-btn.active');
-    if (initialActiveButton) {
-        updateWallControlsVisibility(initialActiveButton.getAttribute('data-target'));
-    }
-
+    // --- DEMO 3: STĚNA ---
     (function initializeLoremWall() {
         const canvas = document.getElementById('lorem-wall-canvas');
         if (!canvas) return;
@@ -203,7 +195,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const init = () => {
             if (canvas.dataset.initialized) return;
             canvas.dataset.initialized = 'true';
-            const isMobile = /Mobi|Android/i.test(navigator.userAgent);
             const ctx = canvas.getContext('2d', { alpha: false });
             const FONT_SIZE = isMobile ? 40 : 50;
             const BASE_WEIGHT = 100, MAX_WEIGHT = 900;

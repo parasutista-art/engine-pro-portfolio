@@ -1,4 +1,8 @@
-﻿@font-face {
+﻿html, body {
+    overflow: hidden;
+}
+
+@font-face {
     font-family: 'Blokkada VF';
     src: url('Blokkada VF.ttf') format('truetype-variations');
     font-weight: 100 900;
@@ -215,7 +219,6 @@
     margin-bottom: 1rem;
 }
 
-/* --- OPRAVA PRO MOBILNÍ ZAŘÍZENÍ --- */
 @media (max-width: 600px) {
     .sliders {
         row-gap: 1.5rem;
@@ -225,7 +228,6 @@
         flex-basis: 100%;
     }
 
-    /* Poslední dva prvky (přepínač a tlačítko animace) se seřadí vedle sebe */
     .switcher-group {
         flex-basis: auto;
         flex-grow: 1;
@@ -237,3 +239,35 @@
         flex-grow: 0;
     }
 }
+
+.about-content {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 1rem 2rem;
+    overflow-y: auto;
+    color: #ccc;
+    font-family: sans-serif;
+    /* ZMĚNA: Přidány vlastnosti pro skrytí posuvníku */
+    scrollbar-width: none; /* Pro Firefox */
+    -ms-overflow-style: none; /* Pro IE a Edge */
+}
+
+    /* ZMĚNA: Přidáno pravidlo pro skrytí posuvníku v Chromu a Safari */
+    .about-content::-webkit-scrollbar {
+        display: none;
+    }
+
+    .about-content p {
+        font-size: 1rem;
+        line-height: 1.7;
+        margin-bottom: 1.5rem;
+        text-align: justify;
+    }
+
+    .about-content img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        margin: 1rem 0 2rem 0;
+        display: block;
+    }
