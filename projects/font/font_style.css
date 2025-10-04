@@ -12,7 +12,7 @@
     height: 100%;
     box-sizing: border-box;
     min-height: 0;
-    min-width: 0; /* OPRAVA: Zabraňuje roztahování sloupce obsahem */
+    min-width: 0;
 }
 
 .demo-content {
@@ -20,7 +20,7 @@
     display: flex;
     flex-direction: column;
     min-height: 0;
-    min-width: 0; /* OPRAVA: Zabraňuje roztahování demo panelu */
+    min-width: 0;
 }
 
 /* --- Panely Demoverzí --- */
@@ -210,7 +210,30 @@
 
 .wall-controls {
     display: flex;
-    justify-content: flex-start; /* Zarovnání vlevo */
+    justify-content: flex-start;
     gap: 10px;
     margin-bottom: 1rem;
+}
+
+/* --- OPRAVA PRO MOBILNÍ ZAŘÍZENÍ --- */
+@media (max-width: 600px) {
+    .sliders {
+        row-gap: 1.5rem;
+    }
+
+    .slider-group {
+        flex-basis: 100%;
+    }
+
+    /* Poslední dva prvky (přepínač a tlačítko animace) se seřadí vedle sebe */
+    .switcher-group {
+        flex-basis: auto;
+        flex-grow: 1;
+        padding-right: 1rem;
+    }
+
+    .wave-button-group {
+        flex-basis: auto;
+        flex-grow: 0;
+    }
 }
