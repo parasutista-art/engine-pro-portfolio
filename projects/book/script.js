@@ -33,7 +33,6 @@ const state = {
     isLightboxOpen: false
 };
 
-// ZÁZNAM PRO medium4 BYL ODSTRANĚN
 let mediaItems = [
     { src: 'media/medium1_spread3.jpg' },
     { src: 'media/medium2_spread4.webm' },
@@ -113,7 +112,6 @@ function loadMedia(index) {
     lightboxStage.innerHTML = '';
     const media = mediaItems[index];
 
-    // Tato část synchronizuje knihu na pozadí s aktuálním médiem
     const button = buttonData.find(b => b.mediaSrc === media.src);
     if (button) {
         const targetSpread = button.spread;
@@ -289,6 +287,7 @@ function setupMediaOverlays() {
 // =================================================================
 
 function main() {
+    // TATO FUNKCE BYLA ODKOMENTOVÁNA
     createNav('../../', 'portfolio');
 
     slider.min = 0;

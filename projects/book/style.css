@@ -4,8 +4,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400&display=swap');
 
 :root {
-    --page-ratio: 2480/3508;
-    --spread-ratio: calc(2 * var(--page-ratio));
+    /* Poměr stran dvoustrany (šířka / výška). Pro A4 je to ~1.414 */
+    --spread-aspect-ratio: 1.41421;
+    /* Hodnoty z main_style.css pro správné zarovnání */
+    --nav-width: 250px;
+    --nav-transition-speed: 0.3s;
 }
 
 * {
@@ -17,7 +20,10 @@ html, body {
 }
 
 .book-viewport {
-    flex-grow: 1;
+    margin-left: var(--nav-width);
+    width: calc(100% - var(--nav-width));
+    height: 100vh;
+    transition: margin-left var(--nav-transition-speed) ease-in-out;
     position: relative;
     display: flex;
     justify-content: center;
@@ -26,13 +32,21 @@ html, body {
     overflow: hidden;
 }
 
+body.desktop-nav-closed .book-viewport {
+    margin-left: 40px;
+    width: calc(100% - 40px);
+}
+
+
 /* ===================================== */
 /* === KNIHA & STRÁNKY === */
 /* ===================================== */
 .book {
+    /* Velikost pro zobrazení na šířku (landscape) */
+    width: 90%;
+    max-width: calc(90vh * var(--spread-aspect-ratio));
+    aspect-ratio: var(--spread-aspect-ratio);
     position: relative;
-    width: calc(min(90vw, 90vh * var(--spread-ratio)));
-    height: calc(min(90vh, 90vw / var(--spread-ratio)));
     transform-style: preserve-3d;
     perspective: 2500px;
     z-index: 100;
@@ -61,12 +75,6 @@ html, body {
         transform: rotateY(180deg);
     }
 
-.page-content {
-    position: relative;
-    width: 100%;
-    height: 100%;
-}
-
 .page-image {
     width: 100%;
     height: 100%;
@@ -91,7 +99,7 @@ html, body {
 .nav-arrow {
     position: absolute;
     top: 50%;
-    transform: translateY(-50%); /* Tato transformace zůstává, ale nemění se při hoveru */
+    transform: translateY(-50%);
     font-size: 2rem;
     font-weight: bold;
     color: #fff;
@@ -101,11 +109,10 @@ html, body {
     z-index: 2000;
     padding: 10px 20px;
     border-radius: 8px;
-    transition: background-color 0.2s; /* Plynulá změna pouze u pozadí */
+    transition: background-color 0.2s;
     line-height: 1;
 }
 
-    /* OPRAVA: Efekt najetí myší již nezpůsobuje žádný posun ani změnu velikosti */
     .nav-arrow:hover {
         background: rgba(0, 0, 0, 0.6);
     }
@@ -133,33 +140,6 @@ html, body {
 .lightbox-arrow.right::before {
     content: '→';
 }
-
-.lb-button {
-    position: absolute;
-    background: rgba(0,0,0,0.6);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    z-index: 27000;
-    transition: background-color 0.2s;
-}
-
-#lb-zoom {
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 20px;
-    padding: 8px 12px;
-}
-
-    #lb-zoom::before {
-        content: '🔍';
-    }
-
-    #lb-zoom.active {
-        background: rgba(0,150,255,0.8);
-    }
 
 /* --- POSUVNÍK --- */
 .slider-wrap {
@@ -217,7 +197,7 @@ html, body {
     justify-content: center;
 }
 
-    .lightbox-stage img, .lightbox-stage video {
+    .lightbox-stage img, .lightbox-stage video, .lightbox-stage iframe {
         display: block;
         width: auto;
         height: auto;
@@ -226,15 +206,6 @@ html, body {
         border: none;
         border-radius: 6px;
         object-fit: contain;
-    }
-
-    .lightbox-stage iframe {
-        max-width: 90vw;
-        max-height: 85vh;
-        width: 160vh;
-        height: 85vh;
-        border: none;
-        background: transparent;
     }
 
 .lb-close {
@@ -256,13 +227,16 @@ html, body {
         background: rgba(0,0,0,0.8);
     }
 
+/* OPRAVA: Velikost vrstvy pro tlačítka se nyní shoduje s velikostí knihy */
 #interactive-layer {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: calc(min(90vw, 90vh * var(--spread-ratio)));
-    height: calc(min(90vh, 90vw / var(--spread-ratio)));
+    /* Stejná logika velikosti jako .book */
+    width: 90%;
+    max-width: calc(90vh * var(--spread-aspect-ratio));
+    aspect-ratio: var(--spread-aspect-ratio);
     pointer-events: none;
     z-index: 1500;
 }
@@ -284,6 +258,16 @@ html, body {
 /* ===================================== */
 /* === RESPONZIVNÍ ÚPRAVY === */
 /* ===================================== */
+
+/* OPRAVA: Přidána pravidla pro zobrazení na výšku (portrait) */
+@media (orientation: portrait) {
+    .book, #interactive-layer {
+        height: 90%;
+        max-height: calc(90vw / var(--spread-aspect-ratio));
+        width: auto;
+    }
+}
+
 @media (max-width: 800px) {
     .lightbox-arrow {
         top: auto;

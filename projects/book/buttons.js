@@ -43,21 +43,15 @@ const buttonData = [
             height: '8%'
         }
     },
-    // ZÁZNAM PRO SPREAD 5 BYL ODSTRANÌN
-    // Zbývající data pro správnou funkci lightboxu
+    // Spread 6
     {
         spread: 6,
-        mediaSrc: 'media/medium5_spread6_1114653811.vimeo',
-        styles: {}
+        mediaSrc: 'media/medium4_spread6.vimeo',
+        styles: {
+            top: '25%',
+            left: '55%',
+            width: '35%',
+            height: '45%'
+        }
     },
-    {
-        spread: 7,
-        mediaSrc: 'media/medium6_spread7_1114707280.vimeo',
-        styles: {}
-    },
-    {
-        spread: 8,
-        mediaSrc: 'media/medium7_spread8.jpg',
-        styles: {}
-    }
 ];
