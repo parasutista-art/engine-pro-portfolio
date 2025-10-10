@@ -4,9 +4,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400&display=swap');
 
 :root {
-    /* Poměr stran dvoustrany (šířka / výška). Pro A4 je to ~1.414 */
+    /* Poměr stran DVOUSTRANY (šířka / výška). Pro formát A4 je to zhruba 1.414. */
     --spread-aspect-ratio: 1.41421;
-    /* Hodnoty z main_style.css pro správné zarovnání */
+    /* Hodnoty z main_style.css pro správné zarovnání s navigační lištou */
     --nav-width: 250px;
     --nav-transition-speed: 0.3s;
 }
@@ -19,19 +19,22 @@ html, body {
     height: 100%;
 }
 
+/* Kontejner pro knihu (počítačová verze) */
 .book-viewport {
+    /* Udělá místo pro postranní lištu */
     margin-left: var(--nav-width);
     width: calc(100% - var(--nav-width));
     height: 100vh;
     transition: margin-left var(--nav-transition-speed) ease-in-out;
+    /* Zarovná knihu na střed kontejneru */
     position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-width: 0;
     overflow: hidden;
 }
 
+/* Když se lišta na PC zavře, zmenší se i odsazení */
 body.desktop-nav-closed .book-viewport {
     margin-left: 40px;
     width: calc(100% - 40px);
@@ -39,20 +42,54 @@ body.desktop-nav-closed .book-viewport {
 
 
 /* ===================================== */
-/* === KNIHA & STRÁNKY === */
+/* === KNIHA & INTERAKTIVNÍ VRSTVA === */
 /* ===================================== */
-.book {
-    /* Velikost pro zobrazení na šířku (landscape) */
-    width: 90%;
-    max-width: calc(90vh * var(--spread-aspect-ratio));
-    aspect-ratio: var(--spread-aspect-ratio);
+
+/* Kniha a vrstva pro tlačítka mají stejnou velikost a pozici */
+.book,
+#interactive-layer {
     position: relative;
     transform-style: preserve-3d;
     perspective: 2500px;
     z-index: 100;
-    touch-action: pan-y;
+    /* === NOVÝ A JEDNODUŠŠÍ ZPŮSOB VÝPOČTU VELIKOSTI === */
+    /* Na šířku bude velikost určena VÝŠKOU obrazovky */
+    height: 90vh;
+    width: auto;
+    /* Na výšku bude velikost určena ŠÍŘKOU obrazovky */
+    @media (orientation: portrait) {
+        width: 90vw;
+        height: auto;
+    }
+    /* aspect-ratio vždy zajistí správné proporce */
+    aspect-ratio: var(--spread-aspect-ratio);
 }
 
+/* Vrstva pro tlačítka leží přesně nad knihou */
+#interactive-layer {
+    position: absolute;
+    pointer-events: none; /* Vrstva samotná je neklikatelná... */
+    z-index: 1500;
+}
+
+.interactive-button {
+    pointer-events: auto; /* ...ale tlačítka na ní ano */
+    position: absolute;
+    background: transparent;
+    cursor: pointer;
+    transition: background-color 0.2s, border 0.2s;
+    border-radius: 4px;
+}
+
+    .interactive-button:hover {
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.7);
+    }
+
+
+/* ===================================== */
+/* === STRÁNKY A OBSAH === */
+/* ===================================== */
 .paper {
     position: absolute;
     width: 50%;
@@ -75,7 +112,9 @@ body.desktop-nav-closed .book-viewport {
         transform: rotateY(180deg);
     }
 
-.page-image {
+.page-image, .media-overlay {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
     object-fit: contain;
@@ -84,24 +123,17 @@ body.desktop-nav-closed .book-viewport {
 }
 
 .media-overlay {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    pointer-events: none;
     z-index: 2;
 }
 
 /* ===================================== */
-/* === OVLÁDACÍ PRVKY === */
+/* === OVLÁDACÍ PRVKY (ŠIPKY, SLIDER) === */
 /* ===================================== */
 .nav-arrow {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
     font-size: 2rem;
-    font-weight: bold;
     color: #fff;
     background: rgba(0, 0, 0, 0.3);
     border: none;
@@ -133,15 +165,6 @@ body.desktop-nav-closed .book-viewport {
         right: 20px;
     }
 
-.lightbox-arrow.left::before {
-    content: '←';
-}
-
-.lightbox-arrow.right::before {
-    content: '→';
-}
-
-/* --- POSUVNÍK --- */
 .slider-wrap {
     position: absolute;
     bottom: 30px;
@@ -149,9 +172,6 @@ body.desktop-nav-closed .book-viewport {
     transform: translateX(-50%);
     width: 50%;
     max-width: 600px;
-    height: 40px;
-    display: flex;
-    align-items: center;
     z-index: 1100;
 }
 
@@ -165,7 +185,7 @@ body.desktop-nav-closed .book-viewport {
     }
 
 /* ===================================== */
-/* === LIGHTBOX & INTERAKTIVNÍ VRSTVA === */
+/* === LIGHTBOX (ZOBRAZENÍ MÉDIÍ) === */
 /* ===================================== */
 .lightbox {
     display: flex;
@@ -187,20 +207,12 @@ body.desktop-nav-closed .book-viewport {
     }
 
 .lightbox-stage {
-    position: relative;
-    width: auto;
-    height: auto;
-    max-width: 80vw;
-    max-height: 90vh;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
     .lightbox-stage img, .lightbox-stage video, .lightbox-stage iframe {
-        display: block;
-        width: auto;
-        height: auto;
         max-width: 95vw;
         max-height: 95vh;
         border: none;
@@ -210,96 +222,61 @@ body.desktop-nav-closed .book-viewport {
 
 .lb-close {
     position: absolute;
-    background: rgba(0,0,0,0.6);
+    top: 20px;
+    right: 30px;
+    font-size: 20px;
+    padding: 8px 12px;
     color: white;
+    background: rgba(0,0,0,0.6);
     border: none;
     border-radius: 8px;
     cursor: pointer;
     z-index: 27000;
     transition: background-color 0.2s;
-    top: 20px;
-    right: 30px;
-    font-size: 20px;
-    padding: 8px 12px;
 }
 
     .lb-close:hover {
         background: rgba(0,0,0,0.8);
     }
 
-/* OPRAVA: Velikost vrstvy pro tlačítka se nyní shoduje s velikostí knihy */
-#interactive-layer {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    /* Stejná logika velikosti jako .book */
-    width: 90%;
-    max-width: calc(90vh * var(--spread-aspect-ratio));
-    aspect-ratio: var(--spread-aspect-ratio);
-    pointer-events: none;
-    z-index: 1500;
+.lightbox-arrow.left::before {
+    content: '←';
 }
 
-.interactive-button {
-    position: absolute;
-    background: transparent;
-    cursor: pointer;
-    pointer-events: auto;
-    transition: background-color 0.2s, border 0.2s;
-    border-radius: 4px;
+.lightbox-arrow.right::before {
+    content: '→';
 }
-
-    .interactive-button:hover {
-        background: rgba(255, 255, 255, 0.15);
-        border: 1px solid rgba(255, 255, 255, 0.7);
-    }
 
 /* ===================================== */
-/* === RESPONZIVNÍ ÚPRAVY === */
+/* === RESPONZIVNÍ ÚPRAVY PRO MOBIL === */
 /* ===================================== */
-
-/* OPRAVA: Přidána pravidla pro zobrazení na výšku (portrait) */
-@media (orientation: portrait) {
-    .book, #interactive-layer {
-        height: 90%;
-        max-height: calc(90vw / var(--spread-aspect-ratio));
-        width: auto;
+@media (max-width: 768px) {
+    /* KLÍČOVÁ OPRAVA: Zruší odsazení pro postranní lištu, která na mobilu není */
+    .book-viewport {
+        margin-left: 0;
+        width: 100%;
     }
-}
 
-@media (max-width: 800px) {
-    .lightbox-arrow {
+    /* Posunutí šipek pro lepší ovládání na dotykovém displeji */
+    .nav-arrow {
         top: auto;
-        bottom: 20px;
+        bottom: 80px;
         transform: translateY(0);
     }
 
-        .lightbox-arrow.left {
+        .nav-arrow.left {
             left: 50%;
             transform: translateX(-120%);
         }
 
-        .lightbox-arrow.right {
+        .nav-arrow.right {
             right: 50%;
             transform: translateX(120%);
         }
 
-    @media (orientation: portrait) {
-        .nav-arrow {
-            top: auto;
-            bottom: 80px;
-            transform: translateY(0);
-        }
-
-            .nav-arrow.left {
-                left: 50%;
-                transform: translateX(-120%);
-            }
-
-            .nav-arrow.right {
-                right: 50%;
-                transform: translateX(120%);
-            }
+    /* Šipky v lightboxu */
+    .lightbox-arrow {
+        top: auto;
+        bottom: 20px;
     }
 }
