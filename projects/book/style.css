@@ -1,12 +1,9 @@
 ﻿/* ===================================== */
 /* === ZÁKLADNÍ NASTAVENÍ & LAYOUT === */
 /* ===================================== */
-@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400&display=swap');
 
 :root {
-    /* Poměr stran DVOUSTRANY (šířka / výška). Pro formát A4 je to zhruba 1.414. */
     --spread-aspect-ratio: 1.41421;
-    /* Hodnoty z main_style.css pro správné zarovnání s navigační lištou */
     --nav-width: 250px;
     --nav-transition-speed: 0.3s;
 }
@@ -19,14 +16,13 @@ html, body {
     height: 100%;
 }
 
-/* Kontejner pro knihu (počítačová verze) */
+
+
 .book-viewport {
-    /* Udělá místo pro postranní lištu */
     margin-left: var(--nav-width);
     width: calc(100% - var(--nav-width));
     height: 100vh;
     transition: margin-left var(--nav-transition-speed) ease-in-out;
-    /* Zarovná knihu na střed kontejneru */
     position: relative;
     display: flex;
     justify-content: center;
@@ -34,7 +30,6 @@ html, body {
     overflow: hidden;
 }
 
-/* Když se lišta na PC zavře, zmenší se i odsazení */
 body.desktop-nav-closed .book-viewport {
     margin-left: 40px;
     width: calc(100% - 40px);
@@ -45,35 +40,33 @@ body.desktop-nav-closed .book-viewport {
 /* === KNIHA & INTERAKTIVNÍ VRSTVA === */
 /* ===================================== */
 
-/* Kniha a vrstva pro tlačítka mají stejnou velikost a pozici */
 .book,
 #interactive-layer {
     position: relative;
     transform-style: preserve-3d;
     perspective: 2500px;
     z-index: 100;
-    /* === NOVÝ A JEDNODUŠŠÍ ZPŮSOB VÝPOČTU VELIKOSTI === */
-    /* Na šířku bude velikost určena VÝŠKOU obrazovky */
     height: 90vh;
     width: auto;
-    /* Na výšku bude velikost určena ŠÍŘKOU obrazovky */
-    @media (orientation: portrait) {
-        width: 90vw;
-        height: auto;
-    }
-    /* aspect-ratio vždy zajistí správné proporce */
     aspect-ratio: var(--spread-aspect-ratio);
 }
 
-/* Vrstva pro tlačítka leží přesně nad knihou */
+@media (orientation: portrait) {
+    .book,
+    #interactive-layer {
+        width: 90vw;
+        height: auto;
+    }
+}
+
 #interactive-layer {
     position: absolute;
-    pointer-events: none; /* Vrstva samotná je neklikatelná... */
+    pointer-events: none;
     z-index: 1500;
 }
 
 .interactive-button {
-    pointer-events: auto; /* ...ale tlačítka na ní ano */
+    pointer-events: auto;
     position: absolute;
     background: transparent;
     cursor: pointer;
@@ -210,14 +203,40 @@ body.desktop-nav-closed .book-viewport {
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 2rem;
+    width: 90vw;
+    height: 90vh;
 }
 
-    .lightbox-stage img, .lightbox-stage video, .lightbox-stage iframe {
-        max-width: 95vw;
-        max-height: 95vh;
-        border: none;
-        border-radius: 6px;
-        object-fit: contain;
+    .lightbox-stage.text-only {
+        justify-content: center;
+    }
+
+.lightbox-media {
+    flex-shrink: 1;
+    min-width: 0;
+    max-width: 60%;
+    max-height: 90vh;
+    object-fit: contain;
+}
+
+.lightbox-text {
+    background-color: transparent;
+    color: #fff;
+    line-height: 1.7;
+    font-size: 1.1rem;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+    flex-shrink: 0;
+    width: 500px; /* ZVĚTŠENO */
+    max-width: 90vw;
+    max-height: 80vh;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+    .lightbox-text::-webkit-scrollbar {
+        display: none;
     }
 
 .lb-close {
@@ -247,17 +266,38 @@ body.desktop-nav-closed .book-viewport {
     content: '→';
 }
 
+
 /* ===================================== */
 /* === RESPONZIVNÍ ÚPRAVY PRO MOBIL === */
 /* ===================================== */
+@media (max-width: 900px) {
+    .lightbox-stage {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+        justify-content: center;
+        overflow-y: auto;
+    }
+
+    .lightbox-media {
+        max-width: 100%;
+        max-height: 50vh;
+    }
+
+    .lightbox-text {
+        width: 100%;
+        text-align: left; /* ZMĚNĚNO */
+        max-height: 40vh;
+        font-size: 1rem;
+    }
+}
+
 @media (max-width: 768px) {
-    /* KLÍČOVÁ OPRAVA: Zruší odsazení pro postranní lištu, která na mobilu není */
     .book-viewport {
         margin-left: 0;
         width: 100%;
     }
 
-    /* Posunutí šipek pro lepší ovládání na dotykovém displeji */
     .nav-arrow {
         top: auto;
         bottom: 80px;
@@ -274,7 +314,6 @@ body.desktop-nav-closed .book-viewport {
             transform: translateX(120%);
         }
 
-    /* Šipky v lightboxu */
     .lightbox-arrow {
         top: auto;
         bottom: 20px;

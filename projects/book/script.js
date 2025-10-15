@@ -1,11 +1,12 @@
 // =================================================================
-//  KONFIGURACE A PROMĚNNÉ
+//  KONFIGURACE A GLOBÁLNÍ PROMĚNNÉ
 // =================================================================
+
 const CONFIG = {
     animationDuration: 800,
     snapDuration: 500,
     wheelSensitivity: 0.0025,
-    maxZoomScale: 5,
+    touchSwipeThreshold: 50,
 };
 
 const mediaOverlays = {
@@ -14,56 +15,43 @@ const mediaOverlays = {
 };
 
 const book = document.getElementById('book');
+const bookViewport = document.querySelector('.book-viewport');
 const slider = document.getElementById('pageSlider');
 const interactiveLayer = document.getElementById('interactive-layer');
 const lightbox = document.getElementById('lightbox');
 const lightboxStage = document.getElementById('lightbox-stage');
-const lightboxPlayButton = document.getElementById('lb-play');
+const lightboxPrevBtn = document.getElementById('lightboxPrev');
+const lightboxNextBtn = document.getElementById('lightboxNext');
 const papers = Array.from(document.querySelectorAll('.paper'));
 
 const state = {
     currentSpread: 0,
     maxSpread: papers.length,
     isAnimating: false,
-    animationFrame: null,
-    wheelAccumulator: 0,
-    isWheelAnimating: false,
-    touchStartX: null, touchStartY: null,
-    currentMediaIndex: 0,
-    isLightboxOpen: false
+    touchStartX: null,
+    currentGalleryIndex: 0,
 };
 
-let mediaItems = [
-    { src: 'media/medium1_spread3.jpg' },
-    { src: 'media/medium2_spread4.webm' },
-    { src: 'media/medium3_spread4.webm' },
-    { src: 'media/medium5_spread6_1114653811.vimeo' },
-    { src: 'media/medium6_spread7_1114707280.vimeo' },
-    { src: 'media/medium7_spread8.jpg' },
-];
+let galleryItems = [];
 
-let currentVideo = null;
-let vimeoPlayer = null;
 // =================================================================
 //  HLAVNÍ FUNKCE KNIHY
 // =================================================================
 
 function updateBook(spread) {
-    papers.forEach((paper, i) => {
-        const progress = Math.max(0, Math.min(1, spread - i));
+    papers.forEach((paper, index) => {
+        const progress = Math.max(0, Math.min(1, spread - index));
         const rotation = -progress * 180;
         paper.style.transform = `rotateY(${rotation}deg)`;
-
-        const zIndex = spread > i ? i : state.maxSpread - i;
-        paper.style.zIndex = zIndex;
+        paper.style.zIndex = spread > index ? index : state.maxSpread - index;
     });
     renderButtons(Math.floor(spread));
 }
 
-
 function renderButtons(spread) {
     interactiveLayer.innerHTML = '';
     const relevantButtons = buttonData.filter(btn => btn.spread === spread);
+
     relevantButtons.forEach(data => {
         const element = document.createElement(data.url ? 'a' : 'div');
         element.className = 'interactive-button';
@@ -71,94 +59,97 @@ function renderButtons(spread) {
         if (data.url) {
             element.href = data.url;
             element.target = '_blank';
-            element.setAttribute('aria-label', 'Otevřít odkaz v nové kartě');
         } else {
             element.setAttribute('role', 'button');
-            element.setAttribute('aria-label', `Zobrazit médium ${data.mediaSrc}`);
             element.addEventListener('click', () => {
-                const mediaIndex = mediaItems.findIndex(item => item.src === data.mediaSrc);
-                if (mediaIndex !== -1) {
-                    openLightbox(mediaIndex);
+                const galleryIndex = galleryItems.findIndex(item => item === data);
+                if (galleryIndex !== -1) {
+                    openLightbox(galleryIndex);
                 }
             });
         }
-
         Object.assign(element.style, data.styles);
         interactiveLayer.appendChild(element);
     });
 }
 
-
 // =================================================================
-//  LIGHTBOX (ZOBRAZENÍ MÉDIÍ)
+//  LIGHTBOX PRO SJEDNOCENOU GALERII
 // =================================================================
 
 function openLightbox(index) {
-    state.isLightboxOpen = true;
     lightbox.classList.add('show');
     document.body.style.overflow = 'hidden';
-    loadMedia(index);
+    loadGalleryItem(index);
 }
 
 function closeLightbox() {
-    state.isLightboxOpen = false;
     lightbox.classList.remove('show');
     document.body.style.overflow = '';
     lightboxStage.innerHTML = '';
 }
 
-function loadMedia(index) {
-    state.currentMediaIndex = index;
+function loadGalleryItem(index) {
+    state.currentGalleryIndex = index;
     lightboxStage.innerHTML = '';
-    const media = mediaItems[index];
 
-    const button = buttonData.find(b => b.mediaSrc === media.src);
-    if (button) {
-        const targetSpread = button.spread;
-        if (state.currentSpread !== targetSpread) {
-            animateTo(parseFloat(slider.value), targetSpread, CONFIG.animationDuration);
-        }
+    if (galleryItems.length === 0) return;
+
+    const showArrows = galleryItems.length > 1;
+    lightboxPrevBtn.style.display = showArrows ? 'block' : 'none';
+    lightboxNextBtn.style.display = showArrows ? 'block' : 'none';
+
+    const itemData = galleryItems[index];
+
+    const targetSpread = itemData.spread;
+    const currentBookSpread = Math.round(parseFloat(slider.value));
+    if (targetSpread !== undefined && targetSpread !== currentBookSpread) {
+        animateTo(parseFloat(slider.value), targetSpread, CONFIG.animationDuration);
     }
 
-    const srcParts = media.src.split('.');
-    const type = srcParts[srcParts.length - 1];
-    const isVimeo = type === 'vimeo';
+    if (itemData.mediaSrc) {
+        const srcParts = itemData.mediaSrc.split('.');
+        const type = srcParts[srcParts.length - 1];
+        const isVimeo = type === 'vimeo';
 
-    if (isVimeo) {
-        const vimeoId = media.src.split('_').pop().split('.')[0];
-        lightboxStage.innerHTML = `<iframe src="https://player.vimeo.com/video/${vimeoId}?autoplay=1&loop=1&autopause=0&muted=1" frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
-        lightboxPlayButton.classList.remove('show');
-    } else {
-        const isVideo = ['mp4', 'webm', 'gif'].includes(type);
-        const content = document.createElement(isVideo ? 'video' : 'img');
-        content.src = media.src;
-
-        if (content.tagName === 'VIDEO') {
-            Object.assign(content, { autoplay: true, loop: true, muted: true, playsInline: true });
-            lightboxPlayButton.classList.remove('show');
+        let content;
+        if (isVimeo) {
+            const vimeoId = itemData.mediaSrc.split('_').pop().split('.')[0];
+            content = document.createElement('iframe');
+            content.src = `https://player.vimeo.com/video/${vimeoId}?autoplay=1&loop=1&autopause=0&muted=1`;
+            Object.assign(content, { frameborder: '0', allow: 'autoplay; fullscreen; picture-in-picture', allowfullscreen: true });
+        } else {
+            const isVideo = ['mp4', 'webm', 'gif'].includes(type);
+            content = document.createElement(isVideo ? 'video' : 'img');
+            content.src = itemData.mediaSrc;
+            if (isVideo) {
+                Object.assign(content, { autoplay: true, loop: true, muted: true, playsInline: true });
+            }
         }
+        content.className = 'lightbox-media';
         lightboxStage.appendChild(content);
     }
-}
 
-function setupLightboxControls() {
-    document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
-    document.getElementById('lightboxPrev').addEventListener('click', () => changeMedia(-1));
-    document.getElementById('lightboxNext').addEventListener('click', () => changeMedia(1));
-
-    lightboxPlayButton.addEventListener('click', () => {
-        const video = lightboxStage.querySelector('video');
-        if (video) {
-            video.paused ? (video.play(), lightboxPlayButton.textContent = '❚❚') : (video.pause(), lightboxPlayButton.textContent = '▶');
+    if (itemData.text) {
+        const textElement = document.createElement('div');
+        textElement.className = 'lightbox-text';
+        textElement.innerHTML = itemData.text.replace(/\n/g, '<br>');
+        lightboxStage.appendChild(textElement);
+        if (!itemData.mediaSrc) {
+            lightboxStage.classList.add('text-only');
+        } else {
+            lightboxStage.classList.remove('text-only');
         }
-    });
+    } else {
+        lightboxStage.classList.remove('text-only');
+    }
 }
 
-function changeMedia(delta) {
-    const newIndex = (state.currentMediaIndex + delta + mediaItems.length) % mediaItems.length;
-    loadMedia(newIndex);
+function changeGalleryItem(delta) {
+    if (galleryItems.length <= 1) return;
+    const newIndex = (state.currentGalleryIndex + delta + galleryItems.length) % galleryItems.length;
+    loadGalleryItem(newIndex);
 }
-
 
 // =================================================================
 //  ZPRACOVÁNÍ VSTUPU A UDÁLOSTÍ
@@ -166,11 +157,9 @@ function changeMedia(delta) {
 
 function setupEventListeners() {
     slider.addEventListener('input', () => updateBook(parseFloat(slider.value)));
-
     slider.addEventListener('change', () => {
         const currentValue = parseFloat(slider.value);
         const targetSpread = Math.round(currentValue);
-
         if (Math.abs(currentValue - targetSpread) > 0.001) {
             animateTo(currentValue, targetSpread, CONFIG.snapDuration);
         }
@@ -179,19 +168,20 @@ function setupEventListeners() {
     document.getElementById('arrowLeft').addEventListener('click', () => changeSpread(-1));
     document.getElementById('arrowRight').addEventListener('click', () => changeSpread(1));
 
-    document.addEventListener('keydown', (e) => {
-        if (state.isLightboxOpen) {
-            if (e.key === 'ArrowLeft') changeMedia(-1);
-            if (e.key === 'ArrowRight') changeMedia(1);
-            if (e.key === 'Escape') closeLightbox();
+    document.addEventListener('keydown', (event) => {
+        if (lightbox.classList.contains('show')) {
+            if (event.key === 'ArrowLeft') changeGalleryItem(-1);
+            if (event.key === 'ArrowRight') changeGalleryItem(1);
+            if (event.key === 'Escape') closeLightbox();
         } else {
-            if (e.key === 'ArrowLeft') changeSpread(-1);
-            if (e.key === 'ArrowRight') changeSpread(1);
+            if (event.key === 'ArrowLeft') changeSpread(-1);
+            if (event.key === 'ArrowRight') changeSpread(1);
         }
     });
 
-    setupWheel();
     setupLightboxControls();
+    setupWheel();
+    setupTouchGestures();
 }
 
 function changeSpread(delta) {
@@ -206,7 +196,6 @@ function changeSpread(delta) {
 function animateTo(start, end, duration) {
     if (state.isAnimating) return;
     state.isAnimating = true;
-
     const startTime = performance.now();
     const frame = (currentTime) => {
         const elapsed = currentTime - startTime;
@@ -215,14 +204,12 @@ function animateTo(start, end, duration) {
         const currentVal = start + (end - start) * ease;
         slider.value = currentVal;
         updateBook(currentVal);
-        if (progress < 1) {
-            requestAnimationFrame(frame);
-        } else {
+        if (progress < 1) requestAnimationFrame(frame);
+        else {
             state.isAnimating = false;
             slider.value = end;
             updateBook(end);
             renderButtons(end);
-            state.currentSpread = end;
             history.pushState(null, '', `#spread=${end}`);
         }
     };
@@ -230,25 +217,27 @@ function animateTo(start, end, duration) {
 }
 
 function setupWheel() {
-    book.parentElement.addEventListener('wheel', e => {
-        e.preventDefault();
-        state.wheelAccumulator += e.deltaY * CONFIG.wheelSensitivity;
-        if (!state.isWheelAnimating) {
-            state.isWheelAnimating = true;
+    let wheelAccumulator = 0;
+    let isWheelAnimating = false;
+    bookViewport.addEventListener('wheel', event => {
+        event.preventDefault();
+        wheelAccumulator += event.deltaY * CONFIG.wheelSensitivity;
+        if (!isWheelAnimating) {
+            isWheelAnimating = true;
             animateWheel();
         }
     }, { passive: false });
 
     function animateWheel() {
-        if (Math.abs(state.wheelAccumulator) < 0.001) {
-            state.isWheelAnimating = false;
+        if (Math.abs(wheelAccumulator) < 0.001) {
+            isWheelAnimating = false;
             const target = Math.round(parseFloat(slider.value));
             animateTo(parseFloat(slider.value), target, CONFIG.snapDuration);
             return;
         }
         const current = parseFloat(slider.value);
-        const step = state.wheelAccumulator * 0.15;
-        state.wheelAccumulator -= step;
+        const step = wheelAccumulator * 0.15;
+        wheelAccumulator -= step;
         const nextVal = Math.max(0, Math.min(state.maxSpread, current + step));
         slider.value = nextVal;
         updateBook(nextVal);
@@ -256,45 +245,56 @@ function setupWheel() {
     }
 }
 
-// =================================================================
-//  POMOCNÉ FUNKCE
-// =================================================================
-
-function wrapPageImages() {
-    document.querySelectorAll('.page-image').forEach(img => {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'page-image-wrapper';
-        img.parentNode.insertBefore(wrapper, img);
-        wrapper.appendChild(img);
+function setupTouchGestures() {
+    bookViewport.addEventListener('touchstart', (event) => {
+        state.touchStartX = event.changedTouches[0].screenX;
+    }, { passive: true });
+    bookViewport.addEventListener('touchend', (event) => {
+        if (state.touchStartX === null) return;
+        const touchEndX = event.changedTouches[0].screenX;
+        const deltaX = touchEndX - state.touchStartX;
+        if (Math.abs(deltaX) > CONFIG.touchSwipeThreshold) {
+            changeSpread(deltaX < 0 ? 1 : -1);
+        }
+        state.touchStartX = null;
     });
 }
 
-function setupMediaOverlays() {
-    for (const pageNum in mediaOverlays) {
-        const overlayData = mediaOverlays[pageNum];
-        const pageElement = document.querySelector(`#p${Math.floor((pageNum - 1) / 2)} ${pageNum % 2 !== 0 ? '.back' : '.front'} .page-image-wrapper`);
-        if (pageElement) {
-            const video = document.createElement('video');
-            video.className = 'media-overlay';
-            Object.assign(video, { src: overlayData.src, autoplay: true, muted: true, loop: true, playsInline: true });
-            pageElement.appendChild(video);
+function setupLightboxControls() {
+    document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
+    lightboxPrevBtn.addEventListener('click', () => changeGalleryItem(-1));
+    lightboxNextBtn.addEventListener('click', () => changeGalleryItem(1));
+
+    // === ZDE JE PŘIDANÁ FUNKCE ===
+    lightbox.addEventListener('click', (event) => {
+        // Zkontroluje, jestli se kliklo přímo na pozadí (lightbox)
+        // a ne na nějaký jeho prvek uvnitř (obrázek, text, šipky...).
+        if (event.target === lightbox) {
+            closeLightbox();
         }
-    }
+    });
 }
+
+function wrapPageImages() { document.querySelectorAll(".page-image").forEach(e => { const t = document.createElement("div"); t.className = "page-image-wrapper", e.parentNode.insertBefore(t, e), t.appendChild(e) }) }
+function setupMediaOverlays() { for (const e in mediaOverlays) { const t = mediaOverlays[e], o = document.querySelector(`#p${Math.floor((e - 1) / 2)} ${e % 2 != 0 ? ".back" : ".front"} .page-image-wrapper`); if (o) { const n = document.createElement("video"); n.className = "media-overlay", Object.assign(n, { src: t.src, autoplay: !0, muted: !0, loop: !0, playsInline: !0 }), o.appendChild(n) } } }
 
 // =================================================================
 //  SPUŠTĚNÍ APLIKACE
 // =================================================================
 
 function main() {
-    // TATO FUNKCE BYLA ODKOMENTOVÁNA
     createNav('../../', 'portfolio');
+
+    galleryItems = buttonData
+        .filter(item => !item.url)
+        .sort((a, b) => a.spread - b.spread);
 
     slider.min = 0;
     slider.max = state.maxSpread;
     wrapPageImages();
     setupMediaOverlays();
     setupEventListeners();
+
     const hash = location.hash;
     let initialSpread = 0;
     if (hash.startsWith('#spread=')) {
@@ -303,10 +303,8 @@ function main() {
             initialSpread = spreadFromUrl;
         }
     }
-    state.currentSpread = initialSpread;
     slider.value = initialSpread;
     updateBook(initialSpread);
-    renderButtons(initialSpread);
 }
 
 document.addEventListener('DOMContentLoaded', main);

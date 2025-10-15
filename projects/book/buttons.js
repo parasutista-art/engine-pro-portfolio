@@ -1,18 +1,19 @@
-// This file contains all data for interactive buttons.
+// DŮLEŽITÉ: Tento soubor musí být uložen v kódování UTF-8, aby se správně zobrazovala diakritika.
 
 const buttonData = [
-    // Spread 3
+    // Dvoustrana 2
     {
-        spread: 3,
-        mediaSrc: 'media/medium1_spread3.jpg',
+        spread: 2,
+       
+        text: `Triptych animovaných plakátů, který vizuálně interpretuje tři stavy studentského života: školní tlak, nemoc a volný čas. Každý stav je reprezentován symbolickým objektem a citátem doprovázenými simulací tiskové bitmapy a abstraktní deformací obrazu. Projekt byl záměrným experimentem s cílem naučit se základy motion designu, přičemž textura a bitmapa byly vytvořeny ve Photoshopu a animace a deformace v After Effects.`,
         styles: {
-            top: '40%',
-            left: '20%',
-            width: '25%',
-            height: '50%'
+            top: '5%',
+            left: '1%',
+            width: '48%',
+            height: '26%'
         }
     },
-    // Spread 4
+    // Dvoustrana 4
     {
         spread: 4,
         mediaSrc: 'media/medium2_spread4.webm',
@@ -27,26 +28,27 @@ const buttonData = [
         spread: 4,
         mediaSrc: 'media/medium3_spread4.webm',
         styles: {
-            top: '66% ',
+            top: '66%',
             left: '11%',
             width: '28%',
             height: '24%'
         }
     },
+    // Dvoustrana 5: Pouze text
     {
-        spread: 4,
-        url: 'https://drive.google.com/drive/folders/1FrY21x_N2kG79eNC36Gj2iPrpOIcFiuB?usp=sharing',
+        spread: 5,
+        text: 'Tohle je jen krátká poznámka bez obrázku. Někdy stačí jen pár slov na zachycení myšlenky. Příliš žluťoučký kůň úpěl ďábelské ódy. Je důležité, aby byl tento soubor uložen ve správném kódování, jinak se česká diakritika nezobrazí správně.',
         styles: {
-            top: '20% ',
-            left: '33%',
-            width: '12%',
-            height: '8%'
+            top: '15%',
+            left: '55%',
+            width: '30%',
+            height: '25%'
         }
     },
-    // Spread 6
+    // Dvoustrana 6
     {
         spread: 6,
-        mediaSrc: 'media/medium4_spread6.vimeo',
+        mediaSrc: 'media/medium5_spread6_1114653811.vimeo',
         styles: {
             top: '25%',
             left: '55%',
