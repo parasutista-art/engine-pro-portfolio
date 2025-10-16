@@ -4,7 +4,7 @@ const buttonData = [
     // Dvoustrana 2
     {
         spread: 2,
-       
+
         text: `Triptych animovaných plakátů, který vizuálně interpretuje tři stavy studentského života: školní tlak, nemoc a volný čas. Každý stav je reprezentován symbolickým objektem a citátem doprovázenými simulací tiskové bitmapy a abstraktní deformací obrazu. Projekt byl záměrným experimentem s cílem naučit se základy motion designu, přičemž textura a bitmapa byly vytvořeny ve Photoshopu a animace a deformace v After Effects.`,
         styles: {
             top: '5%',
@@ -13,6 +13,54 @@ const buttonData = [
             height: '26%'
         }
     },
+
+    // === NOVÁ SEKCE PRO SPREAD 3 ===
+    {
+        spread: 2,
+        mediaSrc: 'media/medium1_spread3.jpg',
+        styles: {
+            // TOTO SI UPRAVTE:
+            top: '10%',
+            left: '55%', // (přes 50% = pravá stránka)
+            width: '40%',
+            height: '25%'
+        }
+    },
+    {
+        spread: 2,
+        mediaSrc: 'media/medium2_spread3.mp4',
+        styles: {
+            // TOTO SI UPRAVTE:
+            top: '10%',
+            left: '55%', // (přes 50% = pravá stránka)
+            width: '40%',
+            height: '25%'
+        }
+    },
+    {
+        spread: 2,
+        mediaSrc: 'media/medium3_spread3.jpg',
+        styles: {
+            // TOTO SI UPRAVTE:
+            top: '40%',
+            left: '55%',
+            width: '40%',
+            height: '25%'
+        }
+    },
+    {
+        spread: 2,
+        mediaSrc: 'media/medium4_spread3.jpg',
+        styles: {
+            // TOTO SI UPRAVTE:
+            top: '70%',
+            left: '55%',
+            width: '40%',
+            height: '25%'
+        }
+    },
+    // =================================
+
     // Dvoustrana 4
     {
         spread: 4,

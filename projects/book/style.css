@@ -178,7 +178,7 @@ body.desktop-nav-closed .book-viewport {
     }
 
 /* ===================================== */
-/* === LIGHTBOX (ZOBRAZENÍ MÉDIÍ) === */
+/* === LIGHTBOX (ČISTÝ PÁS) === */
 /* ===================================== */
 .lightbox {
     display: flex;
@@ -200,44 +200,89 @@ body.desktop-nav-closed .book-viewport {
     }
 
 .lightbox-stage {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 2rem;
-    width: 90vw;
-    height: 90vh;
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: transparent;
 }
 
-    .lightbox-stage.text-only {
-        justify-content: center;
+/* Wrapper pro každou položku (média nebo text) */
+.lightbox-item {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    /* Výchozí "skrytý" stav */
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 0;
+    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease-out;
+    /* Omezení velikosti */
+    max-width: 70vw;
+    max-height: 80vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+    /* Aktivní (středová) položka */
+    .lightbox-item.active {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+        z-index: 10;
     }
 
-.lightbox-media {
-    flex-shrink: 1;
-    min-width: 0;
-    max-width: 60%;
-    max-height: 90vh;
+    /* --- ZMĚNA: Předchozí položka (zcela skrytá NAHOŘE) --- */
+    .lightbox-item.prev {
+        transform: translate(-50%, -150%) scale(1);
+        opacity: 0;
+        z-index: 5;
+    }
+
+    /* --- ZMĚNA: Následující položka (zcela skrytá DOLE) --- */
+    .lightbox-item.next {
+        transform: translate(-50%, 150%) scale(1);
+        opacity: 0;
+        z-index: 5;
+    }
+
+
+/* Samotný obsah uvnitř wrapperu */
+.lightbox-media,
+.lightbox-text {
+    width: auto;
+    height: auto;
+    max-width: 70vw;
+    max-height: 80vh;
     object-fit: contain;
+    display: block;
 }
 
+/* Text s omezenou šířkou */
 .lightbox-text {
     background-color: transparent;
     color: #fff;
     line-height: 1.7;
     font-size: 1.1rem;
     text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
-    flex-shrink: 0;
-    width: 500px; /* ZVĚTŠENO */
-    max-width: 90vw;
+    width: auto;
+    max-width: 70ch; /* Omezení pro čitelnost */
+
     max-height: 80vh;
     overflow-y: auto;
-    scrollbar-width: none;
+    padding: 1.5em;
+    scrollbar-width: thin;
     -ms-overflow-style: none;
 }
 
     .lightbox-text::-webkit-scrollbar {
-        display: none;
+        width: 6px;
     }
+
+    .lightbox-text::-webkit-scrollbar-thumb {
+        background-color: rgba(255,255,255,0.3);
+        border-radius: 3px;
+    }
+
 
 .lb-close {
     position: absolute;
@@ -271,23 +316,16 @@ body.desktop-nav-closed .book-viewport {
 /* === RESPONZIVNÍ ÚPRAVY PRO MOBIL === */
 /* ===================================== */
 @media (max-width: 900px) {
-    .lightbox-stage {
-        flex-direction: column;
-        gap: 1rem;
-        padding: 1rem;
-        justify-content: center;
-        overflow-y: auto;
-    }
-
-    .lightbox-media {
-        max-width: 100%;
-        max-height: 50vh;
+    .lightbox-item,
+    .lightbox-media,
+    .lightbox-text {
+        max-width: 90vw;
+        max-height: 80vh;
     }
 
     .lightbox-text {
-        width: 100%;
-        text-align: left; /* ZMĚNĚNO */
-        max-height: 40vh;
+        width: auto;
+        max-width: 90vw;
         font-size: 1rem;
     }
 }

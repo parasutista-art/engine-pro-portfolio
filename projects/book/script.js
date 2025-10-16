@@ -7,6 +7,8 @@ const CONFIG = {
     snapDuration: 500,
     wheelSensitivity: 0.0025,
     touchSwipeThreshold: 50,
+    lightboxAnimDuration: 400, // Doba animace přechodu v lightboxu (ms)
+    lightboxWheelThrottle: 500 // Omezení pro kolečko myši (ms)
 };
 
 const mediaOverlays = {
@@ -14,6 +16,7 @@ const mediaOverlays = {
     7: { type: 'webm', src: 'assets/page-7-overlay.webm' }
 };
 
+// ... (získání DOM elementů book, bookViewport, atd.) ...
 const book = document.getElementById('book');
 const bookViewport = document.querySelector('.book-viewport');
 const slider = document.getElementById('pageSlider');
@@ -24,15 +27,21 @@ const lightboxPrevBtn = document.getElementById('lightboxPrev');
 const lightboxNextBtn = document.getElementById('lightboxNext');
 const papers = Array.from(document.querySelectorAll('.paper'));
 
+
 const state = {
     currentSpread: 0,
     maxSpread: papers.length,
     isAnimating: false,
     touchStartX: null,
-    currentGalleryIndex: 0,
 };
 
-let galleryItems = [];
+let galleryItems = []; // Všechny položky galerie (z buttons.js)
+let spreadsWithItems = []; // Pole čísel dvoustran, které mají položky
+
+// --- Stav lightboxu ---
+let spreadItems = []; // DOM elementy položek na *aktuální* dvoustraně
+let currentSpreadItemIndex = 0; // Index aktivní položky v poli spreadItems
+let isLightboxAnimating = false; // Zabraňuje spamování kolečkem myši
 
 // =================================================================
 //  HLAVNÍ FUNKCE KNIHY
@@ -61,12 +70,12 @@ function renderButtons(spread) {
             element.target = '_blank';
         } else {
             element.setAttribute('role', 'button');
-            element.addEventListener('click', () => {
-                const galleryIndex = galleryItems.findIndex(item => item === data);
-                if (galleryIndex !== -1) {
+            const galleryIndex = galleryItems.findIndex(item => item === data);
+            if (galleryIndex !== -1) {
+                element.addEventListener('click', () => {
                     openLightbox(galleryIndex);
-                }
-            });
+                });
+            }
         }
         Object.assign(element.style, data.styles);
         interactiveLayer.appendChild(element);
@@ -74,82 +83,144 @@ function renderButtons(spread) {
 }
 
 // =================================================================
-//  LIGHTBOX PRO SJEDNOCENOU GALERII
+//  LIGHTBOX (NOVÝ KOLOTOČ)
 // =================================================================
 
 function openLightbox(index) {
+    const clickedItem = galleryItems[index];
+    if (!clickedItem) return;
+
+    const targetSpread = clickedItem.spread;
+
     lightbox.classList.add('show');
     document.body.style.overflow = 'hidden';
-    loadGalleryItem(index);
+
+    lightboxPrevBtn.style.display = 'block';
+    lightboxNextBtn.style.display = 'block';
+
+    const currentBookSpread = Math.round(parseFloat(slider.value));
+
+    if (targetSpread !== currentBookSpread) {
+        animateTo(
+            parseFloat(slider.value),
+            targetSpread,
+            CONFIG.animationDuration,
+            () => loadSpreadItems(targetSpread, clickedItem) // Callback po dokončení
+        );
+    } else {
+        loadSpreadItems(targetSpread, clickedItem);
+    }
 }
 
 function closeLightbox() {
     lightbox.classList.remove('show');
     document.body.style.overflow = '';
-    lightboxStage.innerHTML = '';
+    lightboxStage.innerHTML = ''; // Vyčistíme obsah
+    spreadItems = []; // Resetujeme stav
+    currentSpreadItemIndex = 0;
 }
 
-function loadGalleryItem(index) {
-    state.currentGalleryIndex = index;
+/**
+ * Načte všechny položky pro danou dvoustranu do lightboxu
+ * a připraví je pro zobrazení.
+ */
+function loadSpreadItems(spread, itemToSelect = null) {
     lightboxStage.innerHTML = '';
+    spreadItems = [];
+    currentSpreadItemIndex = 0;
 
-    if (galleryItems.length === 0) return;
+    const itemsForSpread = galleryItems.filter(item => item.spread === spread);
 
-    const showArrows = galleryItems.length > 1;
-    lightboxPrevBtn.style.display = showArrows ? 'block' : 'none';
-    lightboxNextBtn.style.display = showArrows ? 'block' : 'none';
+    itemsForSpread.forEach((itemData, index) => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'lightbox-item';
 
-    const itemData = galleryItems[index];
+        let element = null;
 
-    const targetSpread = itemData.spread;
-    const currentBookSpread = Math.round(parseFloat(slider.value));
-    if (targetSpread !== undefined && targetSpread !== currentBookSpread) {
-        animateTo(parseFloat(slider.value), targetSpread, CONFIG.animationDuration);
-    }
+        if (itemData.text) {
+            element = document.createElement('div');
+            element.className = 'lightbox-text';
+            element.innerHTML = itemData.text.replace(/\n/g, '<br>');
+        } else if (itemData.mediaSrc) {
+            const srcParts = itemData.mediaSrc.split('.');
+            const type = srcParts[srcParts.length - 1];
+            const isVimeo = type === 'vimeo';
 
-    if (itemData.mediaSrc) {
-        const srcParts = itemData.mediaSrc.split('.');
-        const type = srcParts[srcParts.length - 1];
-        const isVimeo = type === 'vimeo';
+            if (isVimeo) {
+                const vimeoId = itemData.mediaSrc.split('_').pop().split('.')[0];
+                element = document.createElement('iframe');
+                element.src = `https://player.vimeo.com/video/${vimeoId}?autoplay=1&loop=1&autopause=0&muted=1`;
+                Object.assign(element, { frameborder: '0', allow: 'autoplay; fullscreen; picture-in-picture', allowfullscreen: true });
+            } else {
+                const isVideo = ['mp4', 'webm', 'gif'].includes(type);
+                element = document.createElement(isVideo ? 'video' : 'img');
+                element.src = itemData.mediaSrc;
+                if (isVideo) {
+                    Object.assign(element, { autoplay: false, loop: true, muted: true, playsInline: true });
+                }
+            }
+            element.className = 'lightbox-media';
+        }
 
-        let content;
-        if (isVimeo) {
-            const vimeoId = itemData.mediaSrc.split('_').pop().split('.')[0];
-            content = document.createElement('iframe');
-            content.src = `https://player.vimeo.com/video/${vimeoId}?autoplay=1&loop=1&autopause=0&muted=1`;
-            Object.assign(content, { frameborder: '0', allow: 'autoplay; fullscreen; picture-in-picture', allowfullscreen: true });
-        } else {
-            const isVideo = ['mp4', 'webm', 'gif'].includes(type);
-            content = document.createElement(isVideo ? 'video' : 'img');
-            content.src = itemData.mediaSrc;
-            if (isVideo) {
-                Object.assign(content, { autoplay: true, loop: true, muted: true, playsInline: true });
+        if (element) {
+            wrapper.appendChild(element);
+            lightboxStage.appendChild(wrapper);
+            spreadItems.push(wrapper);
+
+            if (itemData === itemToSelect) {
+                currentSpreadItemIndex = index;
             }
         }
-        content.className = 'lightbox-media';
-        lightboxStage.appendChild(content);
-    }
+    });
 
-    if (itemData.text) {
-        const textElement = document.createElement('div');
-        textElement.className = 'lightbox-text';
-        textElement.innerHTML = itemData.text.replace(/\n/g, '<br>');
-        lightboxStage.appendChild(textElement);
-        if (!itemData.mediaSrc) {
-            lightboxStage.classList.add('text-only');
+    // Zobrazíme položky ve správných pozicích
+    updateLightboxView();
+}
+
+/**
+ * Aktualizuje zobrazení v lightboxu (aplikuje třídy active, prev, next)
+ */
+function updateLightboxView() {
+    if (spreadItems.length === 0) return;
+
+    const prevIndex = (currentSpreadItemIndex - 1 + spreadItems.length) % spreadItems.length;
+    const nextIndex = (currentSpreadItemIndex + 1) % spreadItems.length;
+
+    spreadItems.forEach((item, index) => {
+        item.classList.remove('active', 'prev', 'next');
+        const video = item.querySelector('video');
+
+        if (index === currentSpreadItemIndex) {
+            item.classList.add('active');
+            if (video) video.play().catch(e => console.log("Autoplay byl zablokován prohlížečem."));
+        } else if (index === prevIndex && spreadItems.length > 1) {
+            item.classList.add('prev');
+            if (video) video.pause();
+        } else if (index === nextIndex && spreadItems.length > 1) {
+            item.classList.add('next');
+            if (video) video.pause();
         } else {
-            lightboxStage.classList.remove('text-only');
+            if (video) video.pause();
         }
-    } else {
-        lightboxStage.classList.remove('text-only');
-    }
+    });
 }
 
-function changeGalleryItem(delta) {
-    if (galleryItems.length <= 1) return;
-    const newIndex = (state.currentGalleryIndex + delta + galleryItems.length) % galleryItems.length;
-    loadGalleryItem(newIndex);
+/**
+ * Přepne na další/předchozí POLOŽKU na *stejné* dvoustraně
+ */
+function changeSpreadItem(direction) {
+    if (isLightboxAnimating || spreadItems.length <= 1) return;
+
+    isLightboxAnimating = true;
+    currentSpreadItemIndex = (currentSpreadItemIndex + direction + spreadItems.length) % spreadItems.length;
+
+    updateLightboxView();
+
+    setTimeout(() => {
+        isLightboxAnimating = false;
+    }, CONFIG.lightboxAnimDuration); // Musí odpovídat CSS přechodu
 }
+
 
 // =================================================================
 //  ZPRACOVÁNÍ VSTUPU A UDÁLOSTÍ
@@ -170,10 +241,14 @@ function setupEventListeners() {
 
     document.addEventListener('keydown', (event) => {
         if (lightbox.classList.contains('show')) {
-            if (event.key === 'ArrowLeft') changeGalleryItem(-1);
-            if (event.key === 'ArrowRight') changeGalleryItem(1);
+            // --- Nová logika pro lightbox ---
+            if (event.key === 'ArrowLeft') findNextSpreadWithItems(-1);
+            if (event.key === 'ArrowRight') findNextSpreadWithItems(1);
+            if (event.key === 'ArrowUp') changeSpreadItem(-1);
+            if (event.key === 'ArrowDown') changeSpreadItem(1);
             if (event.key === 'Escape') closeLightbox();
         } else {
+            // Původní chování, když je lightbox zavřený
             if (event.key === 'ArrowLeft') changeSpread(-1);
             if (event.key === 'ArrowRight') changeSpread(1);
         }
@@ -184,6 +259,49 @@ function setupEventListeners() {
     setupTouchGestures();
 }
 
+/**
+ * Přepne na další/předchozí DVOUSTRANU, která obsahuje položky.
+ */
+function findNextSpreadWithItems(direction) {
+    if (state.isAnimating || spreadsWithItems.length === 0) return;
+
+    const currentBookSpread = Math.round(parseFloat(slider.value));
+    let currentSpreadIndex = spreadsWithItems.indexOf(currentBookSpread);
+    let nextSpreadIndex;
+
+    if (currentSpreadIndex === -1) {
+        if (direction > 0) {
+            nextSpreadIndex = spreadsWithItems.findIndex(s => s > currentBookSpread);
+            if (nextSpreadIndex === -1) nextSpreadIndex = 0; // Přejít na začátek
+        } else {
+            const reversedIndex = [...spreadsWithItems].reverse().findIndex(s => s < currentBookSpread);
+            if (reversedIndex === -1) nextSpreadIndex = spreadsWithItems.length - 1; // Přejít na konec
+            else nextSpreadIndex = spreadsWithItems.length - 1 - reversedIndex;
+        }
+    } else {
+        nextSpreadIndex = (currentSpreadIndex + direction + spreadsWithItems.length) % spreadsWithItems.length;
+    }
+
+    const targetSpread = spreadsWithItems[nextSpreadIndex];
+
+    if (targetSpread !== currentBookSpread) {
+        // --- ZMĚNA: Okamžité načtení ---
+        // 1. Okamžitě načti obsah pro novou stránku
+        loadSpreadItems(targetSpread, null);
+
+        // 2. Spusť animaci, ale předej prázdný callback,
+        //    aby se přebila výchozí logika v animateTo a nenačetlo se to 2x
+        animateTo(
+            parseFloat(slider.value),
+            targetSpread,
+            CONFIG.animationDuration,
+            () => { } // Prázdný "do nothing" callback
+        );
+        // --- Konec změny ---
+    }
+}
+
+
 function changeSpread(delta) {
     if (state.isAnimating) return;
     const current = Math.round(parseFloat(slider.value));
@@ -193,7 +311,7 @@ function changeSpread(delta) {
     }
 }
 
-function animateTo(start, end, duration) {
+function animateTo(start, end, duration, onCompleteCallback = null) {
     if (state.isAnimating) return;
     state.isAnimating = true;
     const startTime = performance.now();
@@ -211,6 +329,13 @@ function animateTo(start, end, duration) {
             updateBook(end);
             renderButtons(end);
             history.pushState(null, '', `#spread=${end}`);
+
+            if (onCompleteCallback) {
+                onCompleteCallback();
+            } else if (lightbox.classList.contains('show')) {
+                // TATO ČÁST SE NYNÍ PŘESKOČÍ, POKUD VOLÁME Z findNextSpreadWithItems
+                loadSpreadItems(end, null);
+            }
         }
     };
     requestAnimationFrame(frame);
@@ -260,19 +385,43 @@ function setupTouchGestures() {
     });
 }
 
+/**
+ * Přidá ovládání pro kolečko myši uvnitř lightboxu
+ */
+function setupLightboxWheel() {
+    let lastWheelTime = 0;
+    lightbox.addEventListener('wheel', (event) => {
+        event.preventDefault(); // Zabrání skrolování stránky
+        const now = Date.now();
+
+        // Omezení (throttle) proti příliš rychlému skrolování
+        if (now - lastWheelTime < CONFIG.lightboxWheelThrottle || isLightboxAnimating) {
+            return;
+        }
+        lastWheelTime = now;
+
+        const direction = event.deltaY > 0 ? 1 : -1; // 1 = dolů, -1 = nahoru
+        changeSpreadItem(direction);
+
+    }, { passive: false });
+}
+
 function setupLightboxControls() {
     document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
-    lightboxPrevBtn.addEventListener('click', () => changeGalleryItem(-1));
-    lightboxNextBtn.addEventListener('click', () => changeGalleryItem(1));
 
-    // === ZDE JE PŘIDANÁ FUNKCE ===
+    // Šipky nyní přeskakují na stránky s obsahem
+    lightboxPrevBtn.addEventListener('click', () => findNextSpreadWithItems(-1));
+    lightboxNextBtn.addEventListener('click', () => findNextSpreadWithItems(1));
+
+    // Kliknutí na pozadí pro zavření
     lightbox.addEventListener('click', (event) => {
-        // Zkontroluje, jestli se kliklo přímo na pozadí (lightbox)
-        // a ne na nějaký jeho prvek uvnitř (obrázek, text, šipky...).
         if (event.target === lightbox) {
             closeLightbox();
         }
     });
+
+    // Inicializujeme ovládání kolečkem myši
+    setupLightboxWheel();
 }
 
 function wrapPageImages() { document.querySelectorAll(".page-image").forEach(e => { const t = document.createElement("div"); t.className = "page-image-wrapper", e.parentNode.insertBefore(t, e), t.appendChild(e) }) }
@@ -288,6 +437,10 @@ function main() {
     galleryItems = buttonData
         .filter(item => !item.url)
         .sort((a, b) => a.spread - b.spread);
+
+    // Vytvoříme seznam dvoustran, které mají obsah
+    const itemSpreads = new Set(galleryItems.map(item => item.spread));
+    spreadsWithItems = [...itemSpreads].sort((a, b) => a - b);
 
     slider.min = 0;
     slider.max = state.maxSpread;
