@@ -24,6 +24,8 @@ const lightbox = document.getElementById('lightbox');
 const lightboxStage = document.getElementById('lightbox-stage');
 const lightboxPrevBtn = document.getElementById('lightboxPrev');
 const lightboxNextBtn = document.getElementById('lightboxNext');
+// NOVÝ ELEMENT PRO LIŠTU
+const lightboxReel = document.getElementById('lightbox-reel');
 const papers = Array.from(document.querySelectorAll('.paper'));
 
 
@@ -117,15 +119,29 @@ function closeLightbox() {
     lightbox.classList.remove('show');
     document.body.style.overflow = '';
     lightboxStage.innerHTML = ''; // Vyčistíme obsah
+    lightboxReel.innerHTML = ''; // Vyčistíme i lištu
     spreadItems = []; // Resetujeme stav
     currentSpreadItemIndex = 0;
 }
 
 /**
- * Načte všechny položky pro danou dvoustranu do lightboxu
+ * NOVÁ FUNKCE: Nastaví aktuální položku v lightboxu podle indexu
+ */
+function setCurrentSpreadItem(index) {
+    if (index < 0 || index >= spreadItems.length) {
+        console.warn(`Index ${index} je mimo rozsah.`);
+        return;
+    }
+    currentSpreadItemIndex = index;
+    updateLightboxView();
+}
+
+/**
+ * PŘEPRACOVANÁ FUNKCE: Načte všechny položky pro danou dvoustranu do lightboxu A VYGENERUJE LIŠTU
  */
 function loadSpreadItems(spread, itemToSelect = null) {
     lightboxStage.innerHTML = '';
+    lightboxReel.innerHTML = ''; // Vyčistíme lištu
     spreadItems = [];
     currentSpreadItemIndex = 0;
 
@@ -139,6 +155,7 @@ function loadSpreadItems(spread, itemToSelect = null) {
         let textElement = null;
 
         // --- 1. Zpracování Média (pokud existuje) ---
+        // Logika je opravena, aby se vytvořilo médium, i když je přítomen text
         if (itemData.mediaSrc) {
             const srcParts = itemData.mediaSrc.split('.');
             const type = srcParts[srcParts.length - 1];
@@ -161,24 +178,71 @@ function loadSpreadItems(spread, itemToSelect = null) {
         }
 
         // --- 2. Zpracování Textu (pokud existuje) ---
+        // Logika je opravena, aby se vytvořil text, i když je přítomno médium
         if (itemData.text) {
             textElement = document.createElement('div');
             textElement.className = 'lightbox-text';
             textElement.innerHTML = itemData.text.replace(/\n/g, '<br>');
         }
 
-        // --- 3. Sestavení a přidání do DOMu ---
+        // --- 3. Sestavení a přidání do DOMu (opraveno) ---
         if (mediaElement) {
             wrapper.appendChild(mediaElement);
         }
-
         if (textElement) {
-            // Pokud existuje i médium, přidáme textu speciální třídu pro překrytí
+            // Pokud existuje i médium, přidáme textu třídu pro speciální pozicování
             if (mediaElement) {
                 textElement.classList.add('is-overlay');
             }
             wrapper.appendChild(textElement);
         }
+
+        // --- 4. Vytvoření náhledu pro lištu (NOVÁ ČÁST) ---
+        if (mediaElement || textElement) {
+            const thumb = document.createElement('button');
+            thumb.className = 'reel-thumbnail';
+            thumb.dataset.index = index;
+            thumb.setAttribute('aria-label', `Zobrazit položku ${index + 1}`);
+
+            if (itemData.mediaSrc) {
+                const srcParts = itemData.mediaSrc.split('.');
+                const type = srcParts[srcParts.length - 1];
+                const isVimeo = type === 'vimeo';
+                const isVideo = ['mp4', 'webm', 'gif'].includes(type) && !isVimeo;
+                const isImage = !isVideo && !isVimeo;
+
+                if (isImage) {
+                    const img = document.createElement('img');
+                    img.src = itemData.mediaSrc;
+                    img.alt = `Náhled ${index + 1}`;
+                    thumb.appendChild(img);
+                } else if (isVideo) {
+                    // Statický <video> tag pro náhled
+                    const vid = document.createElement('video');
+                    vid.src = itemData.mediaSrc;
+                    vid.muted = true;
+                    vid.preload = "metadata"; // Načte první frame (důležité pro Safari)
+                    vid.disablePictureInPicture = true;
+                    vid.playsInline = true;
+                    thumb.appendChild(vid);
+                } else if (isVimeo) {
+                    thumb.innerHTML = '<span>VIDEO</span>';
+                    thumb.classList.add('is-placeholder');
+                }
+            } else if (itemData.text) {
+                // Náhled pouze pro text
+                thumb.innerHTML = '<span>TEXT</span>';
+                thumb.classList.add('is-placeholder');
+            }
+
+            // Kliknutí na náhled změní položku
+            thumb.addEventListener('click', () => {
+                setCurrentSpreadItem(index);
+            });
+
+            lightboxReel.appendChild(thumb);
+        }
+        // --- Konec vytváření náhledu ---
 
         // Přidáme wrapper do stage, POKUD má vůbec nějaký obsah
         if (mediaElement || textElement) {
@@ -190,11 +254,16 @@ function loadSpreadItems(spread, itemToSelect = null) {
             }
         }
     });
+
+    // Zobrazíme/skryjeme lištu podle počtu položek
+    lightboxReel.style.display = spreadItems.length > 1 ? 'flex' : 'none';
+
     updateLightboxView();
 }
 
+
 /**
- * Aktualizuje zobrazení v lightboxu (aplikuje třídy active, prev, next)
+ * UPRAVENÁ FUNKCE: Aktualizuje zobrazení v lightboxu A V LIŠTĚ
  */
 function updateLightboxView() {
     if (spreadItems.length === 0) return;
@@ -202,13 +271,16 @@ function updateLightboxView() {
     const prevIndex = (currentSpreadItemIndex - 1 + spreadItems.length) % spreadItems.length;
     const nextIndex = (currentSpreadItemIndex + 1) % spreadItems.length;
 
+    // Aktualizace hlavního okna
     spreadItems.forEach((item, index) => {
         item.classList.remove('active', 'prev', 'next');
         const video = item.querySelector('video');
+        const iframe = item.querySelector('iframe');
 
         if (index === currentSpreadItemIndex) {
             item.classList.add('active');
             if (video) video.play().catch(e => console.log("Autoplay byl zablokován prohlížečem."));
+            // (Autoplay pro Vimeo je řešen v URL)
         } else if (index === prevIndex && spreadItems.length > 1) {
             item.classList.add('prev');
             if (video) video.pause();
@@ -217,6 +289,25 @@ function updateLightboxView() {
             if (video) video.pause();
         } else {
             if (video) video.pause();
+        }
+
+        // Zastavení vimeo videí, která nejsou aktivní
+        if (iframe && index !== currentSpreadItemIndex) {
+            // "Zastaví" video přenastavením src
+            const oldSrc = iframe.src;
+            iframe.src = oldSrc;
+        }
+    });
+
+    // Aktualizace aktivního náhledu v liště (NOVÁ ČÁST)
+    const thumbnails = document.querySelectorAll('.reel-thumbnail');
+    thumbnails.forEach((thumb, index) => {
+        if (index === currentSpreadItemIndex) {
+            thumb.classList.add('active');
+            // Zajistí, že aktivní náhled je vždy vidět (pokud by lišta skrolovala)
+            thumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        } else {
+            thumb.classList.remove('active');
         }
     });
 }
@@ -299,13 +390,14 @@ function findNextSpreadWithItems(direction) {
     const targetSpread = spreadsWithItems[nextSpreadIndex];
 
     if (targetSpread !== currentBookSpread) {
-        loadSpreadItems(targetSpread, null);
-
+        // loadSpreadItems se nyní volá až v callbacku animateTo
         animateTo(
             parseFloat(slider.value),
             targetSpread,
             CONFIG.animationDuration,
-            () => { }
+            () => {
+                loadSpreadItems(targetSpread, null); // Načteme obsah AŽ po dotočení
+            }
         );
     }
 }
@@ -341,9 +433,9 @@ function animateTo(start, end, duration, onCompleteCallback = null) {
 
             if (onCompleteCallback) {
                 onCompleteCallback();
-            } else if (lightbox.classList.contains('show')) {
-                loadSpreadItems(end, null);
             }
+            // Odebrána větev 'else if (lightbox.classList.contains('show'))',
+            // volání loadSpreadItems je nyní řízeno explicitně v onCompleteCallback
         }
     };
     requestAnimationFrame(frame);
@@ -451,6 +543,11 @@ function setupLightboxWheel() {
                     isWheeling = false; // "Chvění", uvolníme zámek
                 }
             }
+            // Horizontální scroll pro otáčení stran v lightboxu (pokud chcete)
+            // else if (absX > absY && absX > threshold) {
+            //     isWheeling = true;
+            //     findNextSpreadWithItems(deltaX > 0 ? 1 : -1);
+            // }
         }
 
     }, { passive: false }); // 'passive: false' je nutné pro e.preventDefault()
@@ -493,7 +590,7 @@ function setupLightboxTouchGestures() {
         } else {
             // === VERTIKÁLNÍ SWIPE (měníme POLOŽKU na dvoustraně) ===
             if (Math.abs(deltaY) > CONFIG.touchSwipeThreshold) {
-                changeSpreadItem(deltaY < 0 ? 1 : -1);
+                changeSpreadItem(deltaY < 0 ? -1 : 1); // Opraven směr (swipe nahoru = předchozí = -1)
             }
         }
 
@@ -508,6 +605,7 @@ function setupLightboxControls() {
     lightboxPrevBtn.addEventListener('click', () => findNextSpreadWithItems(-1));
     lightboxNextBtn.addEventListener('click', () => findNextSpreadWithItems(1));
 
+    // Tento listener nyní bude fungovat, protože jsme odstranili .lightbox-content-wrapper
     lightbox.addEventListener('click', (event) => {
         if (event.target === lightbox) {
             closeLightbox();
