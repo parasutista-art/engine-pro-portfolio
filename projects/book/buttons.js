@@ -16,6 +16,7 @@ const buttonData = [
     {
         spread: 2,
         mediaSrc: 'media/medium4_spread3.jpg',
+     
         styles: {
             // TOTO SI UPRAVTE:
             top: '33%',
@@ -38,7 +39,7 @@ const buttonData = [
     {
         spread: 2,
         mediaSrc: 'media/medium2_spread3.webm',
-        text: 'detail',
+  
         styles: {
             // TOTO SI UPRAVTE:
             top: '70%',

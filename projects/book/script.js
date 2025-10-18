@@ -24,7 +24,7 @@ const lightbox = document.getElementById('lightbox');
 const lightboxStage = document.getElementById('lightbox-stage');
 const lightboxPrevBtn = document.getElementById('lightboxPrev');
 const lightboxNextBtn = document.getElementById('lightboxNext');
-// NOVÝ ELEMENT PRO LIŠTU
+// PŘIDÁN ELEMENT PRO LIŠTU
 const lightboxReel = document.getElementById('lightbox-reel');
 const papers = Array.from(document.querySelectorAll('.paper'));
 
@@ -148,14 +148,13 @@ function loadSpreadItems(spread, itemToSelect = null) {
     const itemsForSpread = galleryItems.filter(item => item.spread === spread);
 
     itemsForSpread.forEach((itemData, index) => {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'lightbox-item';
+        const itemWrapper = document.createElement('div');
+        itemWrapper.className = 'lightbox-item';
 
         let mediaElement = null;
         let textElement = null;
 
         // --- 1. Zpracování Média (pokud existuje) ---
-        // Logika je opravena, aby se vytvořilo médium, i když je přítomen text
         if (itemData.mediaSrc) {
             const srcParts = itemData.mediaSrc.split('.');
             const type = srcParts[srcParts.length - 1];
@@ -178,23 +177,34 @@ function loadSpreadItems(spread, itemToSelect = null) {
         }
 
         // --- 2. Zpracování Textu (pokud existuje) ---
-        // Logika je opravena, aby se vytvořil text, i když je přítomno médium
         if (itemData.text) {
             textElement = document.createElement('div');
             textElement.className = 'lightbox-text';
             textElement.innerHTML = itemData.text.replace(/\n/g, '<br>');
         }
 
-        // --- 3. Sestavení a přidání do DOMu (opraveno) ---
-        if (mediaElement) {
-            wrapper.appendChild(mediaElement);
-        }
-        if (textElement) {
-            // Pokud existuje i médium, přidáme textu třídu pro speciální pozicování
-            if (mediaElement) {
-                textElement.classList.add('is-overlay');
-            }
-            wrapper.appendChild(textElement);
+        // --- 3. Sestavení a přidání do DOMu (OPRAVENO) ---
+        if (mediaElement && textElement) {
+            // Případ 1: Médium i text
+            // Vytvoříme wrapper, který očekává CSS
+            const mediaWrapper = document.createElement('div');
+            mediaWrapper.className = 'lightbox-media-wrapper';
+
+            mediaWrapper.appendChild(mediaElement); // Přidáme médium
+
+            textElement.classList.add('is-overlay'); // Přidáme třídu pro text
+            mediaWrapper.appendChild(textElement); // Přidáme text
+
+            // Přidáme celý .lightbox-media-wrapper do .lightbox-item
+            itemWrapper.appendChild(mediaWrapper); 
+
+        } else if (mediaElement) {
+            // Případ 2: Pouze médium
+            itemWrapper.appendChild(mediaElement);
+
+        } else if (textElement) {
+            // Případ 3: Pouze text
+            itemWrapper.appendChild(textElement);
         }
 
         // --- 4. Vytvoření náhledu pro lištu (NOVÁ ČÁST) ---
@@ -246,8 +256,8 @@ function loadSpreadItems(spread, itemToSelect = null) {
 
         // Přidáme wrapper do stage, POKUD má vůbec nějaký obsah
         if (mediaElement || textElement) {
-            lightboxStage.appendChild(wrapper);
-            spreadItems.push(wrapper);
+            lightboxStage.appendChild(itemWrapper);
+            spreadItems.push(itemWrapper);
 
             if (itemData === itemToSelect) {
                 currentSpreadItemIndex = index;
@@ -366,6 +376,7 @@ function setupEventListeners() {
 
 /**
  * Přepne na další/předchozí DVOUSTRANU, která obsahuje položky.
+ * OPRAVENO: Média se načtou hned, ne až po animaci.
  */
 function findNextSpreadWithItems(direction) {
     if (state.isAnimating || spreadsWithItems.length === 0) return;
@@ -390,14 +401,15 @@ function findNextSpreadWithItems(direction) {
     const targetSpread = spreadsWithItems[nextSpreadIndex];
 
     if (targetSpread !== currentBookSpread) {
-        // loadSpreadItems se nyní volá až v callbacku animateTo
+        // ZMĚNA: Nejdříve načteme obsah lightboxu
+        loadSpreadItems(targetSpread, null);
+
+        // AŽ POTÉ spustíme animaci otáčení knihy, bez callbacku
         animateTo(
             parseFloat(slider.value),
             targetSpread,
             CONFIG.animationDuration,
-            () => {
-                loadSpreadItems(targetSpread, null); // Načteme obsah AŽ po dotočení
-            }
+            null // Callback je odebrán
         );
     }
 }
@@ -434,8 +446,6 @@ function animateTo(start, end, duration, onCompleteCallback = null) {
             if (onCompleteCallback) {
                 onCompleteCallback();
             }
-            // Odebrána větev 'else if (lightbox.classList.contains('show'))',
-            // volání loadSpreadItems je nyní řízeno explicitně v onCompleteCallback
         }
     };
     requestAnimationFrame(frame);
@@ -486,84 +496,54 @@ function setupTouchGestures() {
     });
 }
 
-/**
- * === FINÁLNÍ OPRAVA v4.0 (Agresivní minimum prodlevy) ===
- */
+
 function setupLightboxWheel() {
 
-    let isWheeling = false; // Zámek, zda právě probíhá gesto
-    let wheelGestureTimeout = null; // Ukazatel na časovač
-
-    // Doba (ms) klidu, po které považujeme gesto "swipnutí" za ukončené.
-    // *** ZMĚNA: Sníženo na 50ms (agresivní minimum) ***
+    let isWheeling = false; 
+    let wheelGestureTimeout = null; 
     const WHEEL_GESTURE_END_DELAY = 50;
 
     lightbox.addEventListener('wheel', (e) => {
-        // Vždy zabráníme výchozímu chování (scroll stránky)
         e.preventDefault();
 
-        // 1. Resetujeme časovač při každé události
         if (wheelGestureTimeout) {
             clearTimeout(wheelGestureTimeout);
         }
 
-        // 2. Nastavíme nový časovač
-        // Pokud nepřijde další 'wheel' událost během 50ms,
-        // znamená to, že gesto skončilo, a resetujeme zámek 'isWheeling'.
         wheelGestureTimeout = setTimeout(() => {
             isWheeling = false;
             wheelGestureTimeout = null;
         }, WHEEL_GESTURE_END_DELAY);
 
-        // 3. Provedeme akci POUZE pokud:
-        //    - neprobíhá už jiné gesto (isWheeling = false)
-        //    - neprobíhá animace položky (isLightboxAnimating = false)
-        //    - neprobíhá animace otáčení knihy (state.isAnimating = false)
         if (!isWheeling && !isLightboxAnimating && !state.isAnimating) {
 
             const deltaY = e.deltaY;
             const deltaX = e.deltaX;
             const absY = Math.abs(deltaY);
             const absX = Math.abs(deltaX);
-
-            // Prahová hodnota pro "mrtvou zónu"
             const threshold = 1;
 
-            // Reagujeme POUZE na dominantní VERTIKÁLNÍ pohyb
-
             if (absY > absX && absY > threshold) {
-                // === VERTIKÁLNÍ SWIPE (měníme položku) ===
-                isWheeling = true; // Aktivujeme zámek gesta
-
+                isWheeling = true; 
                 if (deltaY > threshold) {
                     changeSpreadItem(1); // Dolů
                 } else if (deltaY < -threshold) {
                     changeSpreadItem(-1); // Nahoru
                 } else {
-                    isWheeling = false; // "Chvění", uvolníme zámek
+                    isWheeling = false; 
                 }
             }
-            // Horizontální scroll pro otáčení stran v lightboxu (pokud chcete)
-            // else if (absX > absY && absX > threshold) {
-            //     isWheeling = true;
-            //     findNextSpreadWithItems(deltaX > 0 ? 1 : -1);
-            // }
         }
 
-    }, { passive: false }); // 'passive: false' je nutné pro e.preventDefault()
+    }, { passive: false }); 
 }
 
 
-/**
- * Zjednodušená funkce (text už neskroluje)
- */
 function setupLightboxTouchGestures() {
-    // Vždy zabráníme skrolování/bounce efektu na mobilu
     lightbox.addEventListener('touchmove', (event) => {
         event.preventDefault();
     }, { passive: false });
 
-    // Posloucháme na 'stage', kde jsou položky
     lightboxStage.addEventListener('touchstart', (event) => {
         state.touchStartX = event.changedTouches[0].screenX;
         state.touchStartY = event.changedTouches[0].screenY;
@@ -581,7 +561,6 @@ function setupLightboxTouchGestures() {
         const deltaX = touchEndX - state.touchStartX;
         const deltaY = touchEndY - state.touchStartY;
 
-        // Zjistíme, který směr byl dominantní
         if (Math.abs(deltaX) > Math.abs(deltaY)) {
             // === HORIZONTÁLNÍ SWIPE (měníme DVOUSTRANU) ===
             if (Math.abs(deltaX) > CONFIG.touchSwipeThreshold) {
@@ -590,7 +569,7 @@ function setupLightboxTouchGestures() {
         } else {
             // === VERTIKÁLNÍ SWIPE (měníme POLOŽKU na dvoustraně) ===
             if (Math.abs(deltaY) > CONFIG.touchSwipeThreshold) {
-                changeSpreadItem(deltaY < 0 ? -1 : 1); // Opraven směr (swipe nahoru = předchozí = -1)
+                changeSpreadItem(deltaY < 0 ? -1 : 1); 
             }
         }
 
@@ -605,14 +584,14 @@ function setupLightboxControls() {
     lightboxPrevBtn.addEventListener('click', () => findNextSpreadWithItems(-1));
     lightboxNextBtn.addEventListener('click', () => findNextSpreadWithItems(1));
 
-    // Tento listener nyní bude fungovat, protože jsme odstranili .lightbox-content-wrapper
+    // Zavírání kliknutím na pozadí
     lightbox.addEventListener('click', (event) => {
-        if (event.target === lightbox) {
+        if (event.target === lightbox || event.target === lightboxStage) {
             closeLightbox();
         }
     });
 
-    setupLightboxWheel(); // Volá naši novou, opravenou funkci
+    setupLightboxWheel(); 
     setupLightboxTouchGestures();
 }
 
