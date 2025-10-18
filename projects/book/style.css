@@ -216,8 +216,6 @@ body.desktop-nav-closed .book-viewport {
     transform: translate(-50%, -50%) scale(0.8);
     opacity: 0;
     transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease-out;
-    /* --- ZMĚNA: Omezení velikosti PŘESUNUTO ODTUD --- */
-
     display: flex;
     justify-content: center;
     align-items: center;
@@ -254,7 +252,6 @@ body.desktop-nav-closed .book-viewport {
     display: block;
 }
 
-/* --- ZMĚNA: Pravidla velikosti PŘESUNUTA SEM --- */
 .lightbox-media {
     max-width: 70vw;
     max-height: 80vh;
@@ -269,22 +266,9 @@ body.desktop-nav-closed .book-viewport {
     text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
     width: auto;
     max-width: 70ch; /* Omezení pro čitelnost na desktopu */
-    max-height: 80vh; /* Omezení výšky */
-
-    overflow-y: auto;
+    /* ODSTRANĚNO: overflow-y, max-height a scrollbar styly */
     padding: 1.5em;
-    scrollbar-width: thin;
-    -ms-overflow-style: none;
 }
-
-    .lightbox-text::-webkit-scrollbar {
-        width: 6px;
-    }
-
-    .lightbox-text::-webkit-scrollbar-thumb {
-        background-color: rgba(255,255,255,0.3);
-        border-radius: 3px;
-    }
 
 
 .lb-close {
@@ -318,22 +302,27 @@ body.desktop-nav-closed .book-viewport {
 /* ===================================== */
 /* === RESPONZIVNÍ ÚPRAVY PRO MOBIL === */
 /* ===================================== */
+
 @media (max-width: 900px) {
 
-    /* --- ZMĚNA: Pravidla velikosti pro mobil --- */
-    .lightbox-media,
-    .lightbox-text {
-        max-width: 90vw;
-        max-height: 80vh;
+    /* Média: Téměř od kraje ke kraji */
+    .lightbox-media {
+        max-width: 98vw;
+        max-height: 85vh;
     }
 
+    /* Text: Široký, s minimálními okraji */
     .lightbox-text {
-        width: 100%; /* Donutí text vyplnit 90vw rodiče */
-        max-width: 100%; /* HLAVNÍ OPRAVA: Přepíše desktopové '70ch' */
-        font-size: 0.85rem; /* Ještě menší text dle přání */
-        padding: 1rem;
+        max-width: 95vw;
+        /* ODSTRANĚNO: max-height */
+        width: 95vw;
+        font-size: 0.9rem;
+        padding: 1.5rem;
+        /* PONECHÁNO: Ochrana proti překrytí spodními šipkami */
+        padding-bottom: 70px;
     }
 }
+
 
 @media (max-width: 768px) {
     .book-viewport {
@@ -359,7 +348,6 @@ body.desktop-nav-closed .book-viewport {
 
     .lightbox-arrow {
         top: auto;
-        bottom: 20px;
+        bottom: 20px; /* Toto umisťuje šipky na mobilu dolů */
     }
-}
 }

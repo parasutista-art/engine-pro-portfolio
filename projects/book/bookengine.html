@@ -39,8 +39,15 @@
     <div id="lightbox" class="lightbox" role="dialog">
         <button id="lightboxClose" class="lb-close" aria-label="Zavřít">&#10005;</button>
         <button id="lightboxPrev" class="nav-arrow left lightbox-arrow" aria-label="Předchozí dvoustrana"></button>
-        <div id="lightbox-stage" class="lightbox-stage"></div>
-        <button id="lightboxNext" class="nav-arrow right lightbox-arrow" aria-label="Následující dvoustrana"></button>
+        <button id="lightboxNext" class="nav-arrow right lightbox-arrow" aria-label="Další dvoustrana"></button>
+
+        <div class="lightbox-content-wrapper">
+
+            <div id="lightbox-stage"></div>
+
+            <div id="lightbox-caption"></div>
+
+        </div>
     </div>
 
     <script src="../../nav.js"></script>
