@@ -216,9 +216,8 @@ body.desktop-nav-closed .book-viewport {
     transform: translate(-50%, -50%) scale(0.8);
     opacity: 0;
     transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease-out;
-    /* Omezení velikosti */
-    max-width: 70vw;
-    max-height: 80vh;
+    /* --- ZMĚNA: Omezení velikosti PŘESUNUTO ODTUD --- */
+
     display: flex;
     justify-content: center;
     align-items: center;
@@ -231,14 +230,14 @@ body.desktop-nav-closed .book-viewport {
         z-index: 10;
     }
 
-    /* --- ZMĚNA: Předchozí položka (zcela skrytá NAHOŘE) --- */
+    /* Předchozí položka (zcela skrytá NAHOŘE) */
     .lightbox-item.prev {
         transform: translate(-50%, -150%) scale(1);
         opacity: 0;
         z-index: 5;
     }
 
-    /* --- ZMĚNA: Následující položka (zcela skrytá DOLE) --- */
+    /* Následující položka (zcela skrytá DOLE) */
     .lightbox-item.next {
         transform: translate(-50%, 150%) scale(1);
         opacity: 0;
@@ -251,10 +250,14 @@ body.desktop-nav-closed .book-viewport {
 .lightbox-text {
     width: auto;
     height: auto;
-    max-width: 70vw;
-    max-height: 80vh;
     object-fit: contain;
     display: block;
+}
+
+/* --- ZMĚNA: Pravidla velikosti PŘESUNUTA SEM --- */
+.lightbox-media {
+    max-width: 70vw;
+    max-height: 80vh;
 }
 
 /* Text s omezenou šířkou */
@@ -265,9 +268,9 @@ body.desktop-nav-closed .book-viewport {
     font-size: 1.1rem;
     text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
     width: auto;
-    max-width: 70ch; /* Omezení pro čitelnost */
+    max-width: 70ch; /* Omezení pro čitelnost na desktopu */
+    max-height: 80vh; /* Omezení výšky */
 
-    max-height: 80vh;
     overflow-y: auto;
     padding: 1.5em;
     scrollbar-width: thin;
@@ -316,7 +319,8 @@ body.desktop-nav-closed .book-viewport {
 /* === RESPONZIVNÍ ÚPRAVY PRO MOBIL === */
 /* ===================================== */
 @media (max-width: 900px) {
-    .lightbox-item,
+
+    /* --- ZMĚNA: Pravidla velikosti pro mobil --- */
     .lightbox-media,
     .lightbox-text {
         max-width: 90vw;
@@ -324,9 +328,10 @@ body.desktop-nav-closed .book-viewport {
     }
 
     .lightbox-text {
-        width: auto;
-        max-width: 90vw;
-        font-size: 1rem;
+        width: 100%; /* Donutí text vyplnit 90vw rodiče */
+        max-width: 100%; /* HLAVNÍ OPRAVA: Přepíše desktopové '70ch' */
+        font-size: 0.85rem; /* Ještě menší text dle přání */
+        padding: 1rem;
     }
 }
 
@@ -356,4 +361,5 @@ body.desktop-nav-closed .book-viewport {
         top: auto;
         bottom: 20px;
     }
+}
 }

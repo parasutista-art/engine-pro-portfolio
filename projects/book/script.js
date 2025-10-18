@@ -33,6 +33,7 @@ const state = {
     maxSpread: papers.length,
     isAnimating: false,
     touchStartX: null,
+    touchStartY: null, // <-- PŘIDÁNO: Pro vertikální swipe
 };
 
 let galleryItems = []; // Všechny položky galerie (z buttons.js)
@@ -256,7 +257,7 @@ function setupEventListeners() {
 
     setupLightboxControls();
     setupWheel();
-    setupTouchGestures();
+    setupTouchGestures(); // Ponecháváme pro knihu
 }
 
 /**
@@ -285,19 +286,14 @@ function findNextSpreadWithItems(direction) {
     const targetSpread = spreadsWithItems[nextSpreadIndex];
 
     if (targetSpread !== currentBookSpread) {
-        // --- ZMĚNA: Okamžité načtení ---
-        // 1. Okamžitě načti obsah pro novou stránku
         loadSpreadItems(targetSpread, null);
 
-        // 2. Spusť animaci, ale předej prázdný callback,
-        //    aby se přebila výchozí logika v animateTo a nenačetlo se to 2x
         animateTo(
             parseFloat(slider.value),
             targetSpread,
             CONFIG.animationDuration,
             () => { } // Prázdný "do nothing" callback
         );
-        // --- Konec změny ---
     }
 }
 
@@ -333,7 +329,6 @@ function animateTo(start, end, duration, onCompleteCallback = null) {
             if (onCompleteCallback) {
                 onCompleteCallback();
             } else if (lightbox.classList.contains('show')) {
-                // TATO ČÁST SE NYNÍ PŘESKOČÍ, POKUD VOLÁME Z findNextSpreadWithItems
                 loadSpreadItems(end, null);
             }
         }
@@ -370,6 +365,7 @@ function setupWheel() {
     }
 }
 
+// Gesta pro otáčení stránek knihy
 function setupTouchGestures() {
     bookViewport.addEventListener('touchstart', (event) => {
         state.touchStartX = event.changedTouches[0].screenX;
@@ -394,7 +390,6 @@ function setupLightboxWheel() {
         event.preventDefault(); // Zabrání skrolování stránky
         const now = Date.now();
 
-        // Omezení (throttle) proti příliš rychlému skrolování
         if (now - lastWheelTime < CONFIG.lightboxWheelThrottle || isLightboxAnimating) {
             return;
         }
@@ -406,22 +401,78 @@ function setupLightboxWheel() {
     }, { passive: false });
 }
 
+/**
+ * === UPRAVENÁ FUNKCE ===
+ * Přidá ovládání gesty (swipe nahoru/dolů A ze strany na stranu) uvnitř lightboxu
+ */
+function setupLightboxTouchGestures() {
+    // Zabráníme skrolování/bounce efektu na mobilu, když je lightbox otevřený
+    lightbox.addEventListener('touchmove', (event) => {
+        event.preventDefault();
+    }, { passive: false });
+
+    // Posloucháme na 'stage', kde jsou média
+    lightboxStage.addEventListener('touchstart', (event) => {
+        // Uložíme X i Y pozici
+        state.touchStartX = event.changedTouches[0].screenX;
+        state.touchStartY = event.changedTouches[0].screenY;
+    }, { passive: true });
+
+    lightboxStage.addEventListener('touchend', (event) => {
+        // Zkontrolujeme, zda máme startovní pozice
+        if (state.touchStartX === null || state.touchStartY === null) {
+            // Resetujeme pro jistotu obě
+            state.touchStartX = null;
+            state.touchStartY = null;
+            return;
+        }
+
+        // Získáme koncové pozice
+        const touchEndX = event.changedTouches[0].screenX;
+        const touchEndY = event.changedTouches[0].screenY;
+
+        // Vypočítáme rozdíly
+        const deltaX = touchEndX - state.touchStartX;
+        const deltaY = touchEndY - state.touchStartY;
+
+        // Zjistíme, který směr byl dominantní
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+            // === HORIZONTÁLNÍ SWIPE (měníme DVOUSTRANU) ===
+            if (Math.abs(deltaX) > CONFIG.touchSwipeThreshold) {
+                // deltaX < 0 = swipe doleva (chceme další dvoustranu, index +1)
+                // deltaX > 0 = swipe doprava (chceme předchozí dvoustranu, index -1)
+                findNextSpreadWithItems(deltaX < 0 ? 1 : -1);
+            }
+        } else {
+            // === VERTIKÁLNÍ SWIPE (měníme POLOŽKU na dvoustraně) ===
+            if (Math.abs(deltaY) > CONFIG.touchSwipeThreshold) {
+                // deltaY < 0 = swipe nahoru (chceme další item, index +1)
+                // deltaY > 0 = swipe dolů (chceme předchozí item, index -1)
+                changeSpreadItem(deltaY < 0 ? 1 : -1);
+            }
+        }
+
+        // Resetujeme obě startovní pozice
+        state.touchStartX = null;
+        state.touchStartY = null;
+    });
+}
+
+
 function setupLightboxControls() {
     document.getElementById('lightboxClose').addEventListener('click', closeLightbox);
 
-    // Šipky nyní přeskakují na stránky s obsahem
     lightboxPrevBtn.addEventListener('click', () => findNextSpreadWithItems(-1));
     lightboxNextBtn.addEventListener('click', () => findNextSpreadWithItems(1));
 
-    // Kliknutí na pozadí pro zavření
     lightbox.addEventListener('click', (event) => {
         if (event.target === lightbox) {
             closeLightbox();
         }
     });
 
-    // Inicializujeme ovládání kolečkem myši
     setupLightboxWheel();
+    setupLightboxTouchGestures(); // <-- ZDE SE VOLÁ UPRAVENÁ FUNKCE
 }
 
 function wrapPageImages() { document.querySelectorAll(".page-image").forEach(e => { const t = document.createElement("div"); t.className = "page-image-wrapper", e.parentNode.insertBefore(t, e), t.appendChild(e) }) }
