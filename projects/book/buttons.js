@@ -28,7 +28,7 @@ const buttonData = [
     },
     {
         spread: 2,
-        mediaSrc: 'media/medium2_spread3.mp4',
+        mediaSrc: 'media/medium2_spread3.webm',
         styles: {
             // TOTO SI UPRAVTE:
             top: '10%',
