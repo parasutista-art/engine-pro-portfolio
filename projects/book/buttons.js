@@ -10,42 +10,7 @@ const buttonData = [
             top: '5%',
             left: '1%',
             width: '48%',
-            height: '26%'
-        }
-    },
-
-    // === NOVÁ SEKCE PRO SPREAD 3 ===
-    {
-        spread: 2,
-        mediaSrc: 'media/medium1_spread3.jpg',
-        styles: {
-            // TOTO SI UPRAVTE:
-            top: '10%',
-            left: '55%', // (přes 50% = pravá stránka)
-            width: '40%',
-            height: '25%'
-        }
-    },
-    {
-        spread: 2,
-        mediaSrc: 'media/medium2_spread3.webm',
-        styles: {
-            // TOTO SI UPRAVTE:
-            top: '10%',
-            left: '55%', // (přes 50% = pravá stránka)
-            width: '40%',
-            height: '25%'
-        }
-    },
-    {
-        spread: 2,
-        mediaSrc: 'media/medium3_spread3.jpg',
-        styles: {
-            // TOTO SI UPRAVTE:
-            top: '40%',
-            left: '55%',
-            width: '40%',
-            height: '25%'
+            height: '24%'
         }
     },
     {
@@ -53,8 +18,31 @@ const buttonData = [
         mediaSrc: 'media/medium4_spread3.jpg',
         styles: {
             // TOTO SI UPRAVTE:
+            top: '33%',
+            left: '2%', // (přes 50% = pravá stránka)
+            width: '45%',
+            height: '30%'
+        }
+    },
+    {
+        spread: 2,
+        mediaSrc: 'media/medium3_spread3.webm',
+        styles: {
+            // TOTO SI UPRAVTE:
+            top: '1%',
+            left: '50%', // (přes 50% = pravá stránka)
+            width: '50%',
+            height: '98%'
+        }
+    },
+    {
+        spread: 2,
+        mediaSrc: 'media/medium2_spread3.webm',
+        text: 'detail',
+        styles: {
+            // TOTO SI UPRAVTE:
             top: '70%',
-            left: '55%',
+            left: '110%',
             width: '40%',
             height: '25%'
         }

@@ -11,8 +11,8 @@ const CONFIG = {
 };
 
 const mediaOverlays = {
-    5: { type: 'webm', src: 'assets/page-5-overlay.webm' },
-    7: { type: 'webm', src: 'assets/page-7-overlay.webm' }
+    6: { type: 'webm', src: 'assets/S3B-2_overlay.webm' },
+    8: { type: 'webm', src: 'assets/360-2_overlay.webm' }
 };
 
 // ... (získání DOM elementů book, bookViewport, atd.) ...
@@ -135,35 +135,53 @@ function loadSpreadItems(spread, itemToSelect = null) {
         const wrapper = document.createElement('div');
         wrapper.className = 'lightbox-item';
 
-        let element = null;
+        let mediaElement = null;
+        let textElement = null;
 
-        if (itemData.text) {
-            element = document.createElement('div');
-            element.className = 'lightbox-text';
-            element.innerHTML = itemData.text.replace(/\n/g, '<br>');
-        } else if (itemData.mediaSrc) {
+        // --- 1. Zpracování Média (pokud existuje) ---
+        if (itemData.mediaSrc) {
             const srcParts = itemData.mediaSrc.split('.');
             const type = srcParts[srcParts.length - 1];
             const isVimeo = type === 'vimeo';
 
             if (isVimeo) {
                 const vimeoId = itemData.mediaSrc.split('_').pop().split('.')[0];
-                element = document.createElement('iframe');
-                element.src = `https://player.vimeo.com/video/${vimeoId}?autoplay=1&loop=1&autopause=0&muted=1`;
-                Object.assign(element, { frameborder: '0', allow: 'autoplay; fullscreen; picture-in-picture', allowfullscreen: true });
+                mediaElement = document.createElement('iframe');
+                mediaElement.src = `https://player.vimeo.com/video/${vimeoId}?autoplay=1&loop=1&autopause=0&muted=1`;
+                Object.assign(mediaElement, { frameborder: '0', allow: 'autoplay; fullscreen; picture-in-picture', allowfullscreen: true });
             } else {
                 const isVideo = ['mp4', 'webm', 'gif'].includes(type);
-                element = document.createElement(isVideo ? 'video' : 'img');
-                element.src = itemData.mediaSrc;
+                mediaElement = document.createElement(isVideo ? 'video' : 'img');
+                mediaElement.src = itemData.mediaSrc;
                 if (isVideo) {
-                    Object.assign(element, { autoplay: false, loop: true, muted: true, playsInline: true });
+                    Object.assign(mediaElement, { autoplay: false, loop: true, muted: true, playsInline: true });
                 }
             }
-            element.className = 'lightbox-media';
+            mediaElement.className = 'lightbox-media';
         }
 
-        if (element) {
-            wrapper.appendChild(element);
+        // --- 2. Zpracování Textu (pokud existuje) ---
+        if (itemData.text) {
+            textElement = document.createElement('div');
+            textElement.className = 'lightbox-text';
+            textElement.innerHTML = itemData.text.replace(/\n/g, '<br>');
+        }
+
+        // --- 3. Sestavení a přidání do DOMu ---
+        if (mediaElement) {
+            wrapper.appendChild(mediaElement);
+        }
+
+        if (textElement) {
+            // Pokud existuje i médium, přidáme textu speciální třídu pro překrytí
+            if (mediaElement) {
+                textElement.classList.add('is-overlay');
+            }
+            wrapper.appendChild(textElement);
+        }
+
+        // Přidáme wrapper do stage, POKUD má vůbec nějaký obsah
+        if (mediaElement || textElement) {
             lightboxStage.appendChild(wrapper);
             spreadItems.push(wrapper);
 

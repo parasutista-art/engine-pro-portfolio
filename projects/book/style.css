@@ -257,7 +257,7 @@ body.desktop-nav-closed .book-viewport {
     max-height: 80vh;
 }
 
-/* Text s omezenou šířkou */
+/* Text s omezenou šířkou (POKUD JE SÁM) */
 .lightbox-text {
     background-color: transparent;
     color: #fff;
@@ -266,9 +266,37 @@ body.desktop-nav-closed .book-viewport {
     text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
     width: auto;
     max-width: 70ch; /* Omezení pro čitelnost na desktopu */
-    /* ODSTRANĚNO: overflow-y, max-height a scrollbar styly */
     padding: 1.5em;
 }
+
+    /* === NOVÝ STYL PRO TEXT NAD MÉDIEM (NE PŘES NĚJ) === */
+    .lightbox-text.is-overlay {
+        /* Měníme pozicování z "přes" na "nad" */
+        position: absolute;
+        bottom: 100%; /* Klíčová změna: Posune text na horní hranu média */
+        left: 0; /* Klíčová změna: Zarovná text na levou hranu média */
+        /* Přidáme mezeru mezi text a obrázek */
+        margin-bottom: 1em;
+        /* === Zbytek stylů pro text === */
+        /* Odebrání pozadí a transformací */
+        transform: none;
+        background: transparent;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        border-radius: 0;
+        padding: 0;
+        box-sizing: border-box;
+        /* Definice vzhledu písma a čitelnosti */
+        color: #fff;
+        font-size: 1rem;
+        line-height: 1.5;
+        text-shadow: 1px 1px 3px rgba(0,0,0,0.8); /* Stín pro čitelnost */
+        /* Omezení velikosti textového bloku */
+        width: auto;
+        max-width: 70vw; /* Stejné max-width jako má obrázek */
+        max-height: 30vh; /* Omezení výšky pro dlouhé texty */
+        overflow-y: auto; /* Povolit skrolování jen pro text */
+    }
 
 
 .lb-close {
@@ -311,16 +339,25 @@ body.desktop-nav-closed .book-viewport {
         max-height: 85vh;
     }
 
-    /* Text: Široký, s minimálními okraji */
+    /* Text: Široký, s minimálními okraji (POKUD JE SÁM) */
     .lightbox-text {
         max-width: 95vw;
-        /* ODSTRANĚNO: max-height */
         width: 95vw;
         font-size: 0.9rem;
         padding: 1.5rem;
-        /* PONECHÁNO: Ochrana proti překrytí spodními šipkami */
         padding-bottom: 70px;
     }
+
+        /* === NOVÝ RESPONZIVNÍ STYL PRO TEXT NAD MÉDIEM === */
+        .lightbox-text.is-overlay {
+            font-size: 0.85rem;
+            max-width: 95vw; /* Na mobilu může být text širší (jako obrázek) */
+            max-height: 40vh; /* Více místa na výšku pro text */
+            margin-bottom: 0.5em; /* Menší mezera */
+            /* Přepsání stylů ze samotného .lightbox-text, které nechceme */
+            width: auto; /* Nechceme pevnou šířku 95vw */
+            padding: 0; /* Přepíšeme padding z .lightbox-text */
+        }
 }
 
 
