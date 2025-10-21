@@ -8,13 +8,10 @@
     --nav-transition-speed: 0.3s;
     --reel-height-desktop: 100px;
     --reel-height-mobile: 80px;
-    /* === ZMĚNA === */
-    /* Zvětšili jsme horizontální odsazení, aby média nebyla tak široká */
-    /* a nepřekrývala postranní šipky. */
     --lightbox-v-padding: 20px;
-    --lightbox-h-padding: 80px; /* Původně 10px */
+    --lightbox-h-padding: 80px;
     --lightbox-v-padding-mobile: 10px;
-    --lightbox-h-padding-mobile: 10px; /* Původně 5px */
+    --lightbox-h-padding-mobile: 10px;
 }
 
 * {
@@ -206,7 +203,7 @@ body.desktop-nav-closed .book-viewport {
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s ease;
-    /* Přidáme padding pro lištu */
+    /* Padding pro lištu na desktopu */
     padding-bottom: var(--reel-height-desktop);
     box-sizing: border-box;
 }
@@ -229,31 +226,27 @@ body.desktop-nav-closed .book-viewport {
 .lightbox-item {
     position: absolute;
     left: 50%;
-    top: 50%; /* Bude centrováno na výšku prostoru NAD lištou */
+    top: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
-    /* Výchozí "skrytý" stav */
     transform: translate(-50%, -50%) scale(0.8);
     opacity: 0;
     transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease-out;
 }
 
-    /* Aktivní (středová) položka */
     .lightbox-item.active {
         transform: translate(-50%, -50%) scale(1);
         opacity: 1;
         z-index: 10;
     }
 
-    /* Předchozí položka (zcela skrytá NAHOŘE) */
     .lightbox-item.prev {
         transform: translate(-50%, -150%) scale(0.8);
         opacity: 0;
         z-index: 5;
     }
 
-    /* Následující položka (zcela skrytá DOLE) */
     .lightbox-item.next {
         transform: translate(-50%, 150%) scale(0.8);
         opacity: 0;
@@ -261,105 +254,69 @@ body.desktop-nav-closed .book-viewport {
     }
 
 
-/* Samotný obsah uvnitř wrapperu */
-/* Toto platí pro SOLO média a SOLO text */
-.lightbox-media,
-.lightbox-text {
-    width: auto;
-    height: auto;
-    max-width: 100%; /* 100% rodiče (pokud je) */
-    max-height: 100%; /* 100% rodiče (pokud je) */
-    object-fit: contain;
-    display: block;
-}
+    /* === OBSAH UVNITŘ WRAPPERU === */
 
-.lightbox-media {
-    /* (prázdné) */
-}
-
-/* Text s omezenou šířkou (POKUD JE SÁM) */
-.lightbox-text {
-    background-color: transparent;
-    color: #fff;
-    line-height: 1.7;
-    font-size: 1.1rem;
-    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
-    width: auto;
-    height: auto;
-    max-width: 70ch;
-    padding: 1.5em;
-    box-sizing: border-box;
-    /* Používá standardní odsazení */
-    max-height: calc(100vh - var(--reel-height-desktop) - var(--lightbox-v-padding) * 2);
-    overflow-y: auto;
-    margin: 0;
-}
-
-/* === Wrapper pro média S POPISKEM === */
-.lightbox-media-wrapper {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    position: relative;
-    /* Používá standardní odsazení (nyní 80px) */
-    max-width: calc(100vw - var(--lightbox-h-padding) * 2);
-    max-height: calc(100vh - var(--reel-height-desktop) - var(--lightbox-v-padding) * 2);
-    /* Zajišťuje, že flexbox správně funguje v Safari/Firefoxu */
-    height: 100%;
-}
-
-    /* Obrázek/video uvnitř wrapperu */
-    .lightbox-media-wrapper .lightbox-media {
-        display: block;
-        max-width: 100%;
-        max-height: 100%;
+    /* Pravidlo pro SOLO MÉDIA (bez textu) i MÉDIA S TEXTEM */
+    .lightbox-item > .lightbox-media {
         width: auto;
         height: auto;
+        max-width: calc(100vw - var(--lightbox-h-padding) * 2);
+        max-height: calc(100vh - var(--reel-height-desktop) - var(--lightbox-v-padding) * 2);
         object-fit: contain;
-        /* Médium má prioritu růst a smí se smrštit */
-        flex: 1 1 auto; /* flex-grow: 1, flex-shrink: 1, flex-basis: auto */
-        /* Umožňuje smrštění obrázku pod jeho přirozenou velikost */
-        min-height: 0;
+        display: block;
     }
 
-/* Text POD médiem */
-.lightbox-text.is-overlay {
-    /* Text je statický blok */
-    position: static;
-    display: block;
-    top: auto;
-    left: auto;
-    transform: none;
-    width: 100%;
-    height: auto;
-    margin: 0;
-    margin-top: 0.5em; /* Malá mezera nad textem */
-    padding: 0;
-    box-sizing: border-box;
-    /* Text neroste, ale smí se smrštit */
-    flex: 0 1 auto; /* flex-grow: 0, flex-shrink: 1, flex-basis: auto */
-    /* Maximální výška bloku textu */
-    max-height: 30vh;
-    overflow-y: auto; /* Pokud je text delší, bude rolovat */
-    /* Styly textu */
+    /* Pravidlo pro SOLO TEXT */
+    .lightbox-item > .lightbox-text {
+        background-color: transparent;
+        color: #fff;
+        line-height: 1.7;
+        font-size: 1.1rem;
+        text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        width: auto;
+        height: auto;
+        max-width: 70ch;
+        padding: 1.5em;
+        box-sizing: border-box;
+        max-height: calc(100vh - var(--reel-height-desktop) - var(--lightbox-v-padding) * 2);
+        overflow-y: auto;
+        margin: 0;
+    }
+
+
+/* === TEXT K MÉDIÍM (PŘES CELOU OBRAZOVKU) === */
+.lightbox-text-overlay { /* Přejmenováno pro přehlednost */
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    /* Pozice pro DESKTOP: Nad lištou */
+    bottom: var(--reel-height-desktop);
+    margin-bottom: 10px;
+    width: auto;
+    max-width: calc(100vw - var(--lightbox-h-padding) * 2);
+    max-height: 20vh;
+    overflow-y: auto;
     font-size: 0.85rem;
     line-height: 1.5;
-    text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
-    max-width: 100%;
     color: #fff;
+    /* Bez pozadí, jen stín */
     background: transparent;
-    backdrop-filter: none;
+    text-shadow: 0 0 5px rgba(0,0,0,1), 0 0 8px rgba(0,0,0,0.7);
+    padding: 0.75em 1em;
+    border-radius: 4px;
+    text-align: center;
+    z-index: 26500;
+    /* Skryto by default */
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease-out;
 }
 
-
-/* Pravidlo pro SOLO MÉDIA (bez textu) */
-.lightbox-item > .lightbox-media {
-    width: auto;
-    height: auto;
-    /* Používá standardní odsazení (nyní 80px) */
-    max-width: calc(100vw - var(--lightbox-h-padding) * 2);
-    max-height: calc(100vh - var(--reel-height-desktop) - var(--lightbox-v-padding) * 2);
-}
+    /* Zobrazí se, jen když je aktivní */
+    .lightbox-text-overlay.active {
+        opacity: 1;
+        pointer-events: auto;
+    }
 
 
 .lb-close {
@@ -390,17 +347,24 @@ body.desktop-nav-closed .book-viewport {
 }
 
 /* ===================================== */
-/* === LIGHTBOX REEL (LIŠTA NÁHLEDŮ) === */
+/* === LIGHTBOX REEL & DOTS === */
 /* ===================================== */
 
-#lightbox-reel {
+/* Výchozí stav: obojí skryté */
+#lightbox-reel,
+#lightbox-dots {
+    display: none;
+}
+
+/* Desktop: Zobrazí LIŠTU, pokud je .has-multiple-items */
+.lightbox.has-multiple-items #lightbox-reel {
     position: absolute;
     bottom: 0;
     left: 0;
     width: 100%;
-    height: var(--reel-height-desktop); /* Výška lišty */
+    height: var(--reel-height-desktop);
     z-index: 26000;
-    display: flex;
+    display: flex; /* <-- ZOBRAZIT NA DESKTOPU */
     justify-content: center;
     align-items: center;
     padding: 10px;
@@ -408,8 +372,24 @@ body.desktop-nav-closed .book-viewport {
     overflow-x: auto;
     overflow-y: hidden;
     white-space: nowrap;
-    /* Lišta je průhledná */
     background: transparent;
+}
+
+/* Mobil: Zobrazí TEČKY, pokud je .has-multiple-items */
+.lightbox.has-multiple-items #lightbox-dots {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: var(--reel-height-mobile);
+    z-index: 26000;
+    display: none; /* <-- Na desktopu skryté */
+    justify-content: center;
+    align-items: center;
+    padding: 5px;
+    box-sizing: border-box;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 .reel-thumbnail {
@@ -442,7 +422,6 @@ body.desktop-nav-closed .book-viewport {
         opacity: 1;
     }
 
-    /* Obsah náhledu (obrázek nebo video) */
     .reel-thumbnail img,
     .reel-thumbnail video {
         width: auto;
@@ -451,7 +430,6 @@ body.desktop-nav-closed .book-viewport {
         display: block;
     }
 
-    /* Styl pro placeholdery (Text, Vimeo) */
     .reel-thumbnail.is-placeholder {
         display: inline-flex;
         justify-content: center;
@@ -472,6 +450,27 @@ body.desktop-nav-closed .book-viewport {
         }
 
 
+.lightbox-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #888; /* Šedivá */
+    border: none;
+    padding: 0;
+    margin: 0 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+    .lightbox-dot:hover {
+        background: #bbb;
+    }
+
+    .lightbox-dot.active {
+        background: #fff; /* Bílá */
+    }
+
+
 /* ===================================== */
 /* === RESPONZIVNÍ ÚPRAVY PRO MOBIL === */
 /* ===================================== */
@@ -479,51 +478,43 @@ body.desktop-nav-closed .book-viewport {
 @media (max-width: 900px) {
 
     .lightbox {
+        /* Padding pro tečky na mobilu */
         padding-bottom: var(--reel-height-mobile);
     }
 
-    .lightbox-media-wrapper {
-        /* === ZMĚNA === */
-        /* Na tabletu (mezi 900px a 768px) stále potřebujeme velké odsazení */
-        /* kvůli postranním šipkám. Použijeme tedy desktopovou proměnnou. */
-        max-width: calc( 100vw - var(--lightbox-h-padding) * 2 );
-        max-height: calc( 100vh - var(--reel-height-mobile) - var(--lightbox-v-padding-mobile) * 2 );
-    }
+        /* === TOTO JE KLÍČOVÁ ZMĚNA === */
+        /* Skryjeme lištu a ukážeme tečky */
+        .lightbox.has-multiple-items #lightbox-reel {
+            display: none; /* <-- SKRÝT LIŠTU */
+        }
 
-    /* Limity pro sólo média na mobilu */
+        .lightbox.has-multiple-items #lightbox-dots {
+            display: flex; /* <-- ZOBRAZIT TEČKY */
+        }
+
+
+    /* Média na tabletu */
     .lightbox-item > .lightbox-media {
-        /* === ZMĚNA === */
-        /* Stejné pravidlo i pro sólo média */
         max-width: calc( 100vw - var(--lightbox-h-padding) * 2 );
         max-height: calc( 100vh - var(--reel-height-mobile) - var(--lightbox-v-padding-mobile) * 2 );
     }
 
-    /* Text: Široký, s minimálními okraji (POKUD JE SÁM) */
-    .lightbox-text {
+    /* Text s popiskem (Tablet) */
+    .lightbox-text-overlay {
+        bottom: var(--reel-height-mobile); /* Nad tečky (80px) */
+        max-width: calc( 100vw - var(--lightbox-h-padding) * 2 );
+        margin-bottom: 5px;
+    }
+
+
+    /* Sólo text (Tablet) */
+    .lightbox-item > .lightbox-text {
         max-width: 95vw;
         width: 95vw;
         font-size: 0.9rem;
         padding: 1.5rem;
         padding-bottom: 70px;
-        /* Používá mobilní *vertikální* odsazení */
         max-height: calc(100vh - var(--reel-height-mobile) - var(--lightbox-v-padding-mobile) * 2);
-    }
-
-        /* Úprava textu POD médiem pro mobil */
-        .lightbox-text.is-overlay {
-            font-size: 0.85rem;
-            max-height: 40vh;
-            margin-top: 0.5em;
-        }
-
-    /* Lišta na mobilu */
-    #lightbox-reel {
-        height: var(--reel-height-mobile);
-        padding: 5px;
-    }
-
-    .reel-thumbnail {
-        margin: 0 3px;
     }
 }
 
@@ -552,23 +543,26 @@ body.desktop-nav-closed .book-viewport {
 
     .lightbox-arrow {
         top: auto;
-        bottom: calc(var(--reel-height-mobile) + 20px);
+        /* Posunuto níže - tečky mají 80px, šipka je 10px nad nimi */
+        bottom: 90px;
         z-index: 27000;
     }
 
-    /* === ZMĚNA === */
-    /* Na mobilu (< 768px) se šipky přesunou dolů, */
-    /* takže můžeme vrátit malé horizontální odsazení. */
-    .lightbox-media-wrapper {
+    /* Text s popiskem (Telefon) */
+    .lightbox-text-overlay {
+        /* Posunuto nad šipky (které jsou na 90px) */
+        bottom: 150px;
         max-width: calc( 100vw - var(--lightbox-h-padding-mobile) * 2 );
     }
 
+
+    /* Média na telefonu (malé odsazení) */
     .lightbox-item > .lightbox-media {
         max-width: calc( 100vw - var(--lightbox-h-padding-mobile) * 2 );
     }
 
 
-    /* Posuneme šipky VEDLE lišty, pokud je obrazovka úzká a nízká */
+    /* Zvláštní případ: Nízká obrazovka (landscape mobil) */
     @media (max-height: 500px) {
         .lightbox-arrow {
             top: 50%;
@@ -576,13 +570,13 @@ body.desktop-nav-closed .book-viewport {
             transform: translateY(-50%);
         }
 
-        /* === ZMĚNA === */
-        /* Pokud jsou šipky zpět na straně (úzká a nízká obrazovka), */
-        /* musíme VRÁTIT velké odsazení z desktopu. */
-        .lightbox-media-wrapper {
-            max-width: calc( 100vw - var(--lightbox-h-padding) * 2 );
+        /* Text s popiskem se vrací nad tečky */
+        .lightbox-text-overlay {
+            bottom: var(--reel-height-mobile); /* 80px */
+            margin-bottom: 5px;
         }
 
+        /* Média musí mít zpět velké odsazení, aby nebyly pod šipkami */
         .lightbox-item > .lightbox-media {
             max-width: calc( 100vw - var(--lightbox-h-padding) * 2 );
         }

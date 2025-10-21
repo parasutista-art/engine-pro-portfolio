@@ -43,7 +43,7 @@ const buttonData = [
         styles: {
             // TOTO SI UPRAVTE:
             top: '70%',
-            left: '110%',
+            left: '250%',
             width: '40%',
             height: '25%'
         }
@@ -55,7 +55,7 @@ const buttonData = [
         styles: {
             // TOTO SI UPRAVTE:
             top: '70%',
-            left: '110%',
+            left: '250%',
             width: '40%',
             height: '25%'
         }

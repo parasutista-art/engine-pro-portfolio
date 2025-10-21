@@ -13,8 +13,8 @@ const CONFIG = {
 const mediaOverlays = {
     6: { type: 'webm', src: 'assets/S3B-2_overlay.webm' },
     8: { type: 'webm', src: 'assets/360-2_overlay.webm' },
-    7: { type: 'webm', src: 'assets/Piktogramy pro školu-1_overlay.webm' },
     10: { type: 'webm', src: 'assets/Piktogramy pro školu-2_overlay.webm' },
+    18: { type: 'webm', src: 'assets/Typotrip-2_overlay.webm' },
 };
 
 // ... (získání DOM elementů book, bookViewport, atd.) ...
@@ -26,7 +26,6 @@ const lightbox = document.getElementById('lightbox');
 const lightboxStage = document.getElementById('lightbox-stage');
 const lightboxPrevBtn = document.getElementById('lightboxPrev');
 const lightboxNextBtn = document.getElementById('lightboxNext');
-// PŘIDÁN ELEMENT PRO LIŠTU
 const lightboxReel = document.getElementById('lightbox-reel');
 const papers = Array.from(document.querySelectorAll('.paper'));
 
@@ -117,18 +116,28 @@ function openLightbox(index) {
     }
 }
 
+/**
+ * UPRAVENO: Mažeme teď i texty přidané přímo do .lightbox
+ */
 function closeLightbox() {
     lightbox.classList.remove('show');
     document.body.style.overflow = '';
     lightboxStage.innerHTML = ''; // Vyčistíme obsah
     lightboxReel.innerHTML = ''; // Vyčistíme i lištu
+    document.getElementById('lightbox-dots').innerHTML = ''; // Vyčistíme tečky
+
+    // === PŘIDÁNO: Musíme smazat i texty přidané přímo do lightboxu ===
+    const overlayTexts = lightbox.querySelectorAll('.lightbox-text-overlay');
+    overlayTexts.forEach(el => el.remove());
+
+    // === PŘIDÁNO: Odebereme třídu pro zobrazení ovládacích prvků ===
+    lightbox.classList.remove('has-multiple-items');
+
     spreadItems = []; // Resetujeme stav
     currentSpreadItemIndex = 0;
 }
 
-/**
- * NOVÁ FUNKCE: Nastaví aktuální položku v lightboxu podle indexu
- */
+
 function setCurrentSpreadItem(index) {
     if (index < 0 || index >= spreadItems.length) {
         console.warn(`Index ${index} je mimo rozsah.`);
@@ -142,8 +151,15 @@ function setCurrentSpreadItem(index) {
  * PŘEPRACOVANÁ FUNKCE: Načte všechny položky pro danou dvoustranu do lightboxu A VYGENERUJE LIŠTU
  */
 function loadSpreadItems(spread, itemToSelect = null) {
+    // --- 1. Čištění ---
     lightboxStage.innerHTML = '';
-    lightboxReel.innerHTML = ''; // Vyčistíme lištu
+    lightboxReel.innerHTML = '';
+    document.getElementById('lightbox-dots').innerHTML = '';
+
+    // Vyčistíme staré texty přidané přímo do .lightbox
+    const oldOverlayTexts = lightbox.querySelectorAll('.lightbox-text-overlay');
+    oldOverlayTexts.forEach(el => el.remove());
+
     spreadItems = [];
     currentSpreadItemIndex = 0;
 
@@ -154,9 +170,10 @@ function loadSpreadItems(spread, itemToSelect = null) {
         itemWrapper.className = 'lightbox-item';
 
         let mediaElement = null;
-        let textElement = null;
+        let textElement = null; // Text pro "sólo" zobrazení
+        let overlayTextElement = null; // Text pro zobrazení "přes médium"
 
-        // --- 1. Zpracování Média (pokud existuje) ---
+        // --- 2. Zpracování Média ---
         if (itemData.mediaSrc) {
             const srcParts = itemData.mediaSrc.split('.');
             const type = srcParts[srcParts.length - 1];
@@ -178,38 +195,45 @@ function loadSpreadItems(spread, itemToSelect = null) {
             mediaElement.className = 'lightbox-media';
         }
 
-        // --- 2. Zpracování Textu (pokud existuje) ---
+        // --- 3. Zpracování Textu ---
         if (itemData.text) {
-            textElement = document.createElement('div');
-            textElement.className = 'lightbox-text';
-            textElement.innerHTML = itemData.text.replace(/\n/g, '<br>');
+            if (mediaElement) {
+                // Případ 1: Médium i text -> vytvoříme overlay text
+                overlayTextElement = document.createElement('div');
+                overlayTextElement.className = 'lightbox-text-overlay'; // Nová třída
+                overlayTextElement.innerHTML = itemData.text.replace(/\n/g, '<br>');
+                overlayTextElement.dataset.index = index; // Propojíme ho s indexem položky
+            } else {
+                // Případ 2: Pouze text -> vytvoříme sólo text
+                textElement = document.createElement('div');
+                textElement.className = 'lightbox-text';
+                textElement.innerHTML = itemData.text.replace(/\n/g, '<br>');
+            }
         }
 
-        // --- 3. Sestavení a přidání do DOMu (OPRAVENO) ---
-        if (mediaElement && textElement) {
-            // Případ 1: Médium i text
-            // Vytvoříme wrapper, který očekává CSS
-            const mediaWrapper = document.createElement('div');
-            mediaWrapper.className = 'lightbox-media-wrapper';
-
-            mediaWrapper.appendChild(mediaElement); // Přidáme médium
-
-            textElement.classList.add('is-overlay'); // Přidáme třídu pro text
-            mediaWrapper.appendChild(textElement); // Přidáme text
-
-            // Přidáme celý .lightbox-media-wrapper do .lightbox-item
-            itemWrapper.appendChild(mediaWrapper); 
-
-        } else if (mediaElement) {
-            // Případ 2: Pouze médium
+        // --- 4. Sestavení a přidání do DOMu ---
+        if (mediaElement) {
             itemWrapper.appendChild(mediaElement);
-
         } else if (textElement) {
-            // Případ 3: Pouze text
             itemWrapper.appendChild(textElement);
         }
 
-        // --- 4. Vytvoření náhledu pro lištu (NOVÁ ČÁST) ---
+        // Přidáme wrapper do stage (pokud má obsah)
+        if (mediaElement || textElement) {
+            lightboxStage.appendChild(itemWrapper);
+            spreadItems.push(itemWrapper);
+
+            if (itemData === itemToSelect) {
+                currentSpreadItemIndex = index;
+            }
+        }
+
+        // Přidáme overlay text (pokud existuje) PŘÍMO DO #lightbox
+        if (overlayTextElement) {
+            lightbox.appendChild(overlayTextElement);
+        }
+
+        // --- 5. Vytvoření náhledu pro lištu ---
         if (mediaElement || textElement) {
             const thumb = document.createElement('button');
             thumb.className = 'reel-thumbnail';
@@ -229,11 +253,10 @@ function loadSpreadItems(spread, itemToSelect = null) {
                     img.alt = `Náhled ${index + 1}`;
                     thumb.appendChild(img);
                 } else if (isVideo) {
-                    // Statický <video> tag pro náhled
                     const vid = document.createElement('video');
                     vid.src = itemData.mediaSrc;
                     vid.muted = true;
-                    vid.preload = "metadata"; // Načte první frame (důležité pro Safari)
+                    vid.preload = "metadata";
                     vid.disablePictureInPicture = true;
                     vid.playsInline = true;
                     thumb.appendChild(vid);
@@ -242,40 +265,48 @@ function loadSpreadItems(spread, itemToSelect = null) {
                     thumb.classList.add('is-placeholder');
                 }
             } else if (itemData.text) {
-                // Náhled pouze pro text
                 thumb.innerHTML = '<span>TEXT</span>';
                 thumb.classList.add('is-placeholder');
             }
 
-            // Kliknutí na náhled změní položku
             thumb.addEventListener('click', () => {
                 setCurrentSpreadItem(index);
             });
-
             lightboxReel.appendChild(thumb);
-        }
-        // --- Konec vytváření náhledu ---
-
-        // Přidáme wrapper do stage, POKUD má vůbec nějaký obsah
-        if (mediaElement || textElement) {
-            lightboxStage.appendChild(itemWrapper);
-            spreadItems.push(itemWrapper);
-
-            if (itemData === itemToSelect) {
-                currentSpreadItemIndex = index;
-            }
         }
     });
 
-    // Zobrazíme/skryjeme lištu podle počtu položek
-    lightboxReel.style.display = spreadItems.length > 1 ? 'flex' : 'none';
+    // --- 6. Vytvoření teček pro mobil ---
+    const dotsContainer = document.getElementById('lightbox-dots');
+    dotsContainer.innerHTML = '';
+
+    if (spreadItems.length > 1) {
+        spreadItems.forEach((_, index) => {
+            const dot = document.createElement('button');
+            dot.className = 'lightbox-dot';
+            dot.dataset.index = index;
+            dot.setAttribute('aria-label', `Zobrazit položku ${index + 1}`);
+            dot.addEventListener('click', () => {
+                setCurrentSpreadItem(index);
+            });
+            dotsContainer.appendChild(dot);
+        });
+    }
+
+    // --- 7. Ovládání zobrazení (Lišta vs Tečky) ---
+    // Přidáme třídu na .lightbox, CSS se postará o zbytek
+    if (spreadItems.length > 1) {
+        lightbox.classList.add('has-multiple-items');
+    } else {
+        lightbox.classList.remove('has-multiple-items');
+    }
 
     updateLightboxView();
 }
 
 
 /**
- * UPRAVENÁ FUNKCE: Aktualizuje zobrazení v lightboxu A V LIŠTĚ
+ * UPRAVENÁ FUNKCE: Aktualizuje zobrazení v lightboxu, LIŠTĚ, TEČKÁCH a OVERLAY TEXTU
  */
 function updateLightboxView() {
     if (spreadItems.length === 0) return;
@@ -283,7 +314,7 @@ function updateLightboxView() {
     const prevIndex = (currentSpreadItemIndex - 1 + spreadItems.length) % spreadItems.length;
     const nextIndex = (currentSpreadItemIndex + 1) % spreadItems.length;
 
-    // Aktualizace hlavního okna
+    // --- 1. Aktualizace hlavního okna (Médií/Sólo textů) ---
     spreadItems.forEach((item, index) => {
         item.classList.remove('active', 'prev', 'next');
         const video = item.querySelector('video');
@@ -292,7 +323,6 @@ function updateLightboxView() {
         if (index === currentSpreadItemIndex) {
             item.classList.add('active');
             if (video) video.play().catch(e => console.log("Autoplay byl zablokován prohlížečem."));
-            // (Autoplay pro Vimeo je řešen v URL)
         } else if (index === prevIndex && spreadItems.length > 1) {
             item.classList.add('prev');
             if (video) video.pause();
@@ -303,23 +333,41 @@ function updateLightboxView() {
             if (video) video.pause();
         }
 
-        // Zastavení vimeo videí, která nejsou aktivní
         if (iframe && index !== currentSpreadItemIndex) {
-            // "Zastaví" video přenastavením src
             const oldSrc = iframe.src;
             iframe.src = oldSrc;
         }
     });
 
-    // Aktualizace aktivního náhledu v liště (NOVÁ ČÁST)
+    // --- 2. Aktualizace aktivního náhledu v liště ---
     const thumbnails = document.querySelectorAll('.reel-thumbnail');
     thumbnails.forEach((thumb, index) => {
         if (index === currentSpreadItemIndex) {
             thumb.classList.add('active');
-            // Zajistí, že aktivní náhled je vždy vidět (pokud by lišta skrolovala)
             thumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
         } else {
             thumb.classList.remove('active');
+        }
+    });
+
+    // --- 3. Aktualizace aktivní tečky ---
+    const dots = document.querySelectorAll('.lightbox-dot');
+    dots.forEach((dot, index) => {
+        if (index === currentSpreadItemIndex) {
+            dot.classList.add('active');
+        } else {
+            dot.classList.remove('active');
+        }
+    });
+
+    // --- 4. Aktualizace OVERLAY TEXTU (hledáme v #lightbox) ---
+    const overlayTexts = lightbox.querySelectorAll('.lightbox-text-overlay');
+    overlayTexts.forEach(textEl => {
+        const textIndex = parseInt(textEl.dataset.index, 10);
+        if (textIndex === currentSpreadItemIndex) {
+            textEl.classList.add('active'); // Zobrazíme text pro aktivní položku
+        } else {
+            textEl.classList.remove('active'); // Skryjeme ostatní
         }
     });
 }
@@ -378,7 +426,6 @@ function setupEventListeners() {
 
 /**
  * Přepne na další/předchozí DVOUSTRANU, která obsahuje položky.
- * OPRAVENO: Média se načtou hned, ne až po animaci.
  */
 function findNextSpreadWithItems(direction) {
     if (state.isAnimating || spreadsWithItems.length === 0) return;
@@ -403,15 +450,14 @@ function findNextSpreadWithItems(direction) {
     const targetSpread = spreadsWithItems[nextSpreadIndex];
 
     if (targetSpread !== currentBookSpread) {
-        // ZMĚNA: Nejdříve načteme obsah lightboxu
+        // Nejdříve načteme obsah lightboxu
         loadSpreadItems(targetSpread, null);
-
-        // AŽ POTÉ spustíme animaci otáčení knihy, bez callbacku
+        // AŽ POTÉ spustíme animaci otáčení knihy
         animateTo(
             parseFloat(slider.value),
             targetSpread,
             CONFIG.animationDuration,
-            null // Callback je odebrán
+            null
         );
     }
 }
@@ -501,8 +547,8 @@ function setupTouchGestures() {
 
 function setupLightboxWheel() {
 
-    let isWheeling = false; 
-    let wheelGestureTimeout = null; 
+    let isWheeling = false;
+    let wheelGestureTimeout = null;
     const WHEEL_GESTURE_END_DELAY = 50;
 
     lightbox.addEventListener('wheel', (e) => {
@@ -526,21 +572,21 @@ function setupLightboxWheel() {
             const threshold = 1;
 
             if (absY > absX && absY > threshold) {
-                isWheeling = true; 
+                isWheeling = true;
                 if (deltaY > threshold) {
                     changeSpreadItem(1); // Dolů
                 } else if (deltaY < -threshold) {
                     changeSpreadItem(-1); // Nahoru
                 } else {
-                    isWheeling = false; 
+                    isWheeling = false;
                 }
             }
         }
 
-    }, { passive: false }); 
+    }, { passive: false });
 }
 
-
+// === TOTO JE OPRAVENÁ VERZE GEST ===
 function setupLightboxTouchGestures() {
     lightbox.addEventListener('touchmove', (event) => {
         event.preventDefault();
@@ -571,7 +617,8 @@ function setupLightboxTouchGestures() {
         } else {
             // === VERTIKÁLNÍ SWIPE (měníme POLOŽKU na dvoustraně) ===
             if (Math.abs(deltaY) > CONFIG.touchSwipeThreshold) {
-                changeSpreadItem(deltaY < 0 ? -1 : 1); 
+                // === OPRAVENO: Swipe Nahoru (deltaY < 0) -> Další položka (1) ===
+                changeSpreadItem(deltaY < 0 ? 1 : -1);
             }
         }
 
@@ -593,7 +640,7 @@ function setupLightboxControls() {
         }
     });
 
-    setupLightboxWheel(); 
+    setupLightboxWheel();
     setupLightboxTouchGestures();
 }
 
