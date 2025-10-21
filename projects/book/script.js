@@ -12,7 +12,9 @@ const CONFIG = {
 
 const mediaOverlays = {
     6: { type: 'webm', src: 'assets/S3B-2_overlay.webm' },
-    8: { type: 'webm', src: 'assets/360-2_overlay.webm' }
+    8: { type: 'webm', src: 'assets/360-2_overlay.webm' },
+    7: { type: 'webm', src: 'assets/Piktogramy pro školu-1_overlay.webm' },
+    10: { type: 'webm', src: 'assets/Piktogramy pro školu-2_overlay.webm' },
 };
 
 // ... (získání DOM elementů book, bookViewport, atd.) ...

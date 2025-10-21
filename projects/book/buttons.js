@@ -15,7 +15,7 @@ const buttonData = [
     },
     {
         spread: 2,
-        mediaSrc: 'media/medium4_spread3.jpg',
+        mediaSrc: 'media/4isté rendery pohromadě 2-2.webm',
      
         styles: {
             // TOTO SI UPRAVTE:
@@ -48,8 +48,41 @@ const buttonData = [
             height: '25%'
         }
     },
+    {
+        spread: 2,
+        mediaSrc: 'media/4isté rendery pohromadě invert.webm',
+        text: 'V pozdní fázi navrhování jsem zmítal o inverzy. Ač mi byla velmi vábivá, zůstal jsem u původního konceptu.',
+        styles: {
+            // TOTO SI UPRAVTE:
+            top: '70%',
+            left: '110%',
+            width: '40%',
+            height: '25%'
+        }
+    },
     // =================================
+    // Dvoustrana 3
+    {
+        spread: 3,
 
+        text: `Myšlenku k tomuto projektu se staly práce studentů přípravných kurzů, jejichž různorodé přístupy, ať už jak pracují s uhlem nebo samotná perspektiva. I přes to že jsem studii perspektivy viděl a dělal nespočetněkrát, jsem po kolečku kolem stojanů začal vnímat víc, než jen baličák, uhel a iluzi. Právě jejich propojení jako celku pro mne vytvořilo hlubší význam.`,
+        styles: {
+            top: '6%',
+            left: '1%',
+            width: '48%',
+            height: '22%'
+        }
+    },
+    {
+        spread: 3,
+        mediaSrc: 'media/360-2_overlay.webm',
+        styles: {
+            top: '22%',
+            left: '61%',
+            width: '28%',
+            height: '57%'
+        }
+    },
     // Dvoustrana 4
     {
         spread: 4,
