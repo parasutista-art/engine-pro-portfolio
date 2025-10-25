@@ -30,6 +30,7 @@ html, body {
     height: 100vh;
     transition: margin-left var(--nav-transition-speed) ease-in-out;
     position: relative;
+    /* Ponecháváme flex pro centrování knihy */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -46,29 +47,58 @@ body.desktop-nav-closed .book-viewport {
 /* === KNIHA & INTERAKTIVNÍ VRSTVA === */
 /* ===================================== */
 
-.book,
-#interactive-layer {
+.book {
     position: relative;
     transform-style: preserve-3d;
     perspective: 2500px;
     z-index: 100;
+    /* Tyto rozměry fungují správně pro .book jako flex-item */
     height: 90vh;
-    width: auto;
+    width: calc(90vh * var(--spread-aspect-ratio));
     aspect-ratio: var(--spread-aspect-ratio);
-}
-
-@media (orientation: portrait) {
-    .book,
-    #interactive-layer {
-        width: 90vw;
-        height: auto;
-    }
+    max-width: calc(100% - 160px);
 }
 
 #interactive-layer {
+    /* Původní pravidla pro pozicování */
     position: absolute;
     pointer-events: none;
     z-index: 1500;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    /* * === ZDE JE KLÍČOVÁ OPRAVA ===
+     * Použijeme stejná pravidla pro šířku, max-šířku a poměr stran
+     * jako má .book, ale 'height' nastavíme na 'auto'.
+     *
+     * Tím donutíme výšku vrstvy, aby se VŽDY vypočítala 
+     * z aktuální šířky (která je omezena max-width),
+     * a zachovala tak poměr stran.
+     * 'max-height: 90vh' zajišťuje, že vrstva nikdy nebude vyšší 
+     * než kniha při plné velikosti.
+    */
+    width: calc(90vh * var(--spread-aspect-ratio));
+    max-width: calc(100% - 160px);
+    aspect-ratio: var(--spread-aspect-ratio);
+    height: auto;
+    max-height: 90vh;
+}
+
+@media (orientation: portrait) {
+    .book {
+        /* Pravidla pro knihu na mobilu */
+        width: 90vw;
+        height: auto;
+        max-width: 90vw;
+    }
+
+    #interactive-layer {
+        /* Pravidla pro vrstvu na mobilu */
+        width: 90vw;
+        height: auto;
+        max-width: 90vw;
+        max-height: none; /* Na mobilu nepotřebujeme omezovat výšku */
+    }
 }
 
 .interactive-button {
@@ -99,16 +129,25 @@ body.desktop-nav-closed .book-viewport {
     transform-origin: left center;
 }
 
+    /* TENTO BLOK MÁTE - ZMĚŇTE POUZE BARVU POZADÍ */
     .paper .front, .paper .back {
         position: absolute;
         inset: 0;
         backface-visibility: hidden;
         transform-style: preserve-3d;
-        background: #000;
+        background: #000; /* <-- ZMĚŇTE Z #000 NA BÍLOU (nebo barvu papíru) */
     }
 
+    /* TENTO BLOK MÁTE - UPRAVTE HO PODLE TOHOTO */
     .paper .back {
-        transform: rotateY(180deg);
+        transform: rotateY(180deg) translateZ(-1px); /* <-- PŘIDAT translateZ */
+        z-index: 1; /* <-- PŘIDAT z-index */
+    }
+
+    /* TENTO BLOK VÁM ÚPLNĚ CHYBÍ - CELÝ HO PŘIDEJTE */
+    .paper .front {
+        transform: translateZ(1px); /* <-- PŘIDAT translateZ (pro "odlepení") */
+        z-index: 2; /* <-- PŘIDAT z-index (aby byla přední strana nahoře) */
     }
 
 /* Wrapper přidaný přes JS */
@@ -475,7 +514,7 @@ body.desktop-nav-closed .book-viewport {
 /* === RESPONZIVNÍ ÚPRAVY PRO MOBIL === */
 /* ===================================== */
 
-@media (max-width: 900px) {
+@media (orientation: portrait) {
 
     .lightbox {
         /* Padding pro tečky na mobilu */
@@ -519,7 +558,7 @@ body.desktop-nav-closed .book-viewport {
 }
 
 
-@media (max-width: 768px) {
+@media (orientation: portrait) {
     .book-viewport {
         margin-left: 0;
         width: 100%;

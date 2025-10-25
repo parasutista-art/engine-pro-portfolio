@@ -188,7 +188,7 @@ body {
     display: block !important;
 }
 
-@media (max-width: 768px) {
+@media (orientation: portrait) {
     #desktop-nav {
         display: none !important;
     }
