@@ -62,6 +62,30 @@ const buttonData = [
             height: '25%'
         }
     },
+    {
+        spread: 2,
+        mediaSrc: 'media/proces.webm',
+        text: 'proces',
+        styles: {
+            // TOTO SI UPRAVTE:
+            top: '70%',
+            left: '250%',
+            width: '40%',
+            height: '25%'
+        }
+    },
+    {
+        spread: 2,
+        mediaSrc: 'media/skicas3b.webp',
+        text: 'První skica s výběrem frází a prvními nástřely kompozice',
+        styles: {
+            // TOTO SI UPRAVTE:
+            top: '70%',
+            left: '250%',
+            width: '40%',
+            height: '25%'
+        }
+    },
     // =================================
     // 360 3
     {
@@ -87,6 +111,18 @@ const buttonData = [
             height: '57%'
         }
     },
+    {
+        spread: 3,
+        mediaSrc: 'media/360 video.webm',
+        mediaControls: true,
+        styles: {
+            top: '22%',
+            left: '261%',
+            width: '28%',
+            height: '57%'
+        }
+    },
+   
     // Piktogramy 4
     {
         spread: 4,
