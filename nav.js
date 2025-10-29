@@ -1,14 +1,19 @@
 function createNav(relativePath = '', activePage = '') {
     const links = {
         main: `<a href="${relativePath}index.html" class="name-link">Matyas Kunstmüller</a>`,
+        // "portfolio" nyní odkazuje na tuto knihu
         portfolio: `<a href="${relativePath}projects/book/bookengine.html">portfolio</a>`,
         font: `<a href="${relativePath}projects/font/font.html">blokkada</a>`,
-        projektC: `<a href="${relativePath}index.html">projekt C</a>`
+        // "1.TXT" odkazuje na novou cestu
+        txt: `<a href="${relativePath}projects/1.txt/1.txt.html">1.TXT</a>`
     };
 
+    // Změněna logika aktivace
     if (activePage === 'font') links.font = `<a href="#" class="active">Blokkada</a>`;
     else if (activePage === 'portfolio') links.portfolio = `<a href="#" class="active">portfolio</a>`;
     else if (activePage === 'main') links.main = `<a href="#" class="active name-link">Matyas Kunstmüller</a>`;
+    else if (activePage === 'txt') links.txt = `<a href="#" class="active">1.TXT</a>`;
+
 
     const navLinksHTML = `
         <nav class="project-list">
@@ -16,7 +21,7 @@ function createNav(relativePath = '', activePage = '') {
                 <li>${links.main}</li>
                 <li>${links.portfolio}</li>
                 <li>${links.font}</li>
-                <li>${links.projektC}</li>
+                <li>${links.txt}</li>
             </ul>
         </nav>
     `;
@@ -56,13 +61,9 @@ function createNav(relativePath = '', activePage = '') {
         });
     }
 
-    // Na mobilu...
-    if (window.innerWidth <= 768) {
-        // ...pokud jsme na hlavní stránce ('main')...
+    if (window.innerWidth <= 768 || window.matchMedia("(orientation: portrait)").matches) {
         if (activePage === 'main') {
-            // ...přidáme třídu, která otevře lištu.
             document.body.classList.add('mobile-nav-open');
-            // A změníme text tlačítka na šipku nahoru.
             if (mobileButton) mobileButton.textContent = '↑';
         }
     }

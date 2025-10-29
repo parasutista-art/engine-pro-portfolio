@@ -113,13 +113,24 @@ const buttonData = [
     },
     {
         spread: 3,
+        mediaSrc: 'media/360 plakat.webp',
+        mediaControls: true,
+        styles: {
+            top: '43%',
+            left: '0%',
+            width: '27%',
+            height: '56%'
+        }
+    },
+    {
+        spread: 3,
         mediaSrc: 'media/360 video.webm',
         mediaControls: true,
         styles: {
-            top: '22%',
-            left: '261%',
-            width: '28%',
-            height: '57%'
+            top: '43%',
+            left: '27%',
+            width: '23%',
+            height: '56%'
         }
     },
    
@@ -143,38 +154,155 @@ To popravdě bylo docela hustý protože do té doby jsem nedělal na ničem ofi
     },
     {
         spread: 4,
-        mediaSrc: 'media/medium2_spread4.webm',
+        mediaSrc: 'media/Kunstmuller_gif piktogramů_1.webm',
         styles: {
-            top: '38%',
-            left: '11%',
-            width: '28%',
-            height: '24%'
+            top: '15%',
+            left: '55%',
+            width: '40%',
+            height: '70%'
         }
     },
     {
         spread: 4,
-        mediaSrc: 'media/medium3_spread4.webm',
+        mediaSrc: 'media/Kreslicí plátno 343.webp',
         styles: {
-            top: '66%',
-            left: '11%',
-            width: '28%',
-            height: '24%'
+            top: '31%',
+            left: '3%',
+            width: '44%',
+            height: '23%'
         }
     },
+    {
+        spread: 4,
+        mediaSrc: 'media/Kunstmuller_Hlavní plakát.webp',
+        styles: {
+            top: '31%',
+            left: '250%',
+            width: '44%',
+            height: '23%'
+        }
+    },
+    {
+        spread: 4,
+        mediaSrc: 'media/stránky.webm',
+        styles: {
+            top: '63%',
+            left: '5%',
+            width: '40%',
+            height: '29%'
+        }
+    },
+  
     // Povaleč 5
     {
         spread: 5,
+        text: `Povaleč 
 
-        text: `Povaleč
-
-        Na předmětu Španělštiny, který nemám rád, jsem seděl v lavici s Františkou Bolfovou. V touze zmizet mentálně z té hodiny jsme se bavili o všem jíném a jedno k nám přelítl open call na vizuální identitu festivalu, který nasdílela škola na facebook. Já byl jakože “škoda že jsme se o tom nedozvěděli dřív, za pět ní do deadlinu nic nestihnem”, a fany “VO CO?!”. Hej a lidi mi normálně zustavali ve škole do zavíračky každý den jen abychom to sesmolili za pět dní. Nikdy jsme to nedělali, učili se kvuli tomu ve photoshopu k tomu, a prostě krejzy že jsme do toho šli. A reálně se to vyplatilo, protože jsme se dostali do druhého kola do kterého jsme vypumpovali všechno co jsme měli ale prostě jsme to nikdy nedělali a tak jsme to, ač těsně, nevyhráli. Což byl smutek kvuli času, ale povaleč tým nás oslovil jestli bychom pro ně nechtěli dělat pomocne grafiky. A to byla ta nejlepší věc co se nám mohla stát. Koukli jsme do děje toho, jak to celé vzniká, naučili se toho mrdu, a hlavně si to užili přímo na festivalu. Byli jsme i ročník potom a ač jsme dělali to same cela ta komunita za to prostě stojí.
-
-`,
+        Soutěžní návrh vizuální identity pro hudební festival Povaleč, vytvořený v týmu dvou během pěti dnů. Návrh postoupil do druhého finálového kola. Na základě soutěžní práce jsme byli osloveni ke spolupráci na tvorbě doprovodných festivalových grafik, což poskytlo cennou zkušenost s reálným projektem, prací v týmu a komunikací s klientem.`,
         styles: {
             top: '6%',
             left: '1%',
             width: '48%',
             height: '22%'
+        }
+    },
+    {
+        spread: 5,
+        mediaSrc: 'media/trojplakatpovaleci.webp',
+        text: ``,
+        styles: {
+            top: '32%',
+            left: '2%',
+            width: '46%',
+            height: '31%'
+        }
+    },
+    {
+        spread: 5,
+        mediaSrc: 'media/náramky na ručky planeta povaleč3.webp',
+        text: ``,
+        styles: {
+            top: '66%',
+            left: '2%',
+            width: '46%',
+            height: '4%'
+        }
+    },
+    {
+        spread: 5,
+        mediaSrc: 'media/Příspěvek Kurvy Češi s povalečákem.webp',
+        text: ``,
+        styles: {
+            top: '70%',
+            left: '2%',
+            width: '18%',
+            height: '26%'
+        }
+    },
+    {
+        spread: 5,
+        mediaSrc: 'media/povalecaci na tripu-ipraveno-3.webp',
+        text: ``,
+        styles: {
+            top: '70%',
+            left: '21%',
+            width: '8%',
+            height: '26%'
+        }
+    },
+    {
+        spread: 5,
+        mediaSrc: 'media/Ukzkavyuitplaktvatypickchrozmrech.webp',
+        text: ``,
+        styles: {
+            top: '70%',
+            left: '30%',
+            width: '18%',
+            height: '26%'
+        }
+    },
+    {
+        spread: 5,
+        mediaSrc: 'media/free-urban-posterwall-mockup.webp',
+        text: ``,
+        styles: {
+            top: '70%',
+            left: '250%',
+            width: '18%',
+            height: '26%'
+        }
+    },
+    {
+        spread: 5,
+        mediaSrc: 'media/NoFaceNoCase.webp',
+        text: `ukázka insta-příspěvku z 19. ročníku`,
+        styles: {
+            top: '18%',
+            left: '53%',
+            width: '21%',
+            height: '39%'
+        }
+    },
+    {
+        spread: 5,
+        mediaSrc: 'media/mapavalec.webp',
+        text: `ukázka insta-příspěvku z 19. ročníku`,
+        styles: {
+            top: '18%',
+            left: '77%',
+            width: '18%',
+            height: '39%'
+        }
+    },
+    {
+        spread: 5,
+        mediaSrc: 'media/mapavalec.webp',
+        text: `ukázka insta-příspěvku z 19. ročníku`,
+        styles: {
+            top: '60%',
+            left: '53%',
+            width: '44%',
+            height: '35%'
         }
     },
     // Tousťák 6
@@ -207,13 +335,62 @@ To popravdě bylo docela hustý protože do té doby jsem nedělal na ničem ofi
     // typotrip 8
     {
         spread: 8,
-
         text: `Koncepční návrh vizuální identity pro třídní výstavu. Ve frustraci nepovedených návrhů jsem se rozhodl pro použití fotografií divokého prostoru ve kterém se vystavovalo, a pro zvýraznění jeho charakteru jsem fotky upravil do silně neonových barev. Série fotografií mě bavila ale samotné fotografie na plakát nestačili a tak jsem se rozhodl pro prosákávání fotografií do loopu v motion posteru pro ukázání celého prostoru. `,
         styles: {
             top: '6%',
             left: '1%',
             width: '48%',
             height: '28%'
+        }
+    },
+    {
+        spread: 8,
+        mediaSrc: 'media/!!!POUŽÍVANÝ LOOP s typo 2_1.webm',
+            styles: {
+            top: '1%',
+            left: '59%',
+            width: '41%',
+            height: '98%'
+        }
+    },
+    {
+        spread: 8,
+        mediaSrc: 'media/Mockup jen fotky.webp',
+        styles: {
+            top: '58%',
+            left: '5%',
+            width: '41%',
+            height: '36%'
+        }
+    },
+    {
+        spread: 8,
+        mediaSrc: 'media/DSC00062.webp',
+        styles: {
+            top: '58%',
+            left: '255%',
+            width: '41%',
+            height: '36%'
+        }
+    },
+    {
+        spread: 8,
+        mediaSrc: 'media/DSC00067.webp',
+        styles: {
+            top: '58%',
+            left: '255%',
+            width: '41%',
+            height: '36%'
+        }
+    },
+    {
+        spread: 8,
+        mediaSrc: 'media/DSC00069.webp',
+        styles: {
+            top: '58%',
+            left: '255%',
+            width: '41%',
+            height: '36%'
         }
     },
     // Blokkada 9
