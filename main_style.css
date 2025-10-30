@@ -19,6 +19,7 @@ body {
     color: #fff;
     font-family: 'Roboto Mono', monospace;
     overflow: hidden;
+    display: flex; /* Výchozí layout pro desktop */
 }
 
 .project-list ul {
@@ -31,19 +32,29 @@ body {
     margin-bottom: 0.8rem;
 }
 
+    /* Prázdný řádek pro mezeru */
+    .project-list li.nav-spacer {
+        height: 0.8rem; /* Vytvoří mezeru jednoho řádku */
+        margin: 0; /* Vynuluje margin, aby byla jen mezera */
+    }
+
 .project-list a {
     color: #888;
     text-decoration: none;
     transition: color 0.2s;
     font-size: 1rem;
+    display: block; /* Všechny odkazy jsou blokové pro snadné klikání */
 }
 
     .project-list a:hover, .project-list a.active {
         color: #fff;
     }
 
+    /* Jméno má normální styl, je v <li> */
     .project-list a.name-link {
         color: #fff !important;
+        font-weight: normal;
+        font-size: 1rem;
     }
 
 /* ======================================================= */
@@ -55,92 +66,97 @@ body {
     position: fixed;
     left: 0;
     top: 0;
-    background-color: #000;
-    border-right: 1px solid #333;
-    transition: width var(--nav-transition-speed);
-    z-index: 100;
-    flex-shrink: 0;
-    overflow: visible;
-}
-
-.desktop-nav-content {
+    background: #000;
+    z-index: 1000;
+    transition: transform var(--nav-transition-speed) ease-in-out;
     padding: 1.5rem;
-    overflow: hidden;
-}
-
-body.desktop-nav-closed .desktop-nav-content {
-    visibility: hidden;
+    border-right: 1px solid #333; /* Tvoje dělící linka */
 }
 
 .desktop-toggle-btn {
     position: absolute;
-    left: var(--nav-width);
-    top: 50%;
+    top: 50%; /* Vertikálně na středu */
     transform: translateY(-50%);
-    width: 35px;
-    height: 50px;
-    background-color: transparent;
-    border: none;
+    right: -20px;
+    width: 40px;
+    height: 40px;
+    background-color: #000;
+    border: 1px solid #333;
+    border-left: none;
+    border-radius: 0 5px 5px 0;
     cursor: pointer;
-    transition: left var(--nav-transition-speed);
-    z-index: 1001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-    .desktop-toggle-btn::after {
+    .desktop-toggle-btn::before {
         content: '';
         display: block;
         width: 8px;
         height: 8px;
-        border-top: 2px solid #fff;
-        border-right: 2px solid #fff;
-        transform: rotate(-135deg);
+        border-top: 2px solid #888;
+        border-left: 2px solid #888;
+        transform: rotate(-45deg);
+        transition: transform 0.2s;
     }
 
-.content-column, .book-viewport {
-    width: 100%;
-    height: 100%;
-    margin-left: var(--nav-width);
-    transition: margin-left var(--nav-transition-speed);
+body.desktop-nav-closed .desktop-toggle-btn::before {
+    transform: rotate(135deg);
 }
 
+.desktop-nav-content {
+    /* ZMĚNA: Jméno je nyní úplně nahoře */
+    padding-top: 0;
+}
+
+/* Lišta se skryje celá (podle tvého přání) */
 body.desktop-nav-closed #desktop-nav {
-    width: 0;
+    transform: translateX(calc(-1 * var(--nav-width)));
 }
-
-body.desktop-nav-closed .desktop-toggle-btn {
-    left: 0;
-}
-
-    body.desktop-nav-closed .desktop-toggle-btn::after {
-        transform: rotate(45deg);
-    }
-
-body.desktop-nav-closed .content-column, body.desktop-nav-closed .book-viewport {
-    margin-left: 0;
-}
-
 
 /* ======================================================= */
-/* === 2. MOBILNÍ NAVIGACE (HORNÍ LIŠTA) === */
+/* === 2. OBSAHOVÝ SLOUPEC (VEDLE LIŠTY) === */
+/* ======================================================= */
+.content-column {
+    margin-left: var(--nav-width);
+    width: calc(100% - var(--nav-width));
+    height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    transition: margin-left var(--nav-transition-speed) ease-in-out;
+}
+
+/* Obsah se roztáhne na 100% */
+body.desktop-nav-closed .content-column {
+    margin-left: 0;
+    width: 100%;
+}
+
+/* ======================================================= */
+/* === 3. MOBILNÍ NAVIGACE (HORNÍ LIŠTA) === */
 /* ======================================================= */
 #mobile-nav {
-    position: relative; /* Toto je klíčové pro správné pozicování tlačítka */
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
-}
-
-body.mobile-nav-open #mobile-nav {
-    border-bottom: 1px solid #333;
+    z-index: 1000;
+    background-color: transparent; /* Kontejner je průhledný */
+    pointer-events: none; /* Neblokuje klikání */
 }
 
 .mobile-toggle-btn {
-    position: fixed; /* V zavřeném stavu plave nad obsahem */
-    top: 10px;
+    position: fixed;
+    pointer-events: all; /* Tlačítko je klikatelné */
+    top: 15px;
     right: 15px;
+    bottom: auto;
     width: 50px;
     height: 50px;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0, 0, 0, 0.7);
     backdrop-filter: blur(5px);
-    border: none;
+    border: 1px solid #333;
     border-radius: 50%;
     color: #fff;
     font-size: 24px;
@@ -153,28 +169,34 @@ body.mobile-nav-open #mobile-nav {
 
 .mobile-nav-content {
     padding: 1.5rem;
-    background-color: #000;
-    display: none;
+    background-color: #000; /* Plně černý blok */
+    display: none; /* Skryto defaultně */
+    pointer-events: all;
+    position: relative; /* Pro pozicování zavíracího tlačítka */
 }
 
 body.mobile-nav-open .mobile-nav-content {
-    display: block;
+    display: block; /* Zobrazí se jako full-width blok */
 }
 
-/* === ZDE JE KLÍČOVÁ OPRAVA === */
+/* Tlačítko ZAVŘÍT (↑) */
 body.mobile-nav-open .mobile-toggle-btn {
-    position: absolute; /* V OTEVŘENÉM stavu se pozicuje vůči liště (#mobile-nav) */
+    position: absolute;
     top: auto;
-    bottom: 10px;
-    right: 15px;
-    /* Odstraníme "plovoucí" styly, protože už jsou na černém pozadí lišty */
+    bottom: 5px;
+    right: 10px;
     background: none;
     backdrop-filter: none;
+    border: none;
+    width: auto;
+    height: auto;
+    font-size: 24px;
+    color: #fff;
 }
 
 
 /* ======================================================= */
-/* === 3. PŘEPÍNÁNÍ VIDITELNOSTI A LAYOUTU === */
+/* === 4. PŘEPÍNÁNÍ VIDITELNOSTI A LAYOUTU === */
 /* ======================================================= */
 body {
     display: flex;
@@ -188,7 +210,94 @@ body {
     display: block !important;
 }
 
-@media (orientation: portrait) {
+/* ======================================================= */
+/* === 5. NOVÉ STYLY PRO POD-MENU === */
+/* ======================================================= */
+
+/* ZMĚNA: Toto je nyní odsazení (cca 3 mezery) */
+/* Cílí na .sub-nav, který je UVNITŘ .project-list li */
+.project-list li > .sub-nav {
+    list-style: none;
+    padding: 0;
+    margin-top: 0.8rem; /* Mezera mezi hlavním odkazem a pod-seznamem */
+    margin-bottom: 0;
+    padding-left: 20px; /* Tvoje odsazení */
+}
+
+.sub-nav-item {
+    margin-bottom: 5px;
+}
+
+    .sub-nav-item a {
+        font-size: 0.9rem;
+        color: #888;
+    }
+
+        .sub-nav-item a:hover {
+            color: #fff;
+        }
+
+        .sub-nav-item a.active-sub {
+            color: #fff;
+            font-weight: bold;
+        }
+
+/* Styly pro stránku projekty.html (z minula) */
+.projekty-list-container {
+    padding: 1.5rem;
+    max-width: 900px;
+}
+
+    .projekty-list-container h1 {
+        font-size: 1.2rem;
+        margin-bottom: 2rem;
+        color: #888;
+        text-transform: uppercase;
+    }
+
+.project-item {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2.5rem;
+    position: relative;
+}
+
+.project-item-link {
+    font-size: 1.5rem;
+    color: #fff;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.project-item:hover .project-item-link {
+    color: #888;
+}
+
+.project-preview {
+    display: none;
+    width: 300px;
+    height: 200px;
+    border: 1px solid #333;
+    background-color: #111;
+}
+
+.project-item:hover .project-preview {
+    display: block;
+}
+
+.project-preview img, .project-preview video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+
+/* ======================================================= */
+/* === 6. MOBILNÍ @MEDIA QUERIES === */
+/* ======================================================= */
+@media (max-width: 768px), (orientation: portrait) {
     #desktop-nav {
         display: none !important;
     }
@@ -198,24 +307,45 @@ body {
     }
 
     body {
-        flex-direction: column;
-        height: 100vh;
+        display: block;
     }
 
-    #nav-placeholder {
+    .content-column {
         width: 100%;
-        height: auto;
-        flex-shrink: 0;
-    }
-
-    body:not(.mobile-nav-open) #nav-placeholder {
-        height: 0;
-    }
-
-    .content-column, .book-viewport {
         margin-left: 0;
-        flex-grow: 1;
-        overflow: auto;
-        min-height: 0;
+    }
+
+    body.mobile-nav-open .content-column {
+        display: block;
+    }
+
+    body.desktop-nav-closed .content-column {
+        width: 100%;
+        margin-left: 0;
+    }
+
+    .projekty-list-container {
+        padding: 1.5rem 1rem;
+    }
+
+    .project-item {
+        flex-direction: column;
+        align-items: flex-start;
+        margin-bottom: 3rem;
+    }
+
+    .project-item-link {
+        font-size: 1.3rem;
+        margin-bottom: 1rem;
+    }
+
+    .project-item:hover .project-item-link {
+        color: #fff;
+    }
+
+    .project-preview {
+        display: block;
+        width: 100%;
+        height: 200px;
     }
 }

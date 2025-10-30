@@ -1,0 +1,225 @@
+/* * 1. Úprava hlavního sloupce */
+.content-column.full-bleed {
+    padding: 0;
+    position: relative;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* * 2. Hlavièka (Mute tlaèítko a název) */
+.demo-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    color: #fff;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 10;
+}
+
+    .demo-header h1 {
+        font-size: 1.2rem;
+        margin: 0;
+        text-shadow: 0 0 5px rgba(0,0,0,0.7);
+    }
+
+#mute-btn {
+    background-color: rgba(30, 30, 30, 0.8);
+    color: #fff;
+    border: 1px solid #555;
+    padding: 8px 16px;
+    font-family: 'Roboto Mono', monospace;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    backdrop-filter: blur(2px);
+}
+
+    #mute-btn:hover {
+        background-color: #555;
+    }
+
+/* * 3. Kontejner pro videa (Desktop) */
+#demo-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    gap: 5px;
+    background-color: #050505;
+}
+
+/* 3b. Jednotlivé øádky */
+.demo-row {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    gap: 5px;
+}
+
+#row-top {
+    height: 50%;
+}
+
+#row-bottom {
+    height: 50%;
+}
+
+
+/* * 4. Jednotlivé elementy videa (Desktop) */
+.smog-element {
+    flex-grow: 1;
+    flex-basis: 0;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    padding: 0;
+    background-color: transparent;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+    /* * 5. Samotné video */
+    .smog-element video {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        mix-blend-mode: lighten;
+        visibility: visible;
+        opacity: 1;
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+
+/*
+ * ================================================
+ * === 6. LIŠTA A TEÈKY ===
+ * ================================================
+ */
+
+/* 6a. Kontejner pro lištu odpoètu (skrytý) */
+.progress-bar-container {
+    display: none;
+    position: absolute;
+    bottom: 25px;
+    left: 34%;
+    width: 32%;
+    height: 4px;
+    background-color: #333;
+    z-index: 5;
+    pointer-events: none;
+}
+
+.smog-element:hover .progress-bar-container {
+    display: block;
+}
+
+/* 6b. Samotná lišta odpoètu */
+.progress-bar {
+    height: 100%;
+    background-color: #555;
+    width: 0%;
+}
+
+    .progress-bar.animate {
+        animation: progressFill 2s linear;
+    }
+
+@keyframes progressFill {
+    from {
+        width: 0%;
+    }
+
+    to {
+        width: 100%;
+    }
+}
+
+/* 6c. Kontejner pro teèky (skrytý na desktopu) */
+.phase-dots-container {
+    display: none;
+    position: absolute;
+    bottom: 8px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    z-index: 5;
+    pointer-events: none;
+}
+
+.smog-element:hover .phase-dots-container {
+    display: block;
+}
+
+/* 6d. Jednotlivé teèky */
+.phase-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #444;
+    margin: 0 4px;
+    transition: background-color 0.2s ease;
+}
+
+    .phase-dot.active {
+        background-color: #fff;
+    }
+
+    .phase-dot.pending {
+        background-color: #FFA500;
+    }
+
+/*
+ * ================================================
+ * === 7. MOBILNÍ STYLY ===
+ * ================================================
+ */
+@media (orientation: portrait) {
+
+    .content-column.full-bleed {
+        height: 100vh;
+        overflow-y: auto;
+        overflow-x: hidden;
+    }
+
+    .demo-header {
+        position: absolute;
+    }
+
+    #demo-container {
+        flex-direction: column;
+        height: auto;
+        padding-top: 80px;
+        padding-bottom: 20px;
+    }
+
+    .demo-row {
+        display: contents;
+    }
+
+    .smog-element {
+        flex-grow: 0;
+        flex-basis: auto;
+        width: 95%;
+        height: auto;
+        max-height: 60vh;
+        margin-bottom: 10px;
+    }
+
+    .progress-bar-container {
+        display: none !important;
+    }
+
+    /* === ZMÌNA: Teèky jsou na mobilu vždy viditelné === */
+    .phase-dots-container {
+        display: block !important;
+        bottom: 10px; /* Odsazení odspodu na mobilu */
+    }
+}

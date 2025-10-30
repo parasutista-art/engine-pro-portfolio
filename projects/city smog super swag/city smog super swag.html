@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo - City Smog Super Swag</title>
+
+    <link rel="stylesheet" href="../../main_style.css">
+    <link rel="stylesheet" href="city smog super swag.css">
+</head>
+<body>
+    <div id="nav-placeholder"></div>
+
+    <main class="content-column full-bleed">
+
+        <div class="demo-header">
+            <h1>City Smog Super Swag - Demo</h1>
+            <button id="mute-btn">Unmute</button>
+        </div>
+
+        <div id="demo-container">
+
+            <div class="demo-row" id="row-top">
+                <div class="smog-element" data-id="zelena">
+                    <video muted playsinline></video>
+                    <div class="progress-bar-container"><div class="progress-bar"></div></div>
+                    <div class="phase-dots-container"></div>
+                </div>
+                <div class="smog-element" data-id="cervena">
+                    <video muted playsinline></video>
+                    <div class="progress-bar-container"><div class="progress-bar"></div></div>
+                    <div class="phase-dots-container"></div>
+                </div>
+            </div>
+
+            <div class="demo-row" id="row-bottom">
+                <div class="smog-element" data-id="sipka">
+                    <video muted playsinline></video>
+                    <div class="progress-bar-container"><div class="progress-bar"></div></div>
+                    <div class="phase-dots-container"></div>
+                </div>
+                <div class="smog-element" data-id="otevreno">
+                    <video muted playsinline></video>
+                    <div class="progress-bar-container"><div class="progress-bar"></div></div>
+                    <div class="phase-dots-container"></div>
+                </div>
+                <div class="smog-element" data-id="zavory">
+                    <video muted playsinline></video>
+                    <div class="progress-bar-container"><div class="progress-bar"></div></div>
+                    <div class="phase-dots-container"></div>
+                </div>
+            </div>
+
+        </div>
+
+        <
+    </main>
+    <script src="../../nav.js"></script>
+    <script>
+        createNav('../../', 'projekty-citysmog'); // ZMĚNA ZDE
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const LOOP_DURATION = 2000;
+            let globalIsMuted = true;
+
+            const videoSources = {
+                'zelena': [
+                    { file: 'assets/Zelená 0.webm' },
+                    { file: 'assets/Zelená 1.webm' },
+                    { file: 'assets/Zelená 2.webm' },
+                    { file: 'assets/Zelená 3.webm' }
+                ],
+                'sipka': [
+                    { file: 'assets/šipka 1.webm' },
+                    { file: 'assets/šipka 2.webm' },
+                    { file: 'assets/šipka 3.webm' }
+                ],
+                'cervena': [
+                    { file: 'assets/červená 0.webm' },
+                    { file: 'assets/červená 1.webm' },
+                    { file: 'assets/červená 2.webm' },
+                    { file: 'assets/červená 3.webm' }
+                ],
+                'otevreno': [
+                    { file: 'assets/otevřeno 0.webm' },
+                    { file: 'assets/otevřeno 1.webm' },
+                    { file: 'assets/otevřeno 2.webm' },
+                    { file: 'assets/otevřeno 3.webm' }
+                ],
+                'zavory': [
+                    { file: 'assets/závory 1.webm' },
+                    { file: 'assets/závory 2.webm' },
+                    { file: 'assets/závory 3.webm' }
+                ]
+            };
+
+            const elementState = {};
+
+            // --- 3. LOGIKA AKTUALIZACE TEČEK ---
+            function updateDots(state) {
+                const { currentPhase, nextPhase, dots } = state;
+                dots.forEach((dot, index) => {
+                    dot.className = 'phase-dot'; // Reset na šedou
+                    if (index === currentPhase) {
+                        dot.classList.add('active'); // Aktuální je bílá
+                    }
+                    if (index === nextPhase && currentPhase !== nextPhase) {
+                        dot.classList.add('pending'); // Čekající je oranžová
+                    }
+                });
+            }
+
+            // --- 2. INICIALIZACE ELEMENTŮ ---
+            document.querySelectorAll('.smog-element').forEach(el => {
+                const id = el.dataset.id;
+                if (!videoSources[id]) return;
+
+                const numStates = videoSources[id].length;
+                const dotsContainer = el.querySelector('.phase-dots-container');
+
+                // Tato kontrola je jen pojistka, ale chyba byla v HTML
+                if (!dotsContainer) {
+                    console.error(`Chyba: Nenašel se .phase-dots-container pro element ${id}`);
+                    return;
+                }
+
+                for (let i = 0; i < numStates; i++) {
+                    const dot = document.createElement('span');
+                    dot.className = 'phase-dot';
+                    dotsContainer.appendChild(dot);
+                }
+
+                elementState[id] = {
+                    id: id,
+                    currentPhase: 0,
+                    nextPhase: 0,
+                    videoEl: el.querySelector('video'),
+                    containerEl: el,
+                    dots: el.querySelectorAll('.phase-dot'),
+                    numStates: numStates
+                };
+
+                // Přidání listeneru na kliknutí
+                el.addEventListener('click', () => {
+                    const state = elementState[id];
+                    state.nextPhase = (state.nextPhase + 1) % state.numStates;
+                    updateDots(state);
+                });
+
+                // === NASTAVENÍ POČÁTEČNÍHO STAVU ===
+                const initialState = elementState[id];
+                const initialVideoInfo = videoSources[id][0]; // Fáze 0
+
+                initialState.videoEl.src = initialVideoInfo.file;
+                initialState.videoEl.load();
+                initialState.videoEl.muted = globalIsMuted;
+                initialState.videoEl.play().catch(e => { }); // Spustí přehrávání
+
+                updateDots(initialState); // Nastaví první tečku jako aktivní
+            });
+
+            // Mute tlačítko
+            const muteBtn = document.getElementById('mute-btn');
+            muteBtn.addEventListener('click', () => {
+                globalIsMuted = !globalIsMuted;
+                muteBtn.textContent = globalIsMuted ? 'Unmute' : 'Mute';
+                for (const id in elementState) {
+                    elementState[id].videoEl.muted = globalIsMuted;
+                }
+            });
+
+            // --- 4. LOGIKA SMYČKY (MASTER CLOCK) ---
+            function runLoopTick() {
+
+                document.querySelectorAll('.progress-bar').forEach(bar => {
+                    bar.classList.remove('animate');
+                    void bar.offsetWidth;
+                    bar.classList.add('animate');
+                });
+
+                for (const id in elementState) {
+                    const state = elementState[id];
+                    const video = state.videoEl;
+
+                    if (state.currentPhase !== state.nextPhase) {
+                        state.currentPhase = state.nextPhase;
+                        const currentStateInfo = videoSources[id][state.currentPhase];
+                        const newSrcKey = currentStateInfo.file;
+
+                        if (!video.src.endsWith(newSrcKey)) {
+                            video.src = newSrcKey;
+                            video.load();
+                        }
+                    }
+
+                    video.currentTime = 0;
+                    video.muted = globalIsMuted;
+                    video.play().catch(e => { });
+
+                    updateDots(state);
+                }
+            }
+
+            // Interval nyní pouze synchronizuje smyčku
+            // TATO ČÁST SE PŘEDTÍM NESPUSTILA KVŮLI CHYBĚ
+            setInterval(runLoopTick, LOOP_DURATION);
+        });
+    </script>
+</body>
+</html>
