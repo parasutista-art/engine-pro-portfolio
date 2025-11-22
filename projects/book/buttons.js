@@ -219,7 +219,7 @@ To popravdě bylo docela hustý protože do té doby jsem nedělal na ničem ofi
     },
     {
         spread: 5,
-        mediaSrc: 'media/náramky na ručky planeta povaleč3.webp',
+        mediaSrc: 'media/narakem.webp',
         text: ``,
         styles: {
             top: '66%',
@@ -286,7 +286,7 @@ To popravdě bylo docela hustý protože do té doby jsem nedělal na ničem ofi
     {
         spread: 5,
         mediaSrc: 'media/mapavalec.webp',
-        text: `ukázka insta-příspěvku z 19. ročníku`,
+        text: `Mapa festivalu, byl extrémní pain ale nakonec tu práci vrátil a je to radost`,
         styles: {
             top: '18%',
             left: '77%',
@@ -296,8 +296,8 @@ To popravdě bylo docela hustý protože do té doby jsem nedělal na ničem ofi
     },
     {
         spread: 5,
-        mediaSrc: 'media/mapavalec.webp',
-        text: `ukázka insta-příspěvku z 19. ročníku`,
+        mediaSrc: 'media/jen tytulka.webm',
+        text: `Pozadí pro A stage mimo program`,
         styles: {
             top: '60%',
             left: '53%',
@@ -321,17 +321,190 @@ To popravdě bylo docela hustý protože do té doby jsem nedělal na ničem ofi
     },
     {
         spread: 6,
-        mediaSrc: 'media/medium5_spread6_1114653811.vimeo',
+        mediaSrc: 'media/Toustak plakat (1).webp',
         styles: {
-            top: '25%',
-            left: '55%',
-            width: '35%',
-            height: '45%'
+            top: '37%',
+            left: '0%',
+            width: '50%',
+            height: '62%'
+        }
+    },
+    {
+        spread: 6,
+        mediaSrc: 'media/poster noraml velikost.webp',
+        styles: {
+            top: '37%',
+            left: '300%',
+            width: '50%',
+            height: '62%'
+        }
+    },
+    {
+        spread: 6,
+        mediaSrc: 'media/Toustak plakat (1).webp',
+        styles: {
+            top: '37%',
+            left: '300%',
+            width: '50%',
+            height: '62%'
+        }
+    },
+    {
+        spread: 6,
+        mediaSrc: 'media/DSC_0346.webp',
+        styles: {
+            top: '1%',
+            left: '50%',
+            width: '50%',
+            height: '98%'
+        }
+    },
+    {
+        spread: 6,
+        mediaSrc: 'media/DSC_0627.webp',
+        styles: {
+            top: '37%',
+            left: '300%',
+            width: '50%',
+            height: '62%'
+        }
+    },
+    {
+        spread: 6,
+        mediaSrc: 'media/DSC_0633.webp',
+        styles: {
+            top: '37%',
+            left: '300%',
+            width: '50%',
+            height: '62%'
+        }
+    },
+    {
+        spread: 6,
+        mediaSrc: 'media/DSC_0656.webp',
+        styles: {
+            top: '37%',
+            left: '300%',
+            width: '50%',
+            height: '62%'
+        }
+    },
+    {
+        spread: 6,
+        mediaSrc: 'media/DSC_0785.webp',
+        styles: {
+            top: '37%',
+            left: '300%',
+            width: '50%',
+            height: '62%'
+        }
+    },
+    {
+        spread: 6,
+        mediaSrc: 'media/DSC_0838.webp',
+        styles: {
+            top: '37%',
+            left: '300%',
+            width: '50%',
+            height: '62%'
+        }
+    },
+    {
+        spread: 6,
+        mediaSrc: 'media/DSC_0884.webp',
+        styles: {
+            top: '37%',
+            left: '300%',
+            width: '50%',
+            height: '62%'
         }
     },
 
     // Busking a ztohoven 7
+    {
+        spread: 7,
+        text: `Pilsen Busking fest
 
+        `,
+        styles: {
+            top: '2%',
+            left: '1%',
+            width: '19%',
+            height: '4%'
+        }
+    },
+    {
+        spread: 7,
+        mediaSrc: 'media/Celek_2.webm',
+        styles: {
+            top: '37%',
+            left: '19%',
+            width: '29%',
+            height: '58%'
+        }
+    },
+    {
+        spread: 7,
+        mediaSrc: 'media/Bez názvu-2 copy.webp',
+        styles: {
+            top: '37%',
+            left: '260%',
+            width: '29%',
+            height: '58%'
+        }
+    },
+    {
+        spread: 7,
+        mediaSrc: 'media/mapa.webp',
+        styles: {
+            top: '37%',
+            left: '260%',
+            width: '29%',
+            height: '58%'
+        }
+    },
+    {
+        spread: 7,
+        mediaSrc: 'media/Tričko.webp',
+        styles: {
+            top: '37%',
+            left: '260%',
+            width: '29%',
+            height: '58%'
+        }
+    },
+    {
+        spread: 7,
+        mediaSrc: 'media/plakatos ohniblijos 2.webp',
+        styles: {
+            top: '37%',
+            left: '260%',
+            width: '29%',
+            height: '58%'
+        }
+    },
+    {
+        spread: 7,
+        text: `Ztohoven
+
+        `,
+        styles: {
+            top: '2%',
+            left: '51%',
+            width: '12%',
+            height: '4%'
+        }
+    },
+    {
+        spread: 7,
+        mediaSrc: 'media/ztohoven.webm',
+        styles: {
+            top: '15%',
+            left: '55%',
+            width: '40%',
+            height: '70%'
+        }
+    },
     // typotrip 8
     {
         spread: 8,
@@ -359,6 +532,16 @@ To popravdě bylo docela hustý protože do té doby jsem nedělal na ničem ofi
         styles: {
             top: '58%',
             left: '5%',
+            width: '41%',
+            height: '36%'
+        }
+    },
+    {
+        spread: 8,
+        mediaSrc: 'media/333 tripotyp.webp',
+        styles: {
+            top: '58%',
+            left: '255%',
             width: '41%',
             height: '36%'
         }
@@ -407,7 +590,110 @@ To popravdě bylo docela hustý protože do té doby jsem nedělal na ničem ofi
     },
     // Autorská knížka 10
 
-    // zatím dík a čau 11
+    // citismog 11
+    {
+        spread: 11,
+        mediaSrc: 'media/showcase naživo.webm',
+        mediaControls: true,
+        styles: {
+            top: '1%',
+            left: '350%',
+            width: '50%',
+            height: '98%'
+        }
+    },
+    {
+        spread: 11,
+        mediaSrc: 'media/zvukový clean mock up.webm',
+        mediaControls: true,
+        styles: {
+            top: '1%',
+            left: '350%',
+            width: '50%',
+            height: '98%'
+        }
+    },
+    {
+        spread: 11,
+        mediaSrc: 'media/smog/Zelená 0.webm',
+        styles: {
+            top: '1%',
+            left: '50%',
+            width: '50%',
+            height: '98%'
+        }
+    },
+    {
+        spread: 11,
+        mediaSrc: 'media/smog/Zelená 1.webm',
+        styles: {
+            top: '1%',
+            left: '350%',
+            width: '50%',
+            height: '98%'
+        }
+    },
+    {
+        spread: 11,
+        mediaSrc: 'media/smog/Zelená 2.webm',
+        styles: {
+            top: '1%',
+            left: '350%',
+            width: '50%',
+            height: '98%'
+        }
+    },
+    {
+        spread: 11,
+        mediaSrc: 'media/smog/Zelená 3.webm',
+        styles: {
+            top: '1%',
+            left: '350%',
+            width: '50%',
+            height: '98%'
+        }
+    },
+    {
+        spread: 11,
+        mediaSrc: 'media/smog/otevřeno 0.webm',
+        styles: {
+            top: '1%',
+            left: '350%',
+            width: '50%',
+            height: '98%'
+        }
+    },
+    {
+        spread: 11,
+        mediaSrc: 'media/smog/otevřeno 1.webm',
+        styles: {
+            top: '1%',
+            left: '350%',
+            width: '50%',
+            height: '98%'
+        }
+    },
+    {
+        spread: 11,
+        mediaSrc: 'media/smog/otevřeno 2.webm',
+        styles: {
+            top: '1%',
+            left: '350%',
+            width: '50%',
+            height: '98%'
+        }
+    },
+    {
+        spread: 11,
+        mediaSrc: 'media/smog/otevřeno 3.webm',
+        styles: {
+            top: '1%',
+            left: '350%',
+            width: '50%',
+            height: '98%'
+        }
+    },
+
 
     // 1.txt 12
     {

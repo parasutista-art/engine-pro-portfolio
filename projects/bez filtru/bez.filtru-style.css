@@ -1,0 +1,387 @@
+﻿/* ===================================== */
+/* === ZÁKLADNÍ NASTAVENÍ & LAYOUT === */
+/* ===================================== */
+
+:root {
+    --spread-aspect-ratio: 1.41421;
+    --nav-width: 250px;
+    --nav-transition-speed: 0.3s;
+    --reel-height-desktop: 100px;
+    --reel-height-mobile: 80px;
+    --lightbox-v-padding: 20px;
+    --lightbox-h-padding: 80px;
+    --lightbox-v-padding-mobile: 10px;
+    --lightbox-h-padding-mobile: 10px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    /* ČERNÉ POZADÍ */
+    background-color: #000000;
+    margin: 0;
+}
+
+.book-viewport {
+    margin-left: var(--nav-width);
+    width: calc(100% - var(--nav-width));
+    height: 100vh;
+    transition: margin-left var(--nav-transition-speed) ease-in-out;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    /* ČERNÉ POZADÍ POD KNIHOU */
+    background-color: #000000;
+}
+
+body.desktop-nav-closed .book-viewport {
+    margin-left: 40px;
+    width: calc(100% - 40px);
+}
+
+/* ===================================== */
+/* === KNIHA & INTERAKTIVNÍ OBLAST === */
+/* ===================================== */
+
+.book {
+    position: relative;
+    width: 100%;
+    height: 90%;
+    max-height: 90vh;
+    max-width: calc(90vh * var(--spread-aspect-ratio));
+    aspect-ratio: var(--spread-aspect-ratio);
+    perspective: 3000px; /* Zvýšeno pro lepší 3D efekt */
+    transform-style: preserve-3d;
+}
+
+.paper {
+    position: absolute;
+    width: 50%;
+    height: 100%;
+    top: 0;
+    left: 50%;
+    transform-origin: left center;
+    transform-style: preserve-3d;
+    background: transparent !important;
+    /* Důležité pro ostrost hran */
+    backface-visibility: hidden;
+}
+
+.front, .back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    top: 0;
+    left: 0;
+    background-color: transparent !important;
+    overflow: hidden;
+}
+
+.front {
+    z-index: 2;
+}
+
+.back {
+    z-index: 1;
+    transform: rotateY(180deg);
+}
+
+    /* ODSTRANĚNÍ STÍNŮ (Gradientů) */
+    .front::after, .back::after {
+        content: none;
+        display: none;
+    }
+
+.page-image-wrapper {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.page-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+#interactive-layer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100%;
+    max-height: 90vh;
+    max-width: calc(90vh * var(--spread-aspect-ratio));
+    aspect-ratio: var(--spread-aspect-ratio);
+    pointer-events: none;
+    z-index: 5000;
+}
+
+.interactive-button {
+    position: absolute;
+    cursor: pointer;
+    pointer-events: auto;
+}
+
+/* ===================================== */
+/* === OVLÁDACÍ PRVKY (BÍLÉ) === */
+/* ===================================== */
+
+.nav-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    width: 60px;
+    height: 60px;
+    cursor: pointer;
+    z-index: 200;
+    opacity: 0.7;
+    transition: opacity 0.3s;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    /* Filtr pro změnu na bílou barvu */
+    filter: invert(1) brightness(2);
+}
+
+    .nav-arrow:hover {
+        opacity: 1;
+    }
+
+    .nav-arrow.left {
+        left: 20px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Cpath d='M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z'/%3E%3C/svg%3E");
+    }
+
+    .nav-arrow.right {
+        right: 20px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Cpath d='M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z'/%3E%3C/svg%3E");
+    }
+
+.slider-wrap {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60%;
+    z-index: 200;
+}
+
+input[type="range"] {
+    width: 100%;
+    cursor: pointer;
+    accent-color: white; /* Bílý slider */
+}
+
+/* ===================================== */
+/* === LIGHTBOX === */
+/* ===================================== */
+
+.lightbox {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000; /* Černé pozadí lightboxu */
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+    .lightbox.show, .lightbox.active {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+.lb-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    font-size: 2.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    z-index: 10001;
+    color: #fff; /* Bílá barva křížku */
+}
+
+.lightbox-content {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: var(--lightbox-v-padding) var(--lightbox-h-padding);
+    overflow: hidden;
+}
+
+.lightbox-stage {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lightbox-item {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    pointer-events: none;
+}
+
+    .lightbox-item.active {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+.lightbox-media {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.lightbox-reel-wrap {
+    height: var(--reel-height-desktop);
+    background: #111; /* Tmavě šedá lišta */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-top: 1px solid #333;
+    padding: 10px 0;
+}
+
+.lightbox-reel {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    max-width: 90%;
+    height: 100%;
+    padding: 0 10px;
+    align-items: center;
+}
+
+.reel-thumbnail {
+    height: 100%;
+    width: auto;
+    cursor: pointer;
+    border: 2px solid transparent;
+    opacity: 0.6;
+    transition: 0.2s;
+    padding: 0;
+    background: none;
+}
+
+    .reel-thumbnail:hover, .reel-thumbnail.active {
+        opacity: 1;
+        border-color: #fff;
+    }
+
+    .reel-thumbnail img {
+        height: 100%;
+        width: auto;
+        display: block;
+    }
+
+.lightbox-dots {
+    display: none;
+    justify-content: center;
+    padding: 10px;
+    gap: 10px;
+}
+
+.lightbox-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #555;
+    border: none;
+    padding: 0;
+}
+
+    .lightbox-dot.active {
+        background: #fff;
+    }
+
+/* ===================================== */
+/* === MEDIA QUERIES (MOBIL) === */
+/* ===================================== */
+
+@media (max-width: 768px) {
+    :root {
+        --nav-width: 0px;
+    }
+
+    .book-viewport {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    body.desktop-nav-closed .book-viewport {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .slider-wrap {
+        width: 90%;
+        bottom: 80px;
+    }
+
+    .lightbox-content {
+        padding: var(--lightbox-v-padding-mobile) var(--lightbox-h-padding-mobile);
+    }
+
+    .lightbox-reel-wrap {
+        display: none;
+    }
+
+    .lightbox-dots {
+        display: flex;
+        position: absolute;
+        bottom: 20px;
+        width: 100%;
+    }
+
+    .lightbox-arrow {
+        bottom: 90px;
+        top: auto;
+        transform: none;
+    }
+
+    .nav-arrow {
+        bottom: 80px;
+        top: auto;
+        transform: translateY(0);
+    }
+
+        .nav-arrow.left {
+            left: 20%;
+        }
+
+        .nav-arrow.right {
+            right: 20%;
+        }
+}

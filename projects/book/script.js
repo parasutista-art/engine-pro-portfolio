@@ -1,3 +1,18 @@
+// --- Globální proměnná a funkce pro skrytí návodu ---
+let instructionsHidden = false;
+
+function hideInstructions() {
+    if (instructionsHidden) return; // Udělá to jen jednou
+
+    const instructionPage = document.getElementById('instruction-page');
+    if (instructionPage) {
+        instructionPage.classList.add('hidden');
+        instructionsHidden = true; // Označíme, že je skryto
+    }
+}
+// ----------------------------------------------------
+
+
 // =================================================================
 //  KONFIGURACE A GLOBÁLNÍ PROMĚNNÉ
 // =================================================================
@@ -21,6 +36,7 @@ const mediaOverlays = {
     14: { type: 'webm', src: 'assets/toustak-2_overlay.webm' },
     16: { type: 'webm', src: 'assets/ztohoven_overlay.webm' },
     18: { type: 'webm', src: 'assets/Typotrip-2_overlay.webm' },
+    24: { type: 'webm', src: 'assets/city smog-2_overlay.webm' },
     26: { type: 'webm', src: 'assets/1-txt-2_overlay_1.webm' },
 };
 
