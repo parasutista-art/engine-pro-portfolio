@@ -34,28 +34,129 @@ body {
 
     /* Prázdný řádek pro mezeru */
     .project-list li.nav-spacer {
-        height: 0.8rem; /* Vytvoří mezeru jednoho řádku */
-        margin: 0; /* Vynuluje margin, aby byla jen mezera */
+        height: 0.8rem;
+        margin: 0;
     }
 
+/* Odkazy */
 .project-list a {
     color: #888;
     text-decoration: none;
     transition: color 0.2s;
     font-size: 1rem;
-    display: block; /* Všechny odkazy jsou blokové pro snadné klikání */
+    /* display: block;  <- Toto odstraněno, řešeno nově flexboxem v .nav-row */
 }
 
     .project-list a:hover, .project-list a.active {
         color: #fff;
     }
 
-    /* Jméno má normální styl, je v <li> */
+    /* Jméno */
     .project-list a.name-link {
         color: #fff !important;
         font-weight: normal;
         font-size: 1rem;
+        display: block; /* Jméno zůstává block */
     }
+
+/* ======================================================= */
+/* === NOVÉ: STYLY PRO ŘÁDEK S ODKAZEM A ŠIPKOU (FIX) === */
+/* ======================================================= */
+
+.nav-row {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    flex-wrap: nowrap;
+    position: relative; /* Pro jistotu */
+}
+
+    .nav-row a {
+        display: inline-block !important;
+        width: auto !important;
+        flex-shrink: 0;
+        margin-right: 0;
+    }
+
+/* ZMĚNA: Přejmenováno z .nav-arrow na .nav-expand-arrow */
+.nav-expand-arrow {
+    cursor: pointer;
+    padding: 10px;
+    margin-left: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: none;
+    transform: none !important;
+    /* Zajistíme, že to není absolutní pozice (což dělala kolize v style.css) */
+    position: static !important;
+}
+
+    .nav-expand-arrow::after {
+        content: '';
+        display: block;
+        width: 8px;
+        height: 8px;
+        border-right: 2px solid #888;
+        border-bottom: 2px solid #888;
+        transition: transform 0.3s ease, margin-top 0.3s ease;
+        /* STAV ZAVŘENO: Šipka doprava (>) */
+        transform: rotate(-45deg);
+        margin-top: 0;
+    }
+
+/* STAV OTEVŘENO: Šipka dolů (v) */
+/* Musíme použít novou třídu i zde */
+li.open .nav-expand-arrow::after {
+    transform: rotate(45deg);
+    border-color: #fff;
+    margin-top: -3px;
+}
+/* ======================================================= */
+/* === 5. NOVÉ STYLY PRO POD-MENU (ANIMACE) === */
+/* ======================================================= */
+
+.project-list li > .sub-nav {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    padding-left: 20px;
+    /* Animace skrytí/odkrytí */
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.4s ease-in-out, opacity 0.4s ease-in-out, margin-top 0.4s;
+}
+
+/* Když je LI.open, zobrazíme sub-nav */
+.project-list li.open > .sub-nav {
+    max-height: 1000px; /* Dostatečná výška pro obsah */
+    opacity: 1;
+    margin-top: 0.5rem; /* Odsazení jen když je otevřeno */
+}
+
+.sub-nav-item {
+    margin-bottom: 5px;
+}
+
+    .sub-nav-item a {
+        font-size: 0.9rem;
+        color: #888;
+        display: block;
+    }
+
+        .sub-nav-item a:hover {
+            color: #fff;
+        }
+
+        .sub-nav-item a.active-sub {
+            color: #fff;
+            font-weight: bold;
+        }
+
 
 /* ======================================================= */
 /* === 1. DESKTOPOVÁ NAVIGACE (POSTRANNÍ LIŠTA) === */
@@ -70,12 +171,12 @@ body {
     z-index: 1000;
     transition: transform var(--nav-transition-speed) ease-in-out;
     padding: 1.5rem;
-    border-right: 1px solid #333; /* Tvoje dělící linka */
+    border-right: 1px solid #333;
 }
 
 .desktop-toggle-btn {
     position: absolute;
-    top: 50%; /* Vertikálně na středu */
+    top: 50%;
     transform: translateY(-50%);
     right: -20px;
     width: 40px;
@@ -106,17 +207,15 @@ body.desktop-nav-closed .desktop-toggle-btn::before {
 }
 
 .desktop-nav-content {
-    /* ZMĚNA: Jméno je nyní úplně nahoře */
     padding-top: 0;
 }
 
-/* Lišta se skryje celá (podle tvého přání) */
 body.desktop-nav-closed #desktop-nav {
     transform: translateX(calc(-1 * var(--nav-width)));
 }
 
 /* ======================================================= */
-/* === 2. OBSAHOVÝ SLOUPEC (VEDLE LIŠTY) === */
+/* === 2. OBSAHOVÝ SLOUPEC === */
 /* ======================================================= */
 .content-column {
     margin-left: var(--nav-width);
@@ -127,14 +226,12 @@ body.desktop-nav-closed #desktop-nav {
     transition: margin-left var(--nav-transition-speed) ease-in-out;
 }
 
-/* Obsah se roztáhne na 100% */
 body.desktop-nav-closed .content-column {
     margin-left: 0;
     width: 100%;
 }
-
 /* ======================================================= */
-/* === 3. MOBILNÍ NAVIGACE (HORNÍ LIŠTA) === */
+/* === 3. MOBILNÍ NAVIGACE (UPRAVENO) === */
 /* ======================================================= */
 #mobile-nav {
     position: fixed;
@@ -142,24 +239,24 @@ body.desktop-nav-closed .content-column {
     left: 0;
     width: 100%;
     z-index: 1000;
-    background-color: transparent; /* Kontejner je průhledný */
-    pointer-events: none; /* Neblokuje klikání */
+    background-color: transparent;
+    pointer-events: none;
 }
 
 .mobile-toggle-btn {
     position: fixed;
-    pointer-events: all; /* Tlačítko je klikatelné */
+    pointer-events: all;
     top: 15px;
     right: 15px;
-    bottom: auto;
     width: 50px;
     height: 50px;
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.7); /* Zachováno pozadí pro čitelnost nad obrázky */
     backdrop-filter: blur(5px);
     border: 1px solid #333;
     border-radius: 50%;
-    color: #fff;
-    font-size: 24px;
+    /* Reset textu */
+    color: transparent;
+    font-size: 0;
     cursor: pointer;
     z-index: 1001;
     display: flex;
@@ -167,36 +264,56 @@ body.desktop-nav-closed .content-column {
     justify-content: center;
 }
 
+    /* Vytvoření šipky (Chevron) uvnitř tlačítka */
+    .mobile-toggle-btn::after {
+        content: '';
+        display: block;
+        width: 10px; /* Velikost šipky */
+        height: 10px;
+        border-right: 2px solid #fff; /* Bílá barva */
+        border-bottom: 2px solid #fff;
+        /* VÝCHOZÍ STAV (Zavřeno) = Šipka dolů (v) */
+        transform: rotate(45deg);
+        margin-top: -3px; /* Optické vycentrování */
+
+        transition: transform 0.3s ease, margin-top 0.3s ease;
+    }
+
 .mobile-nav-content {
     padding: 1.5rem;
-    background-color: #000; /* Plně černý blok */
-    display: none; /* Skryto defaultně */
+    background-color: #000;
+    display: none;
     pointer-events: all;
-    position: relative; /* Pro pozicování zavíracího tlačítka */
+    position: relative;
+    /* NOVÉ: Čára na spodní hraně lišty (stejná jako border-right na desktopu) */
+    border-bottom: 1px solid #333;
 }
 
+/* --- STAV OTEVŘENO --- */
 body.mobile-nav-open .mobile-nav-content {
-    display: block; /* Zobrazí se jako full-width blok */
+    display: block;
 }
 
-/* Tlačítko ZAVŘÍT (↑) */
 body.mobile-nav-open .mobile-toggle-btn {
     position: absolute;
     top: auto;
-    bottom: 5px;
-    right: 10px;
+    bottom: 5px; /* Tlačítko se přesune dolů v rámci menu */
+    right: 15px;
     background: none;
     backdrop-filter: none;
     border: none;
     width: auto;
     height: auto;
-    font-size: 24px;
-    color: #fff;
 }
 
-
+    /* Otočení šipky při otevření */
+    body.mobile-nav-open .mobile-toggle-btn::after {
+        /* OTEVŘENO = Šipka nahoru (^) */
+        transform: rotate(225deg);
+        margin-top: 5px; /* Korekce pozice */
+    }
 /* ======================================================= */
-/* === 4. PŘEPÍNÁNÍ VIDITELNOSTI A LAYOUTU === */
+/* === 4. PŘEPÍNÁNÍ VIDITELNOSTI === */
 /* ======================================================= */
 body {
     display: flex;
@@ -210,39 +327,7 @@ body {
     display: block !important;
 }
 
-/* ======================================================= */
-/* === 5. NOVÉ STYLY PRO POD-MENU === */
-/* ======================================================= */
-
-/* ZMĚNA: Toto je nyní odsazení (cca 3 mezery) */
-/* Cílí na .sub-nav, který je UVNITŘ .project-list li */
-.project-list li > .sub-nav {
-    list-style: none;
-    padding: 0;
-    margin-top: 0.8rem; /* Mezera mezi hlavním odkazem a pod-seznamem */
-    margin-bottom: 0;
-    padding-left: 20px; /* Tvoje odsazení */
-}
-
-.sub-nav-item {
-    margin-bottom: 5px;
-}
-
-    .sub-nav-item a {
-        font-size: 0.9rem;
-        color: #888;
-    }
-
-        .sub-nav-item a:hover {
-            color: #fff;
-        }
-
-        .sub-nav-item a.active-sub {
-            color: #fff;
-            font-weight: bold;
-        }
-
-/* Styly pro stránku projekty.html (z minula) */
+/* Styly pro projekty.html */
 .projekty-list-container {
     padding: 1.5rem;
     max-width: 900px;

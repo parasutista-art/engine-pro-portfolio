@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Portfolio</title>
+    <title>Skicákové portfolio</title>
     <link rel="stylesheet" href="../../main_style.css" />
     <link rel="stylesheet" href="bez.filtru-style.css" />
 </head>
@@ -12,7 +12,13 @@
 
     <div class="book-viewport">
         <div id="book" class="book">
-
+            <div id="p-cover-start" class="paper">
+                <div class="front">
+                    <img class="page-image" src="assets/bez filtru stránka-1.webp" alt="">
+                </div>
+                <div class="back">
+                </div>
+            </div>
             <div id="p0" class="paper"><div class="front"><img class="page-image" src="assets/bez filtru stránka-1.webp" alt=""></div><div class="back"><img class="page-image" src="assets/bez filtru stránka-2.webp" loading="lazy" alt=""></div></div>
             <div id="p1" class="paper"><div class="front"><img class="page-image" src="assets/bez filtru stránka-3.webp" loading="lazy" alt=""></div><div class="back"><img class="page-image" src="assets/bez filtru stránka-4.webp" loading="lazy" alt=""></div></div>
             <div id="p2" class="paper"><div class="front"><img class="page-image" src="assets/bez filtru stránka-5.webp" loading="lazy" alt=""></div><div class="back"><img class="page-image" src="assets/bez filtru stránka-6.webp" loading="lazy" alt=""></div></div>
@@ -169,7 +175,12 @@
 
             <div id="p116" class="paper"><div class="front"><img class="page-image" src="assets/bez filtru stránka-157.webp" loading="lazy" alt=""></div><div class="back"><img class="page-image" src="assets/bez filtru stránka-158.webp" loading="lazy" alt=""></div></div>
             <div id="p117" class="paper"><div class="front"><img class="page-image" src="assets/bez filtru stránka-159.webp" loading="lazy" alt=""></div><div class="back"><img class="page-image" src="assets/bez filtru stránka-160.webp" loading="lazy" alt=""></div></div>
-
+            <div id="p-cover-end" class="paper">
+                <div class="front">
+                </div>
+                <div class="back">
+                </div>
+            </div>
         </div>
 
         <div id="interactive-layer"></div>
@@ -177,7 +188,7 @@
         <button id="arrowRight" class="nav-arrow right" aria-label="Další stránka"></button>
 
         <div class="slider-wrap">
-            <input type="range" id="pageSlider" min="0" step="0.001" value="0" />
+            <input type="range" id="pageSlider" min="0" max="17" step="0.001" value="0" />
         </div>
     </div>
 
@@ -186,17 +197,17 @@
         <button id="lightboxPrev" class="nav-arrow left lightbox-arrow" aria-label="Předchozí dvoustrana"></button>
         <button id="lightboxNext" class="nav-arrow right lightbox-arrow" aria-label="Další dvoustrana"></button>
 
-        <div class="lightbox-content">
-            <div id="lightbox-stage" class="lightbox-stage"></div>
-        </div>
+        <div id="lightbox-stage"></div>
 
-        <div class="lightbox-reel-wrap">
-            <div id="lightbox-reel" class="lightbox-reel"></div>
-        </div>
-
-        <div id="lightbox-dots" class="lightbox-dots"></div>
+        <div id="lightbox-reel"></div>
+        <div id="lightbox-dots"></div>
     </div>
 
+    <script src="buttons.js"></script>
+    <script src="../../nav.js"></script>
+    <script>
+        createNav('../../', 'projekty-Bez filtru');
+    </script>
     <script src="bez.filtru-script.js"></script>
 </body>
 </html>

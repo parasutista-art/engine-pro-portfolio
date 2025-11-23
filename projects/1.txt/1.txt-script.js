@@ -766,7 +766,7 @@ function setupMediaOverlays() { for (const e in mediaOverlays) { const t = media
 // =================================================================
 
 function main() {
-    createNav('../../', '1.txt');
+    createNav('../../', 'projekty-1txt');
 
     galleryItems = buttonData
         .filter(item => !item.url)

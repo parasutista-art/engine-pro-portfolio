@@ -20,10 +20,9 @@
 
 html, body {
     height: 100%;
-    /* ČERNÉ POZADÍ */
-    background-color: #000000;
-    margin: 0;
 }
+
+
 
 .book-viewport {
     margin-left: var(--nav-width);
@@ -31,12 +30,12 @@ html, body {
     height: 100vh;
     transition: margin-left var(--nav-transition-speed) ease-in-out;
     position: relative;
+    /* Ponecháváme flex pro centrování knihy */
     display: flex;
     justify-content: center;
     align-items: center;
     overflow: hidden;
-    /* ČERNÉ POZADÍ POD KNIHOU */
-    background-color: #000000;
+    background: radial-gradient(circle, #222222 0%, #000000 75%);
 }
 
 body.desktop-nav-closed .book-viewport {
@@ -44,344 +43,582 @@ body.desktop-nav-closed .book-viewport {
     width: calc(100% - 40px);
 }
 
+
 /* ===================================== */
-/* === KNIHA & INTERAKTIVNÍ OBLAST === */
+/* === KNIHA & INTERAKTIVNÍ VRSTVA === */
 /* ===================================== */
 
 .book {
     position: relative;
-    width: 100%;
-    height: 90%;
-    max-height: 90vh;
-    max-width: calc(90vh * var(--spread-aspect-ratio));
-    aspect-ratio: var(--spread-aspect-ratio);
-    perspective: 3000px; /* Zvýšeno pro lepší 3D efekt */
     transform-style: preserve-3d;
+    perspective: 2500px;
+    z-index: 100;
+    /* Tyto rozměry fungují správně pro .book jako flex-item */
+    height: 90vh;
+    width: calc(90vh * var(--spread-aspect-ratio));
+    aspect-ratio: var(--spread-aspect-ratio);
+    max-width: calc(100% - 160px);
 }
 
+#interactive-layer {
+    /* Původní pravidla pro pozicování */
+    position: absolute;
+    pointer-events: none;
+    z-index: 1500;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    /* * === ZDE JE KLÍČOVÁ OPRAVA ===
+     * Použijeme stejná pravidla pro šířku, max-šířku a poměr stran
+     * jako má .book, ale 'height' nastavíme na 'auto'.
+     *
+     * Tím donutíme výšku vrstvy, aby se VŽDY vypočítala 
+     * z aktuální šířky (která je omezena max-width),
+     * a zachovala tak poměr stran.
+     * 'max-height: 90vh' zajišťuje, že vrstva nikdy nebude vyšší 
+     * než kniha při plné velikosti.
+    */
+    width: calc(90vh * var(--spread-aspect-ratio));
+    max-width: calc(100% - 160px);
+    aspect-ratio: var(--spread-aspect-ratio);
+    height: auto;
+    max-height: 90vh;
+}
+
+@media (orientation: portrait) {
+    .book {
+        /* Pravidla pro knihu na mobilu */
+        width: 90vw;
+        height: auto;
+        max-width: 90vw;
+    }
+
+    #interactive-layer {
+        /* Pravidla pro vrstvu na mobilu */
+        width: 90vw;
+        height: auto;
+        max-width: 90vw;
+        max-height: none; /* Na mobilu nepotřebujeme omezovat výšku */
+    }
+}
+
+.interactive-button {
+    pointer-events: auto;
+    position: absolute;
+    background: transparent;
+    cursor: pointer;
+    transition: background-color 0.2s, border 0.2s;
+    border-radius: 4px;
+}
+
+    .interactive-button:hover {
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.7);
+    }
+
+
+/* ===================================== */
+/* === STRÁNKY A OBSAH === */
+/* ===================================== */
 .paper {
     position: absolute;
     width: 50%;
     height: 100%;
     top: 0;
     left: 50%;
-    transform-origin: left center;
     transform-style: preserve-3d;
-    background: transparent !important;
-    /* Důležité pro ostrost hran */
-    backface-visibility: hidden;
+    transform-origin: left center;
 }
 
-.front, .back {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    backface-visibility: hidden;
-    top: 0;
-    left: 0;
-    background-color: transparent !important;
-    overflow: hidden;
-}
-
-.front {
-    z-index: 2;
-}
-
-.back {
-    z-index: 1;
-    transform: rotateY(180deg);
-}
-
-    /* ODSTRANĚNÍ STÍNŮ (Gradientů) */
-    .front::after, .back::after {
-        content: none;
-        display: none;
+    /* === TOTO JE KLÍČOVÁ ZMĚNA === */
+    .paper .front, .paper .back {
+        position: absolute;
+        inset: 0;
+        backface-visibility: hidden;
+        transform-style: preserve-3d;
+        background: transparent; /* <-- ZMĚNĚNO Z #000 NA #FFFFFF (BÍLÁ) */
     }
 
+    /* TENTO BLOK MÁTE - UPRAVTE HO PODLE TOHOTO */
+    .paper .back {
+        transform: rotateY(180deg) translateZ(-1px); /* <-- PŘIDAT translateZ */
+        z-index: 1; /* <-- PŘIDAT z-index */
+    }
+
+    /* TENTO BLOK VÁM ÚPLNĚ CHYBÍ - CELÝ HO PŘIDEJTE */
+    .paper .front {
+        transform: translateZ(1px); /* <-- PŘIDAT translateZ (pro "odlepení") */
+        z-index: 2; /* <-- PŘIDAT z-index (aby byla přední strana nahoře) */
+    }
+
+/* Wrapper přidaný přes JS */
 .page-image-wrapper {
-    width: 100%;
-    height: 100%;
-    position: relative;
+    position: absolute;
+    inset: 0;
     overflow: hidden;
 }
 
-.page-image {
+.page-image, .media-overlay {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
     object-fit: contain;
     display: block;
-}
-
-#interactive-layer {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 100%;
-    height: 100%;
-    max-height: 90vh;
-    max-width: calc(90vh * var(--spread-aspect-ratio));
-    aspect-ratio: var(--spread-aspect-ratio);
     pointer-events: none;
-    z-index: 5000;
 }
 
-.interactive-button {
-    position: absolute;
-    cursor: pointer;
-    pointer-events: auto;
+.media-overlay {
+    z-index: 2;
+    object-fit: contain;
 }
 
 /* ===================================== */
-/* === OVLÁDACÍ PRVKY (BÍLÉ) === */
+/* === OVLÁDACÍ PRVKY (ŠIPKY, SLIDER) === */
 /* ===================================== */
-
 .nav-arrow {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    background: none;
+    font-size: 2rem;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.3);
     border: none;
-    width: 60px;
-    height: 60px;
     cursor: pointer;
-    z-index: 200;
-    opacity: 0.7;
-    transition: opacity 0.3s;
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: contain;
-    /* Filtr pro změnu na bílou barvu */
-    filter: invert(1) brightness(2);
+    z-index: 2000;
+    padding: 10px 20px;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+    line-height: 1;
 }
 
     .nav-arrow:hover {
-        opacity: 1;
+        background: rgba(0, 0, 0, 0.6);
+    }
+
+    .nav-arrow.left::before {
+        content: '←';
+    }
+
+    .nav-arrow.right::before {
+        content: '→';
     }
 
     .nav-arrow.left {
         left: 20px;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Cpath d='M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z'/%3E%3C/svg%3E");
     }
 
     .nav-arrow.right {
         right: 20px;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='black'%3E%3Cpath d='M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z'/%3E%3C/svg%3E");
     }
 
 .slider-wrap {
     position: absolute;
-    bottom: 20px;
+    bottom: 30px;
     left: 50%;
     transform: translateX(-50%);
-    width: 60%;
-    z-index: 200;
+    width: 50%;
+    max-width: 600px;
+    z-index: 1100;
 }
 
-input[type="range"] {
+#pageSlider {
     width: 100%;
-    cursor: pointer;
-    accent-color: white; /* Bílý slider */
+    cursor: grab;
 }
 
-/* ===================================== */
-/* === LIGHTBOX === */
-/* ===================================== */
+    #pageSlider:active {
+        cursor: grabbing;
+    }
 
+/* ===================================== */
+/* === LIGHTBOX (ČISTÝ PÁS) === */
+/* ===================================== */
 .lightbox {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: #000; /* Černé pozadí lightboxu */
-    z-index: 10000;
-    display: flex;
-    flex-direction: column;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(15px);
+    z-index: 25000;
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.3s ease;
+    /* Padding pro lištu na desktopu */
+    padding-bottom: var(--reel-height-desktop);
+    box-sizing: border-box;
 }
 
-    .lightbox.show, .lightbox.active {
+    .lightbox.show {
         opacity: 1;
         pointer-events: auto;
     }
+
+
+#lightbox-stage {
+    position: relative;
+    width: 100%;
+    height: 100%; /* Zabere výšku .lightbox (který má padding) */
+    overflow: hidden;
+    background: transparent;
+}
+
+/* Wrapper pro každou položku (média nebo text) */
+.lightbox-item {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 0;
+    transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.3s ease-out;
+}
+
+    .lightbox-item.active {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+        z-index: 10;
+    }
+
+    .lightbox-item.prev {
+        transform: translate(-50%, -150%) scale(0.8);
+        opacity: 0;
+        z-index: 5;
+    }
+
+    .lightbox-item.next {
+        transform: translate(-50%, 150%) scale(0.8);
+        opacity: 0;
+        z-index: 5;
+    }
+
+
+    /* === OBSAH UVNITŘ WRAPPERU === */
+
+    /* Pravidlo pro SOLO MÉDIA (bez textu) i MÉDIA S TEXTEM */
+    .lightbox-item > .lightbox-media {
+        width: auto;
+        height: auto;
+        max-width: calc(100vw - var(--lightbox-h-padding) * 2);
+        max-height: calc(100vh - var(--reel-height-desktop) - var(--lightbox-v-padding) * 2);
+        object-fit: contain;
+        display: block;
+    }
+
+    /* Pravidlo pro SOLO TEXT */
+    .lightbox-item > .lightbox-text {
+        background-color: transparent;
+        color: #fff;
+        line-height: 1.7;
+        font-size: 1.1rem;
+        text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        width: auto;
+        height: auto;
+        max-width: 70ch;
+        padding: 1.5em;
+        box-sizing: border-box;
+        max-height: calc(100vh - var(--reel-height-desktop) - var(--lightbox-v-padding) * 2);
+        overflow-y: auto;
+        margin: 0;
+    }
+
+
+/* === TEXT K MÉDIÍM (PŘES CELOU OBRAZOVKU) === */
+.lightbox-text-overlay { /* Přejmenováno pro přehlednost */
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    /* Pozice pro DESKTOP: Nad lištou */
+    bottom: var(--reel-height-desktop);
+    margin-bottom: 10px;
+    width: auto;
+    max-width: calc(100vw - var(--lightbox-h-padding) * 2);
+    max-height: 20vh;
+    overflow-y: auto;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: #fff;
+    /* Bez pozadí, jen stín */
+    background: transparent;
+    text-shadow: 0 0 5px rgba(0,0,0,1), 0 0 8px rgba(0,0,0,0.7);
+    padding: 0.75em 1em;
+    border-radius: 4px;
+    text-align: center;
+    z-index: 26500;
+    /* Skryto by default */
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease-out;
+}
+
+    /* Zobrazí se, jen když je aktivní */
+    .lightbox-text-overlay.active {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
 
 .lb-close {
     position: absolute;
     top: 20px;
-    right: 20px;
-    font-size: 2.5rem;
-    background: none;
+    right: 30px;
+    font-size: 20px;
+    padding: 8px 12px;
+    color: white;
+    background: rgba(0,0,0,0.6);
     border: none;
+    border-radius: 8px;
     cursor: pointer;
-    z-index: 10001;
-    color: #fff; /* Bílá barva křížku */
+    z-index: 27000;
+    transition: background-color 0.2s;
 }
 
-.lightbox-content {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    padding: var(--lightbox-v-padding) var(--lightbox-h-padding);
-    overflow: hidden;
-}
-
-.lightbox-stage {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.lightbox-item {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity 0.4s ease;
-    pointer-events: none;
-}
-
-    .lightbox-item.active {
-        opacity: 1;
-        pointer-events: auto;
+    .lb-close:hover {
+        background: rgba(0,0,0,0.8);
     }
 
-.lightbox-media {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
+.lightbox-arrow.left::before {
+    content: '←';
 }
 
-.lightbox-reel-wrap {
+.lightbox-arrow.right::before {
+    content: '→';
+}
+
+/* ===================================== */
+/* === LIGHTBOX REEL & DOTS === */
+/* ===================================== */
+
+/* Výchozí stav: obojí skryté */
+#lightbox-reel,
+#lightbox-dots {
+    display: none;
+}
+
+/* Desktop: Zobrazí LIŠTU, pokud je .has-multiple-items */
+.lightbox.has-multiple-items #lightbox-reel {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
     height: var(--reel-height-desktop);
-    background: #111; /* Tmavě šedá lišta */
-    display: flex;
-    align-items: center;
+    z-index: 26000;
+    display: flex; /* <-- ZOBRAZIT NA DESKTOPU */
     justify-content: center;
-    border-top: 1px solid #333;
-    padding: 10px 0;
+    align-items: center;
+    padding: 10px;
+    box-sizing: border-box;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    background: transparent;
 }
 
-.lightbox-reel {
-    display: flex;
-    gap: 10px;
-    overflow-x: auto;
-    max-width: 90%;
-    height: 100%;
-    padding: 0 10px;
+/* Mobil: Zobrazí TEČKY, pokud je .has-multiple-items */
+.lightbox.has-multiple-items #lightbox-dots {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: var(--reel-height-mobile);
+    z-index: 26000;
+    display: none; /* <-- Na desktopu skryté */
+    justify-content: center;
     align-items: center;
+    padding: 5px;
+    box-sizing: border-box;
+    overflow: hidden;
+    white-space: nowrap;
 }
 
 .reel-thumbnail {
     height: 100%;
     width: auto;
-    cursor: pointer;
+    aspect-ratio: unset;
     border: 2px solid transparent;
-    opacity: 0.6;
-    transition: 0.2s;
+    border-radius: 4px;
+    margin: 0 5px;
+    cursor: pointer;
     padding: 0;
-    background: none;
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: middle;
+    position: relative;
+    background: transparent;
+    transition: filter 0.2s ease, border-color 0.2s ease, opacity 0.2s ease;
+    filter: grayscale(100%);
+    opacity: 0.7;
 }
 
-    .reel-thumbnail:hover, .reel-thumbnail.active {
+    .reel-thumbnail:hover {
+        filter: grayscale(0%);
         opacity: 1;
-        border-color: #fff;
     }
 
-    .reel-thumbnail img {
-        height: 100%;
+    .reel-thumbnail.active {
+        filter: grayscale(0%);
+        border-color: #fff;
+        opacity: 1;
+    }
+
+    .reel-thumbnail img,
+    .reel-thumbnail video {
         width: auto;
+        height: 100%;
+        object-fit: contain;
         display: block;
     }
 
-.lightbox-dots {
-    display: none;
-    justify-content: center;
-    padding: 10px;
-    gap: 10px;
-}
+    .reel-thumbnail.is-placeholder {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        aspect-ratio: unset;
+        width: auto;
+        padding: 0 20px;
+    }
+
+        .reel-thumbnail.is-placeholder span {
+            color: #fff;
+            font-size: 0.8rem;
+            font-weight: bold;
+            padding: 5px;
+            text-align: center;
+            text-transform: uppercase;
+            font-family: Arial, sans-serif;
+        }
+
 
 .lightbox-dot {
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    background: #555;
+    background: #888; /* Šedivá */
     border: none;
     padding: 0;
+    margin: 0 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
 }
 
+    .lightbox-dot:hover {
+        background: #bbb;
+    }
+
     .lightbox-dot.active {
-        background: #fff;
+        background: #fff; /* Bílá */
     }
 
+
 /* ===================================== */
-/* === MEDIA QUERIES (MOBIL) === */
+/* === RESPONZIVNÍ ÚPRAVY PRO MOBIL === */
 /* ===================================== */
 
-@media (max-width: 768px) {
-    :root {
-        --nav-width: 0px;
+@media (orientation: portrait) {
+
+    .lightbox {
+        /* Padding pro tečky na mobilu */
+        padding-bottom: var(--reel-height-mobile);
     }
 
+        /* === TOTO JE KLÍČOVÁ ZMĚNA === */
+        /* Skryjeme lištu a ukážeme tečky */
+        .lightbox.has-multiple-items #lightbox-reel {
+            display: none; /* <-- SKRÝT LIŠTU */
+        }
+
+        .lightbox.has-multiple-items #lightbox-dots {
+            display: flex; /* <-- ZOBRAZIT TEČKY */
+        }
+
+
+    /* Média na tabletu */
+    .lightbox-item > .lightbox-media {
+        max-width: calc( 100vw - var(--lightbox-h-padding) * 2 );
+        max-height: calc( 100vh - var(--reel-height-mobile) - var(--lightbox-v-padding-mobile) * 2 );
+    }
+
+    /* Text s popiskem (Tablet) */
+    .lightbox-text-overlay {
+        bottom: var(--reel-height-mobile); /* Nad tečky (80px) */
+        max-width: calc( 100vw - var(--lightbox-h-padding) * 2 );
+        margin-bottom: 5px;
+    }
+
+
+    /* Sólo text (Tablet) */
+    .lightbox-item > .lightbox-text {
+        max-width: 95vw;
+        width: 95vw;
+        font-size: 0.9rem;
+        padding: 1.5rem;
+        padding-bottom: 70px;
+        max-height: calc(100vh - var(--reel-height-mobile) - var(--lightbox-v-padding-mobile) * 2);
+    }
+}
+
+
+@media (orientation: portrait) {
     .book-viewport {
         margin-left: 0;
         width: 100%;
     }
 
-    body.desktop-nav-closed .book-viewport {
-        margin-left: 0;
-        width: 100%;
-    }
-
-    .slider-wrap {
-        width: 90%;
-        bottom: 80px;
-    }
-
-    .lightbox-content {
-        padding: var(--lightbox-v-padding-mobile) var(--lightbox-h-padding-mobile);
-    }
-
-    .lightbox-reel-wrap {
-        display: none;
-    }
-
-    .lightbox-dots {
-        display: flex;
-        position: absolute;
-        bottom: 20px;
-        width: 100%;
-    }
-
-    .lightbox-arrow {
-        bottom: 90px;
-        top: auto;
-        transform: none;
-    }
-
     .nav-arrow {
-        bottom: 80px;
         top: auto;
+        bottom: 80px;
         transform: translateY(0);
     }
 
         .nav-arrow.left {
-            left: 20%;
+            left: 50%;
+            transform: translateX(-120%);
         }
 
         .nav-arrow.right {
-            right: 20%;
+            right: 50%;
+            transform: translateX(120%);
         }
+
+    .lightbox-arrow {
+        top: auto;
+        /* Posunuto níže - tečky mají 80px, šipka je 10px nad nimi */
+        bottom: 90px;
+        z-index: 27000;
+    }
+
+    /* Text s popiskem (Telefon) */
+    .lightbox-text-overlay {
+        /* Posunuto nad šipky (které jsou na 90px) */
+        bottom: 150px;
+        max-width: calc( 100vw - var(--lightbox-h-padding-mobile) * 2 );
+    }
+
+
+    /* Média na telefonu (malé odsazení) */
+    .lightbox-item > .lightbox-media {
+        max-width: calc( 100vw - var(--lightbox-h-padding-mobile) * 2 );
+    }
+
+
+    /* Zvláštní případ: Nízká obrazovka (landscape mobil) */
+    @media (max-height: 500px) {
+        .lightbox-arrow {
+            top: 50%;
+            bottom: auto;
+            transform: translateY(-50%);
+        }
+
+        /* Text s popiskem se vrací nad tečky */
+        .lightbox-text-overlay {
+            bottom: var(--reel-height-mobile); /* 80px */
+            margin-bottom: 5px;
+        }
+
+        /* Média musí mít zpět velké odsazení, aby nebyly pod šipkami */
+        .lightbox-item > .lightbox-media {
+            max-width: calc( 100vw - var(--lightbox-h-padding) * 2 );
+        }
+    }
 }

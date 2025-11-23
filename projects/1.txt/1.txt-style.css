@@ -35,6 +35,7 @@ html, body {
     justify-content: center;
     align-items: center;
     overflow: hidden;
+    background: radial-gradient(circle, #222222 0%, #000000 75%);
 }
 
 body.desktop-nav-closed .book-viewport {
