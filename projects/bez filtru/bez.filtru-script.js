@@ -766,7 +766,7 @@ function setupMediaOverlays() { for (const e in mediaOverlays) { const t = media
 // =================================================================
 
 function main() {
-    createNav('../../', 'projekty-Bez filtru');
+    createNav('../../', 'projekty-bezfiltru');
 
     galleryItems = buttonData
         .filter(item => !item.url)
